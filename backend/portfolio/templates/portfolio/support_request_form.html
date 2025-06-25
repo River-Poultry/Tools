@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Support Request</title>
+    <link rel="stylesheet" href="{% static 'portfolio/style.css' %}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+        
+        .required {
+            color: #e53e3e;
+        }
+        
+        .help-text {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+        
+        .location-info {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .location-info h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .location-info p {
+            color: #718096;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Hide the lat/long fields visually */
+        .hidden-latlong {
+            display: none;
+        }
+        
+        .support-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .support-header h1 {
+            color: var(--primary-blue);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .support-header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        .dashboard {
+            max-width: 500px;
+            margin: 40px auto;
+        }
+        .logo-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .logo-img {
+            height: 60px;
+            background: transparent;
+            border-radius: 8px;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body style="background: var(--light-gray);">
+    <div class="container">
+        <div class="dashboard">
+            <div class="logo-bar">
+                <img src="https://imgur.com/wqYqZqA.png" alt="Left Logo" class="logo-img" />
+                <img src="https://imgur.com/XRMJQhd.png" alt="Right Logo" class="logo-img" />
+            </div>
+            <div class="support-header">
+                <h1>🌾 Farmer Support Request</h1>
+                <p>Get technical assistance from Business Growth Experts</p>
+            </div>
+            <form method="post" id="support-request-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.msme.id_for_label }}">
+                        Select Your MSME <span style="color:#e53e3e;">*</span>
+                    </label>
+                    {{ form.msme }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.area_of_need.id_for_label }}">
+                        Area of Need <span style="color:#e53e3e;">*</span>
+                    </label>
+                    {{ form.area_of_need }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.contact_email.id_for_label }}">Contact Email</label>
+                    {{ form.contact_email }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.contact_phone.id_for_label }}">Contact Phone</label>
+                    {{ form.contact_phone }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.location.id_for_label }}">Location (Town/Area)</label>
+                    {{ form.location }}
+                </div>
+                <div class="location-info">
+                    <h3>📍 Precise Location (Optional)</h3>
+                    <p>Provide your exact coordinates to help experts find you more easily. You can get these from Google Maps or any GPS app.</p>
+                </div>
+                <div class="form-row hidden-latlong">
+                    <div class="form-group">
+                        <label for="{{ form.latitude.id_for_label }}">Latitude</label>
+                        {{ form.latitude }}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.longitude.id_for_label }}">Longitude</label>
+                        {{ form.longitude }}
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;margin-top:1.5rem;">
+                    📤 Submit Support Request
+                </button>
+            </form>
+        </div>
+    </div>
+    <script>
+    document.getElementById('support-request-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var form = this;
+        var submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Getting your location...';
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latInput = form.querySelector('input[name="latitude"]');
+                var longInput = form.querySelector('input[name="longitude"]');
+                if (latInput && longInput) {
+                    latInput.value = position.coords.latitude;
+                    longInput.value = position.coords.longitude;
+                }
+                form.submit();
+            }, function(error) {
+                form.submit();
+            }, {timeout: 10000});
+        } else {
+            form.submit();
+        }
+    });
+    </script>
+</body>
+</html> 

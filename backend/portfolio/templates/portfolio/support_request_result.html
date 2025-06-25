@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Request Result</title>
+    <link rel="stylesheet" href="{% static 'portfolio/style.css' %}">
+    <style>
+        .dashboard {
+            max-width: 700px;
+            margin: 40px auto;
+        }
+        .logo-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .logo-img {
+            height: 60px;
+            background: transparent;
+            border-radius: 8px;
+            box-shadow: none;
+        }
+        .support-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .support-header h1 {
+            color: var(--primary-blue);
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .support-header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        .success-message {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .experts-section h3 {
+            color: var(--primary-blue);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .expert-list {
+            display: grid;
+            gap: 20px;
+        }
+        .expert-card {
+            background: var(--light-gray);
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .expert-name {
+            color: var(--primary-blue);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .expert-expertise {
+            color: #667eea;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .expert-details {
+            display: grid;
+            gap: 8px;
+        }
+        .expert-detail strong {
+            color: #4a5568;
+            min-width: 80px;
+        }
+        .expert-detail span {
+            color: #2d3748;
+        }
+        .no-experts {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-size: 1.1rem;
+        }
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body style="background: var(--light-gray);">
+    <div class="container">
+        <div class="dashboard">
+            <div class="logo-bar">
+                <img src="https://imgur.com/wqYqZqA.png" alt="Left Logo" class="logo-img" />
+                <img src="https://imgur.com/XRMJQhd.png" alt="Right Logo" class="logo-img" />
+            </div>
+            <div class="support-header">
+                <h1>✅ Support Request Submitted</h1>
+                <p>Thank you for your request, {{ support_request.msme_name }}</p>
+            </div>
+            <div class="success-message">
+                <h2>🎉 Request Received!</h2>
+                <p>We've received your support request and found the following Business Growth Experts who can help you:</p>
+            </div>
+            <div class="experts-section">
+                <h3>👨‍💼 Matched Business Growth Experts</h3>
+                {% if matched_bges %}
+                    <div class="expert-list">
+                        {% for bge in matched_bges %}
+                            <div class="expert-card">
+                                <div class="expert-name">{{ bge.name }}</div>
+                                <div class="expert-expertise">{{ bge.area_of_expertise }}</div>
+                                <div class="expert-details">
+                                    <div class="expert-detail">
+                                        <strong>📍 Location:</strong>
+                                        <span>{{ bge.location|default:"Not specified" }}</span>
+                                    </div>
+                                    <div class="expert-detail">
+                                        <strong>📧 Email:</strong>
+                                        <span>{{ bge.email|default:"Not provided" }}</span>
+                                    </div>
+                                    <div class="expert-detail">
+                                        <strong>📞 Phone:</strong>
+                                        <span>{{ bge.phone|default:"Not provided" }}</span>
+                                    </div>
+                                    {% if bge.years_of_experience %}
+                                    <div class="expert-detail">
+                                        <strong>⏱️ Experience:</strong>
+                                        <span>{{ bge.years_of_experience }} years</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if bge.msmes_supported %}
+                                    <div class="expert-detail">
+                                        <strong>👥 MSMEs Supported:</strong>
+                                        <span>{{ bge.msmes_supported }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-experts">
+                        <p>😔 No matching Business Growth Experts were found for your request.</p>
+                        <p>Don't worry! We'll review your request and get back to you soon.</p>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="actions">
+                <a href="{% url 'support_request' %}" class="btn btn-primary">📝 Submit Another Request</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

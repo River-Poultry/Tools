@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio Manager</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'portfolio/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <nav class="nav">
+                <a href="{% url 'home' %}" class="nav-link">Dashboard</a>
+                <a href="{% url 'msme_list' %}" class="nav-link">MSME Database</a>
+                <a href="{% url 'upload_msme_data' %}" class="nav-link">Upload Data</a>
+                <a href="{% url 'msme_analytics' %}" class="nav-link">Analytics</a>
+                <a href="{% url 'bge_list' %}" class="nav-link">Business Growth Experts</a>
+                <a href="{% url 'bge_leaderboard' %}" class="nav-link">BGE Leaderboard</a>
+            </nav>
+        </header>
+        <main class="main">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+    <script src="{% static 'portfolio/script.js' %}"></script>
+</body>
+</html> 

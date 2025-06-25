@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approve BGEs</title>
+    <link rel="stylesheet" href="{% static 'portfolio/style.css' %}">
+    <style>
+        .dashboard { max-width: 800px; margin: 40px auto; }
+        .logo-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+        .logo-img { height: 60px; background: transparent; border-radius: 8px; box-shadow: none; }
+        .support-header { text-align: center; margin-bottom: 2rem; }
+        .support-header h1 { color: var(--primary-blue); font-size: 2rem; font-weight: 700; }
+        .support-header p { color: #718096; font-size: 1.1rem; }
+        .bge-table { width: 100%; border-collapse: collapse; background: var(--white); }
+        .bge-table th, .bge-table td { padding: 12px 10px; border: 1px solid #e2e8f0; text-align: left; }
+        .bge-table th { background: var(--light-gray); color: var(--primary-blue); }
+        .bge-table tr:nth-child(even) { background: #f7f9fa; }
+        .actions { text-align: center; }
+        .btn { margin: 0 4px; }
+    </style>
+</head>
+<body style="background: var(--light-gray);">
+    <div class="container">
+        <div class="dashboard">
+            <div class="logo-bar">
+                <img src="https://imgur.com/wqYqZqA.png" alt="Left Logo" class="logo-img" />
+                <img src="https://imgur.com/XRMJQhd.png" alt="Right Logo" class="logo-img" />
+            </div>
+            <div class="support-header">
+                <h1>Approve Business Growth Experts</h1>
+                <p>Review and approve or reject new BGE applications.</p>
+            </div>
+            {% if pending_bges %}
+            <table class="bge-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Expertise</th>
+                        <th>Location</th>
+                        <th>Experience</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bge in pending_bges %}
+                    <tr>
+                        <td>{{ bge.name }}</td>
+                        <td>{{ bge.email }}</td>
+                        <td>{{ bge.phone }}</td>
+                        <td>{{ bge.area_of_expertise }}</td>
+                        <td>{{ bge.location }}</td>
+                        <td>{{ bge.years_of_experience }}</td>
+                        <td class="actions">
+                            <a href="{% url 'bge_approve' bge.id %}" class="btn btn-primary">Approve</a>
+                            <a href="{% url 'bge_reject' bge.id %}" class="btn btn-outline">Reject</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="support-header">
+                <p>No pending BGE applications at this time.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html> 

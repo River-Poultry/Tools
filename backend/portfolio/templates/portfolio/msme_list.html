@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSME List - Portfolio Manager</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'portfolio/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>MSME Database</h1>
+            <nav class="nav">
+                <a href="{% url 'home' %}" class="nav-link">Dashboard</a>
+                <a href="{% url 'msme_list' %}" class="nav-link active">MSME List</a>
+                <a href="{% url 'upload_msme_data' %}" class="nav-link">Upload Data</a>
+                <a href="{% url 'msme_analytics' %}" class="nav-link">Analytics</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <section class="filters-section">
+                <div class="filters-card">
+                    <form method="get" class="filters-form">
+                        <div class="filter-group">
+                            <label for="search">Search:</label>
+                            <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Search by MSME code, business name, owner, or sector">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="business_type">Business Type:</label>
+                            <select id="business_type" name="business_type">
+                                <option value="">All Types</option>
+                                {% for code, name in business_types %}
+                                    <option value="{{ code }}" {% if business_type == code %}selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="sector">Sector:</label>
+                            <select id="sector" name="sector">
+                                <option value="">All Sectors</option>
+                                {% for code, name in sectors %}
+                                    <option value="{{ code }}" {% if sector == code %}selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-secondary">Filter</button>
+                        <a href="{% url 'msme_list' %}" class="btn btn-outline">Clear Filters</a>
+                    </form>
+                </div>
+            </section>
+
+            <section class="msme-list-section">
+                <div class="list-header">
+                    <h2>MSME Records ({{ page_obj.paginator.count }} total)</h2>
+                    <a href="{% url 'upload_msme_data' %}" class="btn btn-primary">Upload New Data</a>
+                    <a href="{% url 'export_msme_excel' %}" class="btn btn-success">Export to Excel</a>
+                </div>
+                
+                {% if page_obj %}
+                    <table class="msme-table">
+                        <thead>
+                            <tr>
+                                <th>MSME Code</th>
+                                <th>Business Name</th>
+                                <th>Location</th>
+                                <th>Founder Name</th>
+                                <th>Sex of Founder</th>
+                                <th>Phone Number</th>
+                                <th>Email Address of Founder</th>
+                                <th>Business Email</th>
+                                <th>Primary Contact</th>
+                                <th>Industry</th>
+                                <th>Scale</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for msme in page_obj %}
+                            <tr>
+                                <td><strong>{{ msme.msme_code }}</strong></td>
+                                <td><a href="{% url 'msme_detail' msme.id %}">{{ msme.business_name }}</a></td>
+                                <td>{{ msme.city }}, {{ msme.state }}</td>
+                                <td>{{ msme.owner_name }}</td>
+                                <td>{{ msme.get_gender_display }}</td>
+                                <td>{{ msme.phone }}</td>
+                                <td>{{ msme.email }}</td>
+                                <td>{{ msme.business_email }}</td>
+                                <td>{{ msme.owner_name }}</td>
+                                <td>{{ msme.get_sector_display }}</td>
+                                <td>{{ msme.get_business_type_display }}</td>
+                                <td>
+                                    <a href="{% url 'msme_detail' msme.id %}" class="btn btn-small">View</a>
+                                    <a href="{% url 'msme_edit' msme.id %}" class="btn btn-small">Edit</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                        <div class="pagination">
+                            {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if business_type %}&business_type={{ business_type }}{% endif %}{% if sector %}&sector={{ sector }}{% endif %}" class="page-link">&laquo; Previous</a>
+                            {% endif %}
+                            <span class="current-page">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if business_type %}&business_type={{ business_type }}{% endif %}{% if sector %}&sector={{ sector }}{% endif %}" class="page-link">Next &raquo;</a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="no-data">
+                        <p>No MSME records found. {% if search_query or business_type or sector %}Try adjusting your filters.{% else %}Upload some data to get started.{% endif %}</p>
+                        {% if search_query or business_type or sector %}
+                            <a href="{% url 'msme_list' %}" class="btn btn-primary">Clear Filters</a>
+                        {% else %}
+                            <a href="{% url 'upload_msme_data' %}" class="btn btn-primary">Upload Data</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+
+    <script src="{% static 'portfolio/script.js' %}"></script>
+</body>
+</html> 

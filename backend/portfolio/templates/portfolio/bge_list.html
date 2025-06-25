@@ -1,0 +1,62 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+  <h2>Business Growth Experts (BGEs)</h2>
+  <form method="get" class="filters-form" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+    <div>
+      <label for="search">Search:</label>
+      <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Name, email, or phone">
+    </div>
+    <div>
+      <label for="location">Location:</label>
+      <select id="location" name="location">
+        <option value="">All Locations</option>
+        {% for loc in all_locations %}
+          <option value="{{ loc }}" {% if location == loc %}selected{% endif %}>{{ loc }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="skill">Skill:</label>
+      <select id="skill" name="skill">
+        <option value="">All Skills</option>
+        {% for s in all_skills %}
+          <option value="{{ s }}" {% if skill == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    <a href="{% url 'bge_list' %}" class="btn btn-outline">Clear</a>
+  </form>
+  <div class="bge-actions" style="margin-bottom: 1.5rem;">
+    <a href="{% url 'upload_bge_data' %}" class="btn btn-primary">Upload BGE Data (Excel)</a>
+    <a href="{% url 'export_bge_excel' %}" class="btn btn-secondary">Export as Excel</a>
+  </div>
+  <table class="bge-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Location</th>
+        <th>Years of Experience</th>
+        <th>Top Skills</th>
+        <th>Added</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for bge in bges %}
+        <tr>
+          <td><a href="{% url 'bge_detail' bge.id %}">{{ bge.name }}</a></td>
+          <td>{{ bge.email }}</td>
+          <td>{{ bge.phone }}</td>
+          <td>{{ bge.location }}</td>
+          <td>{{ bge.years_of_experience }}</td>
+          <td>{{ bge.top_skills }}</td>
+          <td>{{ bge.created_at|date:"Y-m-d" }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="7">No Business Growth Experts found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %} 

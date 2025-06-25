@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload BGE Data - Portfolio Manager</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'portfolio/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Upload BGE Data</h1>
+            <nav class="nav">
+                <a href="{% url 'home' %}" class="nav-link">Dashboard</a>
+                <a href="{% url 'bge_list' %}" class="nav-link">BGE List</a>
+                <a href="{% url 'upload_bge_data' %}" class="nav-link active">Upload BGE Data</a>
+            </nav>
+        </header>
+
+        <main class="main">
+            <section class="upload-section">
+                <div class="upload-card">
+                    <h2>Upload Excel File</h2>
+                    {% if messages %}
+                        <div class="messages">
+                            {% for message in messages %}
+                                <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <form method="post" enctype="multipart/form-data" class="upload-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="excel_file">Select Excel File (.xlsx or .xls):</label>
+                            <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload and Process</button>
+                    </form>
+                </div>
+                <div class="instructions-card">
+                    <h3>Excel File Format Requirements</h3>
+                    <p>Your Excel file should contain the following columns:</p>
+                    <div class="column-list">
+                        <div class="column-item">
+                            <strong>Name</strong> - Name of the expert (required)
+                        </div>
+                        <div class="column-item">
+                            <strong>Email</strong> - Email address
+                        </div>
+                        <div class="column-item">
+                            <strong>Phone</strong> - Phone number
+                        </div>
+                        <div class="column-item">
+                            <strong>Area of Expertise</strong> - Area(s) of expertise
+                        </div>
+                        <div class="column-item">
+                            <strong>Location</strong> - City or region
+                        </div>
+                        <div class="column-item">
+                            <strong>Years of Experience</strong> - Number of years
+                        </div>
+                        <div class="column-item">
+                            <strong>MSMEs Supported</strong> - Number of MSMEs supported
+                        </div>
+                    </div>
+                    <div class="note">
+                        <strong>Note:</strong> Only the Name field is required. Other fields are optional.
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="{% static 'portfolio/script.js' %}"></script>
+</body>
+</html> 

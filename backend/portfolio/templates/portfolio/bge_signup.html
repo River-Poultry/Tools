@@ -1,0 +1,75 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGE Signup</title>
+    <link rel="stylesheet" href="{% static 'portfolio/style.css' %}">
+    <style>
+        .dashboard { max-width: 500px; margin: 40px auto; }
+        .logo-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
+        .logo-img { height: 60px; background: transparent; border-radius: 8px; box-shadow: none; }
+        .support-header { text-align: center; margin-bottom: 2rem; }
+        .support-header h1 { color: var(--primary-blue); font-size: 2rem; font-weight: 700; }
+        .support-header p { color: #718096; font-size: 1.1rem; }
+        .hidden-latlong { display: none; }
+    </style>
+</head>
+<body style="background: var(--light-gray);">
+    <div class="container">
+        <div class="dashboard">
+            <div class="logo-bar">
+                <img src="https://imgur.com/wqYqZqA.png" alt="Left Logo" class="logo-img" />
+                <img src="https://imgur.com/XRMJQhd.png" alt="Right Logo" class="logo-img" />
+            </div>
+            <div class="support-header">
+                <h1>Become a Business Growth Expert</h1>
+                <p>Submit your details to join our network. Your application will be reviewed by our team.</p>
+            </div>
+            <form method="post" id="bge-signup-form">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                <div class="form-group">{{ form.name.label_tag }}{{ form.name }}</div>
+                <div class="form-group">{{ form.email.label_tag }}{{ form.email }}</div>
+                <div class="form-group">{{ form.phone.label_tag }}{{ form.phone }}</div>
+                <div class="form-group">{{ form.area_of_expertise.label_tag }}{{ form.area_of_expertise }}</div>
+                <div class="form-group">{{ form.location.label_tag }}{{ form.location }}</div>
+                <div class="form-group">{{ form.years_of_experience.label_tag }}{{ form.years_of_experience }}</div>
+                <div class="form-group">{{ form.top_skills.label_tag }}{{ form.top_skills }}</div>
+                <div class="form-group">{{ form.second_area.label_tag }}{{ form.second_area }}</div>
+                <div class="form-group">{{ form.third_area.label_tag }}{{ form.third_area }}</div>
+                <div class="form-row hidden-latlong">
+                    <div class="form-group">{{ form.latitude.label_tag }}{{ form.latitude }}</div>
+                    <div class="form-group">{{ form.longitude.label_tag }}{{ form.longitude }}</div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submit-btn" style="width:100%;margin-top:1.5rem;">Submit Application</button>
+            </form>
+        </div>
+    </div>
+    <script>
+    document.getElementById('bge-signup-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var form = this;
+        var submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Getting your location...';
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var latInput = form.querySelector('input[name="latitude"]');
+                var longInput = form.querySelector('input[name="longitude"]');
+                if (latInput && longInput) {
+                    latInput.value = position.coords.latitude;
+                    longInput.value = position.coords.longitude;
+                }
+                form.submit();
+            }, function(error) {
+                form.submit();
+            }, {timeout: 10000});
+        } else {
+            form.submit();
+        }
+    });
+    </script>
+</body>
+</html> 

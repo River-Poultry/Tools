@@ -1,0 +1,50 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+  <h2>MSME Analytics</h2>
+  <div class="dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Total MSMEs</h3>
+        <p class="stat-value">{{ total_msmes }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Investment Needed</h3>
+        <p class="stat-value">{{ total_investment_needed|floatformat:0 }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Annual Revenue</h3>
+        <p class="stat-value">{{ total_annual_revenue|floatformat:0 }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Employees</h3>
+        <p class="stat-value">{{ total_employees }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>By Business Type</h3>
+        <ul>
+          {% for type, count in business_type_stats.items %}
+            <li>{{ type }}: {{ count }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="stat-card">
+        <h3>By Sector</h3>
+        <ul>
+          {% for sector, count in sector_stats.items %}
+            <li>{{ sector }}: {{ count }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="stat-card">
+        <h3>Top Cities</h3>
+        <ul>
+          {% for city in top_cities %}
+            <li>{{ city.city }}: {{ city.count }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    <br>
+    <a href="/" class="btn">&larr; Back to Dashboard</a>
+  </div>
+{% endblock %} 

@@ -1,0 +1,35 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+  <h2>MSME Details</h2>
+  <table class="msme-detail-table">
+    <tr><th>MSME Code</th><td><strong>{{ msme.msme_code }}</strong></td></tr>
+    <tr><th>Business Name</th><td>{{ msme.business_name }}</td></tr>
+    <tr><th>Location</th><td>{{ msme.city }}, {{ msme.state }}</td></tr>
+    <tr><th>Founder Name</th><td>{{ msme.owner_name }}</td></tr>
+    <tr><th>Sex of Founder</th><td>{{ msme.get_gender_display }}</td></tr>
+    <tr><th>Phone Number</th><td>{{ msme.phone }}</td></tr>
+    <tr><th>Email Address of Founder</th><td>{{ msme.email }}</td></tr>
+    <tr><th>Business Email</th><td>{{ msme.business_email }}</td></tr>
+    <tr><th>Primary Contact</th><td>{{ msme.owner_name }}</td></tr>
+    <tr><th>Industry</th><td>{{ msme.get_sector_display }}</td></tr>
+    <tr><th>Scale</th><td>{{ msme.get_business_type_display }}</td></tr>
+    <tr><th>Registration Number</th><td>{{ msme.registration_number }}</td></tr>
+    <tr><th>Annual Revenue</th><td>{{ msme.annual_revenue }}</td></tr>
+    <tr><th>Employee Count</th><td>{{ msme.employee_count }}</td></tr>
+    <tr><th>Investment Needed</th><td>{{ msme.investment_needed }}</td></tr>
+    <tr><th>Current Funding</th><td>{{ msme.current_funding }}</td></tr>
+    <tr><th>Business Description</th><td>{{ msme.business_description }}</td></tr>
+    <tr><th>Challenges</th><td>{{ msme.challenges }}</td></tr>
+  </table>
+  <br>
+  <a href="{% url 'msme_list' %}">&larr; Back to MSME List</a>
+  <div class="msme-actions">
+    <a href="{% url 'msme_edit' msme.id %}" class="btn btn-primary">Edit</a>
+    {% if user.is_superuser %}
+      <form action="{% url 'msme_delete' msme.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this MSME?');">Delete</button>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %} 

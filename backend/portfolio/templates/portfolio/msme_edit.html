@@ -1,0 +1,81 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+  <h2>Edit MSME</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-container">
+      <div class="form-section">
+        <h3>Basic Information</h3>
+        <div class="form-group">
+          <label for="{{ form.business_name.id_for_label }}">Business Name:</label>
+          {{ form.business_name }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.owner_name.id_for_label }}">Owner Name:</label>
+          {{ form.owner_name }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.gender.id_for_label }}">Sex of Founder:</label>
+          {{ form.gender }}
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Location</h3>
+        <div class="form-group">
+          <label for="{{ form.state.id_for_label }}">State/District:</label>
+          {{ form.state }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.city.id_for_label }}">City/Town:</label>
+          {{ form.city }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.country.id_for_label }}">Country:</label>
+          {{ form.country }}
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Contact Information</h3>
+        <div class="form-group">
+          <label for="{{ form.phone.id_for_label }}">Phone Number:</label>
+          {{ form.phone }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.email.id_for_label }}">Email Address of Founder:</label>
+          {{ form.email }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.business_email.id_for_label }}">Business Email:</label>
+          {{ form.business_email }}
+        </div>
+      </div>
+      
+      <div class="form-section">
+        <h3>Business Details</h3>
+        <div class="form-group">
+          <label for="{{ form.sector.id_for_label }}">Industry:</label>
+          {{ form.sector }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.business_type.id_for_label }}">Scale of Business:</label>
+          {{ form.business_type }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.annual_revenue.id_for_label }}">Annual Revenue:</label>
+          {{ form.annual_revenue }}
+        </div>
+        <div class="form-group">
+          <label for="{{ form.employee_count.id_for_label }}">Employee Count:</label>
+          {{ form.employee_count }}
+        </div>
+      </div>
+    </div>
+    
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+      <a href="{% url 'msme_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+{% endblock %}
