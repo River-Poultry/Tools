@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Portfolio, Investment, Transaction, MSME, BusinessGrowthExpert, SupportRequest
+from .models import Portfolio, Investment, Transaction, MSME, BusinessGrowthExpert, SupportRequest, TrainingSession, Attendance, TrainingTopic
 
 @admin.register(Portfolio)
 class PortfolioAdmin(admin.ModelAdmin):
@@ -74,3 +74,11 @@ class SupportRequestAdmin(admin.ModelAdmin):
     list_display = ('msme_name', 'business_need', 'location', 'latitude', 'longitude', 'created_at')
     search_fields = ('msme_name', 'business_need', 'location')
     list_filter = ('location',)
+
+admin.site.register(TrainingTopic)
+
+class TrainingSessionAdmin(admin.ModelAdmin):
+    filter_horizontal = ('businesses',)
+
+# admin.site.unregister(TrainingSession)
+admin.site.register(TrainingSession, TrainingSessionAdmin)

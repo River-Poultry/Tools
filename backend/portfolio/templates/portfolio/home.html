@@ -1,168 +1,232 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Manager</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'portfolio/style.css' %}">
-</head>
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <img src="https://i.imgur.com/wqYqZqA.png" alt="Left Logo" class="header-logo-left">
-                </div>
-                <div class="header-center">
-                    <h1>PRUDEV II Portfolio Manager</h1>
-                    <nav class="nav">
-                        <a href="{% url 'home' %}" class="nav-link active">Dashboard</a>
-                        <a href="{% url 'msme_list' %}" class="nav-link">MSME Database</a>
-                        <a href="{% url 'upload_msme_data' %}" class="nav-link">Upload Data</a>
-                        <a href="{% url 'msme_analytics' %}" class="nav-link">Analytics</a>
-                    </nav>
-                </div>
-                <div class="header-right">
-                    <img src="https://i.imgur.com/XRMJQhd.png" alt="Right Logo" class="header-logo-right">
-                </div>
-            </div>
-        </header>
-
-        <main class="main">
-            <section class="dashboard">
-                <h2>Dashboard</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total MSMEs</h3>
-                        <p class="stat-value">{{ total_msmes }}</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Total BGEs</h3>
-                        <p class="stat-value">{{ total_bges }}</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Total Annual Revenue</h3>
-                        <p class="stat-value">{{ total_annual_revenue|floatformat:0 }}</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Total Employees</h3>
-                        <p class="stat-value">{{ total_employees }}</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>By Business Type</h3>
-                        <ul>
-                        {% for type, count in business_type_stats.items %}
-                            <li>{{ type }}: {{ count }}</li>
-                        {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="stat-card">
-                        <h3>By Sector</h3>
-                        <ul>
-                        {% for sector, count in sector_stats.items %}
-                            <li>{{ sector }}: {{ count }}</li>
-                        {% endfor %}
-                        </ul>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Suggestions</h3>
-                        <ul>
-                            {% if total_msmes > 0 and total_bges > 0 %}
-                                <li>MSME to BGE ratio: {{ total_msmes|floatformat:0 }}:{{ total_bges|floatformat:0 }}</li>
-                            {% endif %}
-                            {% if total_annual_revenue > 0 and total_msmes > 0 %}
-                                <li>Avg revenue per MSME: {{ avg_revenue_per_msme|floatformat:0 }}</li>
-                            {% endif %}
-                            {% if total_employees > 0 and total_msmes > 0 %}
-                                <li>Avg employees per MSME: {{ avg_employees_per_msme|floatformat:1 }}</li>
-                            {% endif %}
-                            <li>Upload more data for better insights</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <section class="recent-activity">
-                <h2>Recent Activity</h2>
-                <div class="activity-list">
-                    {% if recent_transactions %}
-                        {% for transaction in recent_transactions %}
-                        <div class="activity-item">
-                            <div class="activity-type {{ transaction.transaction_type|lower }}">
-                                {{ transaction.transaction_type }}
-                            </div>
-                            <div class="activity-details">
-                                <strong>{{ transaction.investment.name }}</strong>
-                                <span class="activity-amount">${{ transaction.amount|floatformat:2 }}</span>
-                                <span class="activity-date">{{ transaction.transaction_date|date:"M d, Y" }}</span>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="no-data">No recent activity. Start by creating your first portfolio!</p>
-                    {% endif %}
-                </div>
-            </section>
-
-            {% if portfolios %}
-            <section class="portfolios">
-                <h2>Your Portfolios</h2>
-                <div class="portfolio-grid">
-                    {% for portfolio in portfolios %}
-                    <div class="portfolio-card">
-                        <h3>{{ portfolio.name }}</h3>
-                        <p class="portfolio-description">{{ portfolio.description|default:"No description" }}</p>
-                        <div class="portfolio-stats">
-                            <div class="portfolio-stat">
-                                <span class="stat-label">Value:</span>
-                                <span class="stat-value">${{ portfolio.total_value|floatformat:2 }}</span>
-                            </div>
-                            <div class="portfolio-stat">
-                                <span class="stat-label">Return:</span>
-                                <span class="stat-value {% if portfolio.total_return_percentage >= 0 %}positive{% else %}negative{% endif %}">
-                                    {{ portfolio.total_return_percentage|floatformat:2 }}%
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
-            {% endif %}
-
-            <section class="quick-actions">
-                <h2>Quick Actions</h2>
-                <div class="actions-grid">
-                    <a href="{% url 'upload_msme_data' %}" class="action-card">
-                        <h3>Upload MSME Data</h3>
-                        <p>Import Excel files with MSME information</p>
-                    </a>
-                    <a href="{% url 'upload_bge_data' %}" class="action-card">
-                        <h3>Upload BGE Data</h3>
-                        <p>Import Excel files with Business Growth Expert information</p>
-                    </a>
-                    <a href="{% url 'msme_list' %}" class="action-card">
-                        <h3>View MSME Database</h3>
-                        <p>Browse and search MSME records</p>
-                    </a>
-                    <a href="{% url 'msme_analytics' %}" class="action-card">
-                        <h3>MSME Analytics</h3>
-                        <p>View insights and statistics</p>
-                    </a>
-                    <a href="{% url 'bge_list' %}" class="action-card">
-                        <h3>View BGEs</h3>
-                        <p>Browse and search Business Growth Experts</p>
-                    </a>
-                    <a href="{% url 'bge_leaderboard' %}" class="action-card">
-                        <h3>BGE Leaderboard</h3>
-                        <p>See top Business Growth Experts by MSMEs supported</p>
-                    </a>
-                </div>
-            </section>
-        </main>
+{% extends "portfolio/base.html" %}
+{% block content %}
+<div class="mb-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-blue-900">{{ total_msmes }}</div>
+      <div class="text-gray-500 mt-2">Total MSMEs</div>
     </div>
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-blue-900">{{ total_bges }}</div>
+      <div class="text-gray-500 mt-2">Total BGEs</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-blue-900">{{ total_annual_revenue|floatformat:0 }}</div>
+      <div class="text-gray-500 mt-2">Total Annual Revenue</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+      <div class="text-3xl font-bold text-blue-900">{{ total_employees }}</div>
+      <div class="text-gray-500 mt-2">Total Employees</div>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="font-semibold text-blue-900 mb-2">BGE Status</div>
+      <ul class="text-gray-700 space-y-1">
+        <li>Approved: <span class="font-bold">{{ approved_bges }}</span></li>
+        <li>Pending: <span class="font-bold">{{ pending_bges }}</span></li>
+        <li>Rejected: <span class="font-bold">{{ rejected_bges }}</span></li>
+      </ul>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="font-semibold text-blue-900 mb-2">By Business Type</div>
+      <ul class="text-gray-700 space-y-1">
+        {% for type, count in business_type_stats.items %}
+          <li>{{ type }}: <span class="font-bold">{{ count }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="font-semibold text-blue-900 mb-2">By Sector</div>
+      <ul class="text-gray-700 space-y-1">
+        {% for sector, count in sector_stats.items %}
+          <li>{{ sector }}: <span class="font-bold">{{ count }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="font-semibold text-blue-900 mb-2">Suggestions</div>
+      <ul class="text-gray-700 space-y-1">
+        {% if total_msmes > 0 and total_bges > 0 %}
+          <li>MSME to BGE ratio: <span class="font-bold">{{ total_msmes|floatformat:0 }}:{{ total_bges|floatformat:0 }}</span></li>
+        {% endif %}
+        {% if total_annual_revenue > 0 and total_msmes > 0 %}
+          <li>Avg revenue per MSME: <span class="font-bold">{{ avg_revenue_per_msme|floatformat:0 }}</span></li>
+        {% endif %}
+        {% if total_employees > 0 and total_msmes > 0 %}
+          <li>Avg employees per MSME: <span class="font-bold">{{ avg_employees_per_msme|floatformat:1 }}</span></li>
+        {% endif %}
+        <li>Upload more data for better insights</li>
+      </ul>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6">
+      <div class="font-semibold text-blue-900 mb-2">MSME by Sector (Chart)</div>
+      <canvas id="sectorChart" class="w-full h-48"></canvas>
+    </div>
+  </div>
+</div>
 
-    <script src="{% static 'portfolio/script.js' %}"></script>
-</body>
-</html> 
+{% if recent_bge_signups %}
+<div class="mb-8">
+  <h2 class="text-xl font-bold text-blue-900 mb-4">Recent BGE Signups</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for bge in recent_bge_signups %}
+    <div class="bg-white rounded-xl shadow p-4 flex flex-col gap-2">
+      <div class="flex items-center gap-2">
+        <div class="font-semibold text-blue-900">{{ bge.name }}</div>
+        <span class="px-2 py-1 rounded text-xs font-bold {% if bge.status == 'approved' %}bg-green-100 text-green-700{% elif bge.status == 'pending' %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">{{ bge.get_status_display }}</span>
+      </div>
+      <div class="text-gray-700 text-sm">{{ bge.email }}</div>
+      <div class="text-gray-500 text-xs">{{ bge.top_skills|truncatechars:100 }}</div>
+      <div class="text-gray-400 text-xs">{{ bge.location }} &middot; {{ bge.created_at|date:"M d, Y" }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="mt-4 text-right">
+    <a href="{% url 'bge_signups_list' %}" class="inline-block px-4 py-2 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-700 transition">View All BGE Signups</a>
+  </div>
+</div>
+{% endif %}
+
+<div class="mb-8">
+  <h2 class="text-xl font-bold text-blue-900 mb-4">Recent Activity</h2>
+  <div class="bg-white rounded-xl shadow p-6">
+    {% if recent_transactions %}
+      <ul class="divide-y divide-gray-200">
+        {% for transaction in recent_transactions %}
+        <li class="py-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="px-2 py-1 rounded text-xs font-bold {% if transaction.transaction_type|lower == 'buy' %}bg-green-100 text-green-700{% elif transaction.transaction_type|lower == 'sell' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">{{ transaction.transaction_type }}</span>
+            <span class="font-semibold">{{ transaction.investment.name }}</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-blue-900 font-bold">${{ transaction.amount|floatformat:2 }}</span>
+            <span class="text-gray-400 text-xs">{{ transaction.transaction_date|date:"M d, Y" }}</span>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="text-gray-400 text-center">No recent activity. Start by creating your first portfolio!</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if portfolios %}
+<div class="mb-8">
+  <h2 class="text-xl font-bold text-blue-900 mb-4">Your Portfolios</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for portfolio in portfolios %}
+    <div class="bg-white rounded-xl shadow p-6 flex flex-col gap-2">
+      <div class="font-semibold text-blue-900">{{ portfolio.name }}</div>
+      <div class="text-gray-500 text-xs mb-2">{{ portfolio.description|default:"No description" }}</div>
+      <div class="flex gap-4">
+        <div>
+          <span class="text-xs text-gray-400">Value:</span>
+          <span class="font-bold text-blue-900">${{ portfolio.total_value|floatformat:2 }}</span>
+        </div>
+        <div>
+          <span class="text-xs text-gray-400">Return:</span>
+          <span class="font-bold {% if portfolio.total_return_percentage >= 0 %}text-green-600{% else %}text-red-600{% endif %}">{{ portfolio.total_return_percentage|floatformat:2 }}%</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="mb-8">
+  <h2 class="text-xl font-bold text-blue-900 mb-4">Quick Actions</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <a href="{% url 'upload_msme_data' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">Upload MSME Data</div>
+      <div class="text-gray-500 text-sm">Import Excel files with MSME information</div>
+    </a>
+    <a href="{% url 'upload_bge_data' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">Upload BGE Data</div>
+      <div class="text-gray-500 text-sm">Import Excel files with Business Growth Expert information</div>
+    </a>
+    <a href="{% url 'msme_list' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">View MSME Database</div>
+      <div class="text-gray-500 text-sm">Browse and search MSME records</div>
+    </a>
+    <a href="{% url 'bge_signups_list' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">Manage BGE Signups</div>
+      <div class="text-gray-500 text-sm">Review and approve BGE applications</div>
+    </a>
+    <a href="{% url 'msme_analytics' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">MSME Analytics</div>
+      <div class="text-gray-500 text-sm">View insights and statistics</div>
+    </a>
+    <a href="{% url 'bge_list' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">View BGEs</div>
+      <div class="text-gray-500 text-sm">Browse and search Business Growth Experts</div>
+    </a>
+    <a href="{% url 'bge_leaderboard' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">BGE Leaderboard</div>
+      <div class="text-gray-500 text-sm">See top Business Growth Experts by MSMEs supported</div>
+    </a>
+    <a href="{% url 'session_analytics' %}" class="bg-blue-50 hover:bg-blue-100 rounded-xl shadow p-6 flex flex-col items-start transition">
+      <div class="font-semibold text-blue-900 mb-1">Training Analytics</div>
+      <div class="text-gray-500 text-sm">View training session attendance stats and trends</div>
+    </a>
+  </div>
+</div>
+
+<!-- Training Topics/Areas Section -->
+<div class="mt-10">
+  <h2 class="text-xl font-bold mb-4 text-black">Training Topics / Areas</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for topic in topics %}
+      <div class="bg-white rounded-xl shadow p-4 flex flex-col items-start border-l-4 border-yellow-500">
+        <div class="text-lg font-semibold text-black mb-1">{{ topic.name }}</div>
+        <div class="text-gray-600 text-sm mb-2">{{ topic.description|default:'No description' }}</div>
+        <div class="text-yellow-600 font-bold">Sessions: {{ topic.sessions.count }}</div>
+      </div>
+    {% empty %}
+      <div class="col-span-full text-gray-400">No topics added yet.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sectorLabels = [{% for sector, count in sector_stats.items %}"{{ sector }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+    const sectorCounts = [{% for sector, count in sector_stats.items %}{{ count|add:0 }}{% if not forloop.last %},{% endif %}{% endfor %}];
+    const sectorData = {
+      labels: sectorLabels,
+      datasets: [{
+        label: 'MSMEs by Sector',
+        data: sectorCounts,
+        backgroundColor: [
+          '#2563eb', '#f59e42', '#10b981', '#f43f5e', '#a21caf', '#fbbf24', '#0ea5e9', '#eab308', '#22d3ee', '#6366f1'
+        ],
+        borderRadius: 8
+      }]
+    };
+    const ctx = document.getElementById('sectorChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: sectorData,
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          title: { display: false }
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: '#e5e7eb' } }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %} 

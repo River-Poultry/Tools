@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Container, Alert } from '@mui/material';
 import axios from 'axios';
+import { API_ENDPOINTS } from './config';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ function Login({ onLogin }) {
       const form = new FormData();
       form.append('username', email);
       form.append('password', password);
-      const res = await axios.post('http://127.0.0.1:8002/token', form);
+      const res = await axios.post(API_ENDPOINTS.TOKEN, form);
       onLogin(res.data.access_token);
     } catch (err) {
       setError('Invalid credentials');

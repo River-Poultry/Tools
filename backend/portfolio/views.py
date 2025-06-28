@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from django.core.paginator import Paginator
-from .models import Portfolio, Investment, Transaction, MSME, BusinessGrowthExpert, SupportRequest
+from .models import Portfolio, Investment, Transaction, MSME, BusinessGrowthExpert, SupportRequest, TrainingSession, Attendance, TrainingTopic
 import pandas as pd
 import os
 from django.conf import settings
@@ -13,9 +13,11 @@ from django import forms
 from django.utils.decorators import method_decorator
 import io
 from collections import Counter
-from .forms import SupportRequestForm, BGEPublicSignupForm
+from .forms import SupportRequestForm, BGEPublicSignupForm, TrainingSessionForm, AttendanceForm, MSMEForm, BGEForm
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -66,12 +68,20 @@ def home(request):
     # Get BGE statistics
     bges = BusinessGrowthExpert.objects.all()
     total_bges = bges.count()
+    pending_bges = bges.filter(status='pending').count()
+    approved_bges = bges.filter(status='approved').count()
+    rejected_bges = bges.filter(status='rejected').count()
+    
+    # Get recent BGE signups
+    recent_bge_signups = bges.order_by('-created_at')[:5]
     
     # BGE breakdowns
     bge_locations = [bge.location for bge in bges if bge.location]
     bge_skills = [bge.top_skills for bge in bges if bge.top_skills]
     bge_location_stats = Counter(bge_locations).most_common(5)
     bge_skill_stats = Counter(bge_skills).most_common(5)
+    
+    topics = TrainingTopic.objects.all()
     
     context = {
         'total_portfolios': total_portfolios,
@@ -91,8 +101,13 @@ def home(request):
         'sector_stats': sector_stats,
         'top_cities': top_cities,
         'total_bges': total_bges,
+        'pending_bges': pending_bges,
+        'approved_bges': approved_bges,
+        'rejected_bges': rejected_bges,
+        'recent_bge_signups': recent_bge_signups,
         'bge_location_stats': bge_location_stats,
         'bge_skill_stats': bge_skill_stats,
+        'topics': topics,
     }
     
     return render(request, 'portfolio/home.html', context)
@@ -116,11 +131,17 @@ def msme_list(request):
     # Filtering
     business_type = request.GET.get('business_type', '')
     sector = request.GET.get('sector', '')
+    city = request.GET.get('city', '')
+    state = request.GET.get('state', '')
     
     if business_type:
         msmes = msmes.filter(business_type=business_type)
     if sector:
         msmes = msmes.filter(sector=sector)
+    if city:
+        msmes = msmes.filter(city__iexact=city)
+    if state:
+        msmes = msmes.filter(state__iexact=state)
     
     # Ordering
     msmes = msmes.order_by('-created_at')
@@ -133,14 +154,20 @@ def msme_list(request):
     # For filter dropdowns
     business_types = MSME.BUSINESS_TYPES
     sectors = MSME.SECTORS
+    all_cities = MSME.objects.exclude(city='').values_list('city', flat=True).distinct().order_by('city')
+    all_states = MSME.objects.exclude(state='').values_list('state', flat=True).distinct().order_by('state')
     
     context = {
         'page_obj': page_obj,
         'search_query': search_query,
         'business_type': business_type,
         'sector': sector,
+        'city': city,
+        'state': state,
         'business_types': business_types,
         'sectors': sectors,
+        'all_cities': all_cities,
+        'all_states': all_states,
     }
     
     return render(request, 'portfolio/msme_list.html', context)
@@ -168,14 +195,40 @@ def upload_msme_data(request):
         
         excel_file = request.FILES['excel_file']
         
+        # File size validation (10MB limit)
+        if excel_file.size > 10 * 1024 * 1024:  # 10MB in bytes
+            messages.error(request, 'File size too large. Please upload a file smaller than 10MB.')
+            return redirect('upload_msme_data')
+        
+        # File type validation
         if not excel_file.name.endswith(('.xlsx', '.xls')):
             messages.error(request, 'Please upload a valid Excel file (.xlsx or .xls)')
             return redirect('upload_msme_data')
+        
+        # Additional security check - validate file content
+        try:
+            import magic
+            file_content = excel_file.read(1024)  # Read first 1KB
+            excel_file.seek(0)  # Reset file pointer
+            
+            # Check if it's actually an Excel file
+            mime_type = magic.from_buffer(file_content, mime=True)
+            if mime_type not in ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                                'application/vnd.ms-excel']:
+                messages.error(request, 'Invalid file type. Please upload a valid Excel file.')
+                return redirect('upload_msme_data')
+        except ImportError:
+            # If python-magic is not installed, skip this check
+            pass
         
         try:
             df = pd.read_excel(excel_file)
             success_count = 0
             error_count = 0
+            
+            # Batch processing for better performance
+            batch_size = 100
+            msme_batch = []
             
             for index, row in df.iterrows():
                 try:
@@ -240,13 +293,23 @@ def upload_msme_data(request):
                     
                     # Create MSME if required fields are present
                     if msme_data['business_name'] and msme_data['owner_name']:
-                        MSME.objects.create(**msme_data)
-                        success_count += 1
+                        msme_batch.append(MSME(**msme_data))
+                        
+                        # Process batch when it reaches the batch size
+                        if len(msme_batch) >= batch_size:
+                            MSME.objects.bulk_create(msme_batch, ignore_conflicts=True)
+                            success_count += len(msme_batch)
+                            msme_batch = []
                     else:
                         error_count += 1
                         
                 except Exception as e:
                     error_count += 1
+            
+            # Process remaining items in the batch
+            if msme_batch:
+                MSME.objects.bulk_create(msme_batch, ignore_conflicts=True)
+                success_count += len(msme_batch)
             
             messages.success(request, f'Successfully imported {success_count} MSME records. {error_count} errors occurred.')
         except Exception as e:
@@ -292,18 +355,6 @@ def msme_analytics(request):
     }
     
     return render(request, 'portfolio/msme_analytics.html', context)
-
-class MSMEForm(forms.ModelForm):
-    class Meta:
-        model = MSME
-        fields = [
-            'business_name', 'state', 'city', 'owner_name', 'gender', 
-            'phone', 'email', 'business_email', 'sector', 'business_type',
-            'annual_revenue', 'employee_count', 'investment_needed', 
-            'current_funding', 'business_description', 'challenges', 
-            'opportunities', 'address', 'country'
-        ]
-        exclude = ['created_at', 'updated_at', 'is_active', 'source_file']
 
 @login_required
 def msme_edit(request, msme_id):
@@ -376,13 +427,42 @@ def upload_bge_data(request):
             messages.error(request, 'Please select an Excel file to upload.')
             return redirect('upload_bge_data')
         excel_file = request.FILES['excel_file']
+        
+        # File size validation (10MB limit)
+        if excel_file.size > 10 * 1024 * 1024:  # 10MB in bytes
+            messages.error(request, 'File size too large. Please upload a file smaller than 10MB.')
+            return redirect('upload_bge_data')
+        
+        # File type validation
         if not excel_file.name.endswith(('.xlsx', '.xls')):
             messages.error(request, 'Please upload a valid Excel file (.xlsx or .xls)')
             return redirect('upload_bge_data')
+        
+        # Additional security check - validate file content
+        try:
+            import magic
+            file_content = excel_file.read(1024)  # Read first 1KB
+            excel_file.seek(0)  # Reset file pointer
+            
+            # Check if it's actually an Excel file
+            mime_type = magic.from_buffer(file_content, mime=True)
+            if mime_type not in ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
+                                'application/vnd.ms-excel']:
+                messages.error(request, 'Invalid file type. Please upload a valid Excel file.')
+                return redirect('upload_bge_data')
+        except ImportError:
+            # If python-magic is not installed, skip this check
+            pass
+        
         try:
             df = pd.read_excel(excel_file)
             success_count = 0
             error_count = 0
+            
+            # Batch processing for better performance
+            batch_size = 100
+            bge_batch = []
+            
             for index, row in df.iterrows():
                 try:
                     # Skip empty rows
@@ -392,7 +472,10 @@ def upload_bge_data(request):
                     area1 = str(row.get('Skill area 1', '')).strip()
                     area2 = str(row.get('Skill area 2', '')).strip()
                     area3 = str(row.get('Skill area 3', '')).strip()
-                    top_skills = ', '.join([a for a in [area1, area2, area3] if a])
+                    # Filter out NaN values and empty strings
+                    areas = [a for a in [area1, area2, area3] if a and a != 'nan' and a != 'None']
+                    top_skills = ', '.join(areas) if areas else ''
+                    
                     bge_data = {
                         'name': str(row.get('Full name', '')).strip(),
                         'email': str(row.get('Email address', '')).strip(),
@@ -400,10 +483,23 @@ def upload_bge_data(request):
                         'location': str(row.get('Location', '')).strip(),
                         'top_skills': top_skills,
                     }
-                    BusinessGrowthExpert.objects.create(**bge_data)
-                    success_count += 1
+                    
+                    bge_batch.append(BusinessGrowthExpert(**bge_data))
+                    
+                    # Process batch when it reaches the batch size
+                    if len(bge_batch) >= batch_size:
+                        BusinessGrowthExpert.objects.bulk_create(bge_batch, ignore_conflicts=True)
+                        success_count += len(bge_batch)
+                        bge_batch = []
+                        
                 except Exception as e:
                     error_count += 1
+            
+            # Process remaining items in the batch
+            if bge_batch:
+                BusinessGrowthExpert.objects.bulk_create(bge_batch, ignore_conflicts=True)
+                success_count += len(bge_batch)
+            
             messages.success(request, f'Successfully imported {success_count} BGEs. {error_count} errors occurred.')
         except Exception as e:
             messages.error(request, f'Error processing Excel file: {str(e)}')
@@ -421,7 +517,7 @@ def export_bge_excel(request):
             'Top skills': bge.top_skills,
             'Location': bge.location,
             'Years of Experience': bge.years_of_experience,
-            'MSMEs Supported': bge.msmes_supported,
+            'Status': bge.get_status_display(),
         })
     df = pd.DataFrame(data)
     output = io.BytesIO()
@@ -439,12 +535,6 @@ def bge_detail(request, bge_id):
         messages.error(request, 'Business Growth Expert not found.')
         return redirect('bge_list')
     return render(request, 'portfolio/bge_detail.html', {'bge': bge})
-
-class BGEForm(forms.ModelForm):
-    class Meta:
-        model = BusinessGrowthExpert
-        fields = '__all__'
-        exclude = ['created_at', 'updated_at']
 
 @login_required
 def bge_edit(request, bge_id):
@@ -548,6 +638,49 @@ def bge_signup(request):
             bge = form.save(commit=False)
             bge.status = 'pending'
             bge.save()
+            
+            # Send welcome email
+            try:
+                subject = 'Welcome to PRUDEV II Business Growth Experts Program'
+                message = f"""
+Dear {bge.name},
+
+Thank you for applying to become a Business Growth Expert (BGE) with the PRUDEV II Portfolio Manager program!
+
+Your application has been received and is currently under review. Here are the details of your application:
+
+Name: {bge.name}
+Email: {bge.email}
+Phone: {bge.phone}
+Location: {bge.location}
+Top Skills: {bge.top_skills}
+Years of Experience: {bge.years_of_experience}
+
+What happens next:
+1. Our team will review your application within 3-5 business days
+2. You will receive an email notification once your application has been approved or rejected
+3. If approved, you will be able to start supporting MSMEs in your area of expertise
+
+In the meantime, if you have any questions, please don't hesitate to contact us.
+
+Best regards,
+The PRUDEV II Team
+                """
+                
+                from_email = settings.DEFAULT_FROM_EMAIL or 'noreply@prudev.org'
+                to_email = [bge.email]
+                
+                send_mail(
+                    subject,
+                    message,
+                    from_email,
+                    to_email,
+                    fail_silently=True  # Don't fail if email sending fails
+                )
+            except Exception as e:
+                # Log the error but don't break the signup process
+                print(f"Failed to send welcome email to {bge.email}: {str(e)}")
+            
             return render(request, 'portfolio/bge_signup_success.html', {'bge': bge})
     else:
         form = BGEPublicSignupForm()
@@ -555,19 +688,242 @@ def bge_signup(request):
 
 @staff_member_required
 def bge_approval_list(request):
-    pending_bges = BusinessGrowthExpert.objects.filter(status='pending')
-    return render(request, 'portfolio/bge_approval_list.html', {'pending_bges': pending_bges})
+    # Get all BGEs ordered by status and creation date
+    all_bges = BusinessGrowthExpert.objects.all().order_by('status', '-created_at')
+    
+    # Filter pending BGEs for the table
+    pending_bges = BusinessGrowthExpert.objects.filter(status='pending').order_by('-created_at')
+    
+    # Calculate statistics
+    pending_count = BusinessGrowthExpert.objects.filter(status='pending').count()
+    approved_count = BusinessGrowthExpert.objects.filter(status='approved').count()
+    total_count = BusinessGrowthExpert.objects.count()
+    
+    context = {
+        'pending_bges': pending_bges,
+        'all_bges': all_bges,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'total_count': total_count,
+    }
+    return render(request, 'portfolio/bge_approval_list.html', context)
 
 @staff_member_required
 def bge_approve(request, bge_id):
-    bge = BusinessGrowthExpert.objects.get(id=bge_id)
+    try:
+        bge = BusinessGrowthExpert.objects.get(id=bge_id)
+    except BusinessGrowthExpert.DoesNotExist:
+        messages.error(request, 'Business Growth Expert not found.')
+        return redirect('bge_approval_list')
+    
     bge.status = 'approved'
     bge.save()
+    
+    # Send approval email
+    try:
+        subject = 'Congratulations! Your BGE Application Has Been Approved'
+        message = f"""
+Dear {bge.name},
+
+Great news! Your application to become a Business Growth Expert (BGE) has been approved!
+
+You are now officially part of the PRUDEV II Business Growth Experts program and can start supporting MSMEs in your area of expertise.
+
+Your Profile:
+Name: {bge.name}
+Email: {bge.email}
+Phone: {bge.phone}
+Location: {bge.location}
+Top Skills: {bge.top_skills}
+Years of Experience: {bge.years_of_experience}
+
+Next Steps:
+1. You will be notified when MSMEs in your area need support
+2. You can view your profile and update your information through the system
+3. Start building your reputation by helping MSMEs grow their businesses
+
+Thank you for joining our mission to support small and medium enterprises in Uganda!
+
+Best regards,
+The PRUDEV II Team
+        """
+        
+        from_email = settings.DEFAULT_FROM_EMAIL or 'noreply@prudev.org'
+        to_email = [bge.email]
+        
+        send_mail(
+            subject,
+            message,
+            from_email,
+            to_email,
+            fail_silently=True
+        )
+    except Exception as e:
+        print(f"Failed to send approval email to {bge.email}: {str(e)}")
+    
     return redirect('bge_approval_list')
 
 @staff_member_required
 def bge_reject(request, bge_id):
-    bge = BusinessGrowthExpert.objects.get(id=bge_id)
+    try:
+        bge = BusinessGrowthExpert.objects.get(id=bge_id)
+    except BusinessGrowthExpert.DoesNotExist:
+        messages.error(request, 'Business Growth Expert not found.')
+        return redirect('bge_approval_list')
+    
     bge.status = 'rejected'
     bge.save()
+    
+    # Send rejection email
+    try:
+        subject = 'Update on Your BGE Application'
+        message = f"""
+Dear {bge.name},
+
+Thank you for your interest in becoming a Business Growth Expert (BGE) with the PRUDEV II Portfolio Manager program.
+
+After careful review of your application, we regret to inform you that we are unable to approve your application at this time.
+
+Your Application Details:
+Name: {bge.name}
+Email: {bge.email}
+Phone: {bge.phone}
+Location: {bge.location}
+Top Skills: {bge.top_skills}
+Years of Experience: {bge.years_of_experience}
+
+This decision does not reflect on your capabilities, and we encourage you to:
+1. Gain more experience in your field
+2. Consider reapplying in the future
+3. Stay connected with our program for future opportunities
+
+If you have any questions about this decision, please don't hesitate to contact us.
+
+Thank you for your interest in supporting MSMEs in Uganda.
+
+Best regards,
+The PRUDEV II Team
+        """
+        
+        from_email = settings.DEFAULT_FROM_EMAIL or 'noreply@prudev.org'
+        to_email = [bge.email]
+        
+        send_mail(
+            subject,
+            message,
+            from_email,
+            to_email,
+            fail_silently=True
+        )
+    except Exception as e:
+        print(f"Failed to send rejection email to {bge.email}: {str(e)}")
+    
     return redirect('bge_approval_list')
+
+@staff_member_required
+def bge_signups_list(request):
+    # Get filter parameter
+    status_filter = request.GET.get('status', '')
+    
+    # Get BGEs with optional status filter
+    if status_filter:
+        bges = BusinessGrowthExpert.objects.filter(status=status_filter).order_by('-created_at')
+    else:
+        bges = BusinessGrowthExpert.objects.all().order_by('-created_at')
+    
+    # Calculate statistics
+    pending_count = BusinessGrowthExpert.objects.filter(status='pending').count()
+    approved_count = BusinessGrowthExpert.objects.filter(status='approved').count()
+    rejected_count = BusinessGrowthExpert.objects.filter(status='rejected').count()
+    total_count = BusinessGrowthExpert.objects.count()
+    
+    context = {
+        'bges': bges,
+        'status_filter': status_filter,
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'total_count': total_count,
+    }
+    return render(request, 'portfolio/bge_signups_list.html', context)
+
+def session_list(request):
+    sessions = TrainingSession.objects.all().order_by('-date')
+    return render(request, 'portfolio/session_list.html', {'sessions': sessions})
+
+def session_create(request):
+    if request.method == 'POST':
+        form = TrainingSessionForm(request.POST)
+        if form.is_valid():
+            session = form.save()
+            form.save_m2m()
+            return redirect('session_list')
+    else:
+        form = TrainingSessionForm()
+    return render(request, 'portfolio/session_form.html', {'form': form})
+
+def session_update(request, pk):
+    session = get_object_or_404(TrainingSession, pk=pk)
+    if request.method == 'POST':
+        form = TrainingSessionForm(request.POST, instance=session)
+        if form.is_valid():
+            session = form.save()
+            form.save_m2m()
+            return redirect('session_list')
+    else:
+        form = TrainingSessionForm(instance=session)
+    return render(request, 'portfolio/session_form.html', {'form': form, 'session': session})
+
+def session_delete(request, pk):
+    session = get_object_or_404(TrainingSession, pk=pk)
+    if request.method == 'POST':
+        session.delete()
+        return redirect('session_list')
+    return render(request, 'portfolio/session_confirm_delete.html', {'session': session})
+
+@staff_member_required
+def session_analytics(request):
+    from django.db.models import Count, Q
+    sessions = TrainingSession.objects.all().order_by('-date')
+    msme_count = MSME.objects.count()
+    total_sessions = sessions.count()
+    attendance_data = []
+    total_attendance = 0
+    for session in sessions:
+        present_count = Attendance.objects.filter(session=session, present=True).count()
+        attendance_data.append({
+            'session': session,
+            'present_count': present_count,
+            'percentage': (present_count / msme_count * 100) if msme_count else 0,
+        })
+        total_attendance += present_count
+    avg_attendance = (total_attendance / total_sessions) if total_sessions else 0
+    context = {
+        'sessions': sessions,
+        'msme_count': msme_count,
+        'total_sessions': total_sessions,
+        'avg_attendance': avg_attendance,
+        'attendance_data': attendance_data,
+    }
+    return render(request, 'portfolio/session_analytics.html', context)
+
+@staff_member_required
+def attendance_mark(request, session_id):
+    session = get_object_or_404(TrainingSession, pk=session_id)
+    msmes = MSME.objects.all().order_by('business_name')
+    attendance_dict = {a.msme_id: a for a in Attendance.objects.filter(session=session)}
+
+    if request.method == 'POST':
+        for msme in msmes:
+            present = f'present_{msme.id}' in request.POST
+            attendance, created = Attendance.objects.get_or_create(session=session, msme=msme)
+            attendance.present = present
+            attendance.save()
+        return redirect('session_list')
+
+    context = {
+        'session': session,
+        'msmes': msmes,
+        'attendance_dict': attendance_dict,
+    }
+    return render(request, 'portfolio/attendance_mark.html', context)

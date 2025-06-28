@@ -223,3 +223,33 @@ class SupportRequest(models.Model):
 
     def __str__(self):
         return f"{self.msme_name} - {self.business_need[:30]}..."
+
+class TrainingTopic(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.name
+
+class TrainingSession(models.Model):
+    title = models.CharField(max_length=200)
+    date = models.DateField()
+    location = models.CharField(max_length=200, blank=True)
+    description = models.TextField(blank=True)
+    topic = models.ForeignKey(TrainingTopic, on_delete=models.SET_NULL, null=True, related_name='sessions')
+    businesses = models.ManyToManyField('MSME', blank=True, related_name='sessions_attended')
+
+    def __str__(self):
+        return f"{self.title} ({self.date})"
+
+class Attendance(models.Model):
+    session = models.ForeignKey(TrainingSession, on_delete=models.CASCADE, related_name='attendances')
+    msme = models.ForeignKey('MSME', on_delete=models.CASCADE, related_name='attendances')
+    present = models.BooleanField(default=False)
+    marked_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('session', 'msme')
+
+    def __str__(self):
+        return f"{self.msme} - {self.session}: {'Present' if self.present else 'Absent'}"

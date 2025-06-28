@@ -1,0 +1,92 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto">
+  <div class="flex flex-col md:flex-row items-center justify-between mb-8">
+    <div class="flex items-center gap-4 mb-4 md:mb-0">
+      <img src="https://imgur.com/wqYqZqA.png" alt="Left Logo" class="h-12 rounded-lg shadow-none" />
+      <h1 class="text-2xl font-bold text-blue-900">BGE Signups Overview</h1>
+      <img src="https://imgur.com/XRMJQhd.png" alt="Right Logo" class="h-12 rounded-lg shadow-none" />
+    </div>
+    <p class="text-gray-500">View and manage all Business Growth Expert applications.</p>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-xl shadow p-6 text-center">
+      <div class="text-2xl font-bold text-blue-900">{{ total_count }}</div>
+      <div class="text-gray-500 mt-1">Total Signups</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 text-center">
+      <div class="text-2xl font-bold text-yellow-600">{{ pending_count }}</div>
+      <div class="text-gray-500 mt-1">Pending Approval</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 text-center">
+      <div class="text-2xl font-bold text-green-700">{{ approved_count }}</div>
+      <div class="text-gray-500 mt-1">Approved BGEs</div>
+    </div>
+    <div class="bg-white rounded-xl shadow p-6 text-center">
+      <div class="text-2xl font-bold text-red-700">{{ rejected_count }}</div>
+      <div class="text-gray-500 mt-1">Rejected</div>
+    </div>
+  </div>
+  <div class="bg-white rounded-xl shadow p-6 mb-8">
+    <h3 class="text-lg font-semibold text-blue-900 mb-4">Filter by Status</h3>
+    <div class="flex flex-wrap gap-2">
+      <a href="{% url 'bge_signups_list' %}" class="px-4 py-2 rounded-lg border text-sm font-semibold transition {% if not status_filter %}bg-blue-900 text-white border-blue-900{% else %}bg-white text-blue-900 border-gray-300 hover:bg-blue-50{% endif %}">All ({{ total_count }})</a>
+      <a href="{% url 'bge_signups_list' %}?status=pending" class="px-4 py-2 rounded-lg border text-sm font-semibold transition {% if status_filter == 'pending' %}bg-yellow-500 text-white border-yellow-500{% else %}bg-white text-yellow-700 border-gray-300 hover:bg-yellow-50{% endif %}">Pending ({{ pending_count }})</a>
+      <a href="{% url 'bge_signups_list' %}?status=approved" class="px-4 py-2 rounded-lg border text-sm font-semibold transition {% if status_filter == 'approved' %}bg-green-600 text-white border-green-600{% else %}bg-white text-green-700 border-gray-300 hover:bg-green-50{% endif %}">Approved ({{ approved_count }})</a>
+      <a href="{% url 'bge_signups_list' %}?status=rejected" class="px-4 py-2 rounded-lg border text-sm font-semibold transition {% if status_filter == 'rejected' %}bg-red-600 text-white border-red-600{% else %}bg-white text-red-700 border-gray-300 hover:bg-red-50{% endif %}">Rejected ({{ rejected_count }})</a>
+    </div>
+  </div>
+  <div class="bg-white rounded-xl shadow p-6">
+    {% if bges %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-blue-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Name</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Email</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Phone</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Top Skills</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Location</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Experience</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Status</th>
+            <th class="px-4 py-2 text-left text-xs font-semibold text-blue-900 uppercase tracking-wider">Signup Date</th>
+            <th class="px-4 py-2 text-center text-xs font-semibold text-blue-900 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-100">
+          {% for bge in bges %}
+          <tr class="hover:bg-blue-50 transition">
+            <td class="px-4 py-2 font-semibold text-blue-900">{{ bge.name }}</td>
+            <td class="px-4 py-2 text-sm text-gray-700">{{ bge.email }}</td>
+            <td class="px-4 py-2 text-sm text-gray-700">{{ bge.phone }}</td>
+            <td class="px-4 py-2 text-xs text-gray-500">{{ bge.top_skills|truncatechars:50 }}</td>
+            <td class="px-4 py-2 text-xs text-gray-500">{{ bge.location }}</td>
+            <td class="px-4 py-2 text-xs text-gray-500">{{ bge.years_of_experience }} years</td>
+            <td class="px-4 py-2">
+              <span class="px-2 py-1 rounded text-xs font-bold {% if bge.status == 'approved' %}bg-green-100 text-green-700{% elif bge.status == 'pending' %}bg-yellow-100 text-yellow-700{% else %}bg-red-100 text-red-700{% endif %}">{{ bge.get_status_display }}</span>
+            </td>
+            <td class="px-4 py-2 text-xs text-gray-400">{{ bge.created_at|date:"M d, Y" }}</td>
+            <td class="px-4 py-2 text-center">
+              {% if bge.status == 'pending' %}
+                <a href="{% url 'bge_approve' bge.id %}" class="inline-block px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-xs font-semibold">Approve</a>
+                <a href="{% url 'bge_reject' bge.id %}" class="inline-block px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-xs font-semibold">Reject</a>
+              {% endif %}
+              <a href="{% url 'bge_detail' bge.id %}" class="inline-block px-3 py-1 bg-blue-900 text-white rounded hover:bg-blue-700 transition text-xs font-semibold">View</a>
+              <a href="{% url 'bge_edit' bge.id %}" class="inline-block px-3 py-1 bg-gray-200 text-blue-900 rounded hover:bg-gray-300 transition text-xs font-semibold">Edit</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center text-gray-400 py-8">No BGE applications found with the selected filter.</div>
+    {% endif %}
+    <div class="flex flex-wrap gap-2 justify-center mt-8">
+      <a href="{% url 'home' %}" class="inline-block px-4 py-2 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-700 transition">Back to Dashboard</a>
+      <a href="{% url 'bge_approval_list' %}" class="inline-block px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition">Approval List</a>
+      <a href="{% url 'bge_list' %}" class="inline-block px-4 py-2 bg-gray-200 text-blue-900 rounded-lg font-semibold hover:bg-gray-300 transition">View All BGEs</a>
+    </div>
+  </div>
+</div>
+{% endblock %} 

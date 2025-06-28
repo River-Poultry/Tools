@@ -7,7 +7,7 @@
     <title>Approve BGEs</title>
     <link rel="stylesheet" href="{% static 'portfolio/style.css' %}">
     <style>
-        .dashboard { max-width: 800px; margin: 40px auto; }
+        .dashboard { max-width: 1000px; margin: 40px auto; }
         .logo-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
         .logo-img { height: 60px; background: transparent; border-radius: 8px; box-shadow: none; }
         .support-header { text-align: center; margin-bottom: 2rem; }
@@ -19,6 +19,14 @@
         .bge-table tr:nth-child(even) { background: #f7f9fa; }
         .actions { text-align: center; }
         .btn { margin: 0 4px; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-approved { background: #d1fae5; color: #065f46; }
+        .status-rejected { background: #fee2e2; color: #991b1b; }
+        .stats-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--white); padding: 1.5rem; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-number { font-size: 2rem; font-weight: bold; color: var(--primary-blue); }
+        .stat-label { color: #718096; margin-top: 0.5rem; }
     </style>
 </head>
 <body style="background: var(--light-gray);">
@@ -29,9 +37,26 @@
                 <img src="https://imgur.com/XRMJQhd.png" alt="Right Logo" class="logo-img" />
             </div>
             <div class="support-header">
-                <h1>Approve Business Growth Experts</h1>
-                <p>Review and approve or reject new BGE applications.</p>
+                <h1>BGE Signups & Approvals</h1>
+                <p>Review and manage Business Growth Expert applications.</p>
             </div>
+            
+            <!-- Statistics Cards -->
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-number">{{ pending_count }}</div>
+                    <div class="stat-label">Pending Approval</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ approved_count }}</div>
+                    <div class="stat-label">Approved BGEs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ total_count }}</div>
+                    <div class="stat-label">Total Signups</div>
+                </div>
+            </div>
+
             {% if pending_bges %}
             <table class="bge-table">
                 <thead>
@@ -39,9 +64,11 @@
                         <th>Name</th>
                         <th>Email</th>
                         <th>Phone</th>
-                        <th>Expertise</th>
+                        <th>Top Skills</th>
                         <th>Location</th>
                         <th>Experience</th>
+                        <th>Status</th>
+                        <th>Signup Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -51,12 +78,15 @@
                         <td>{{ bge.name }}</td>
                         <td>{{ bge.email }}</td>
                         <td>{{ bge.phone }}</td>
-                        <td>{{ bge.area_of_expertise }}</td>
+                        <td>{{ bge.top_skills|truncatechars:50 }}</td>
                         <td>{{ bge.location }}</td>
-                        <td>{{ bge.years_of_experience }}</td>
+                        <td>{{ bge.years_of_experience }} years</td>
+                        <td><span class="status-badge status-{{ bge.status }}">{{ bge.get_status_display }}</span></td>
+                        <td>{{ bge.created_at|date:"M d, Y" }}</td>
                         <td class="actions">
                             <a href="{% url 'bge_approve' bge.id %}" class="btn btn-primary">Approve</a>
                             <a href="{% url 'bge_reject' bge.id %}" class="btn btn-outline">Reject</a>
+                            <a href="{% url 'bge_detail' bge.id %}" class="btn btn-secondary">View</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -67,6 +97,11 @@
                 <p>No pending BGE applications at this time.</p>
             </div>
             {% endif %}
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{% url 'home' %}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{% url 'bge_list' %}" class="btn btn-primary">View All BGEs</a>
+            </div>
         </div>
     </div>
 </body>

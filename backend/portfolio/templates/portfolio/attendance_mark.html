@@ -1,0 +1,23 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Mark Attendance for {{ session.title }} ({{ session.date }})</h2>
+<form method="post" class="bg-white p-6 rounded shadow max-w-2xl mx-auto">
+  {% csrf_token %}
+  <table class="min-w-full">
+    <tr class="bg-gray-100">
+      <th class="py-2 px-4">MSME</th>
+      <th class="py-2 px-4">Present?</th>
+    </tr>
+    {% for msme in msmes %}
+    <tr class="border-b">
+      <td class="py-2 px-4">{{ msme.business_name }}</td>
+      <td class="py-2 px-4 text-center">
+        <input type="checkbox" name="present_{{ msme.id }}" {% if attendance_dict.msme.id %}checked{% endif %}>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <button type="submit" class="mt-4 px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">Save Attendance</button>
+</form>
+<a href="{% url 'session_list' %}" class="inline-block mt-4 text-blue-700 hover:underline">Back to Sessions</a>
+{% endblock %} 

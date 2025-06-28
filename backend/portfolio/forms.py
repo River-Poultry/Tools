@@ -1,5 +1,5 @@
 from django import forms
-from .models import SupportRequest, MSME, BusinessGrowthExpert
+from .models import SupportRequest, MSME, BusinessGrowthExpert, TrainingSession, Attendance, TrainingTopic
 
 class SupportRequestForm(forms.ModelForm):
     msme = forms.ModelChoiceField(queryset=MSME.objects.filter(is_active=True), label="Select Your MSME", required=True)
@@ -40,4 +40,48 @@ class BGEPublicSignupForm(forms.ModelForm):
             'top_skills': forms.TextInput(attrs={'placeholder': 'e.g. Marketing, Finance'}),
             'second_area': forms.TextInput(attrs={'placeholder': 'e.g. Livestock'}),
             'third_area': forms.TextInput(attrs={'placeholder': 'e.g. Agronomy'}),
-        } 
+        }
+
+class TrainingTopicForm(forms.ModelForm):
+    class Meta:
+        model = TrainingTopic
+        fields = ['name', 'description']
+
+class TrainingSessionForm(forms.ModelForm):
+    businesses = forms.ModelMultipleChoiceField(
+        queryset=MSME.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        label='Businesses (MSMEs) Covered'
+    )
+    topic = forms.ModelChoiceField(
+        queryset=TrainingTopic.objects.all(),
+        required=True,
+        label='Main Topic Area'
+    )
+    class Meta:
+        model = TrainingSession
+        fields = ['title', 'date', 'location', 'description', 'topic', 'businesses']
+
+class AttendanceForm(forms.ModelForm):
+    class Meta:
+        model = Attendance
+        fields = ['present']
+
+class MSMEForm(forms.ModelForm):
+    class Meta:
+        model = MSME
+        fields = [
+            'business_name', 'state', 'city', 'owner_name', 'gender', 
+            'phone', 'email', 'business_email', 'sector', 'business_type',
+            'annual_revenue', 'employee_count', 'investment_needed', 
+            'current_funding', 'business_description', 'challenges', 
+            'opportunities', 'address', 'country'
+        ]
+        exclude = ['created_at', 'updated_at', 'is_active', 'source_file', 'msme_code']
+
+class BGEForm(forms.ModelForm):
+    class Meta:
+        model = BusinessGrowthExpert
+        fields = '__all__'
+        exclude = ['created_at', 'updated_at'] 

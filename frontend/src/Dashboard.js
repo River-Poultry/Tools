@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Box, Button, Typography, Container, Grid, Snackbar, Alert } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { Box, Button, Typography, Container, Grid, Snackbar, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import axios from 'axios';
+import { API_ENDPOINTS } from './config';
 
 function Dashboard({ token, onLogout }) {
   const [msmes, setMsmes] = useState([]);
@@ -22,7 +22,7 @@ function Dashboard({ token, onLogout }) {
   const fetchMsmes = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://127.0.0.1:8002/msmes', {
+      const res = await axios.get(API_ENDPOINTS.MSMES, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMsmes(res.data);
@@ -37,7 +37,7 @@ function Dashboard({ token, onLogout }) {
 
   const fetchExperts = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8002/experts', {
+      const res = await axios.get(API_ENDPOINTS.EXPERTS, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setExperts(res.data);
@@ -52,7 +52,7 @@ function Dashboard({ token, onLogout }) {
     const form = new FormData();
     form.append('file', file);
     try {
-      await axios.post('http://127.0.0.1:8002/upload/msmes', form, {
+      await axios.post(API_ENDPOINTS.UPLOAD_MSMES, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMsmeUploadStatus('success');
@@ -69,7 +69,7 @@ function Dashboard({ token, onLogout }) {
     const form = new FormData();
     form.append('file', file);
     try {
-      await axios.post('http://127.0.0.1:8002/upload/experts', form, {
+      await axios.post(API_ENDPOINTS.UPLOAD_EXPERTS, form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setExpertUploadStatus('success');
@@ -80,59 +80,107 @@ function Dashboard({ token, onLogout }) {
     expertFileRef.current.value = '';
   };
 
-  const msmeColumns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Name', width: 180 },
-    { field: 'gps_lat', headerName: 'GPS Lat', width: 120 },
-    { field: 'gps_lng', headerName: 'GPS Lng', width: 120 },
-    { field: 'skill_needs', headerName: 'Skill Needs', width: 220, valueGetter: (params) => params.row.skill_needs?.join(', ') },
-    { field: 'assigned_expert_id', headerName: 'Assigned Expert', width: 140 },
-  ];
-
-  const expertColumns = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: 'Name', width: 180 },
-    { field: 'gps_lat', headerName: 'GPS Lat', width: 120 },
-    { field: 'gps_lng', headerName: 'GPS Lng', width: 120 },
-    { field: 'skills', headerName: 'Skills', width: 220, valueGetter: (params) => params.row.skills?.join(', ') },
-  ];
-
   return (
     <Container maxWidth="xl">
       <Box sx={{ mt: 4, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h4">Portfolio Manager Dashboard</Typography>
         <Button variant="outlined" color="secondary" onClick={onLogout}>Logout</Button>
       </Box>
+      
+      {fetchError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {fetchError}
+        </Alert>
+      )}
+      
       <Grid container spacing={4}>
         <Grid item xs={12} md={6}>
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h6">MSMEs</Typography>
+            <Typography variant="h6">MSMEs ({msmes.length})</Typography>
             <Button variant="contained" component="label">
               Upload Excel
               <input type="file" accept=".xlsx" hidden ref={msmeFileRef} onChange={handleMsmeUpload} />
             </Button>
           </Box>
-          <div style={{ height: 400, width: '100%' }}>
-            <DataGrid rows={msmes} columns={msmeColumns} pageSize={5} rowsPerPageOptions={[5, 10, 20]} getRowId={row => row.id} />
-          </div>
+          <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Location</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {msmes.slice(0, 10).map((msme) => (
+                  <TableRow key={msme.id}>
+                    <TableCell>{msme.id}</TableCell>
+                    <TableCell>{msme.business_name || msme.name}</TableCell>
+                    <TableCell>{msme.city || msme.location}</TableCell>
+                  </TableRow>
+                ))}
+                {msmes.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} align="center">
+                      {loading ? 'Loading...' : 'No MSMEs found'}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Grid>
+        
         <Grid item xs={12} md={6}>
           <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography variant="h6">Experts</Typography>
+            <Typography variant="h6">Experts ({experts.length})</Typography>
             <Button variant="contained" component="label">
               Upload Excel
               <input type="file" accept=".xlsx" hidden ref={expertFileRef} onChange={handleExpertUpload} />
             </Button>
           </Box>
-          <div style={{ height: 400, width: '100%' }}>
-            <DataGrid rows={experts} columns={expertColumns} pageSize={5} rowsPerPageOptions={[5, 10, 20]} getRowId={row => row.id} />
-          </div>
+          <TableContainer component={Paper} sx={{ maxHeight: 400 }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Location</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {experts.slice(0, 10).map((expert) => (
+                  <TableRow key={expert.id}>
+                    <TableCell>{expert.id}</TableCell>
+                    <TableCell>{expert.name}</TableCell>
+                    <TableCell>{expert.location}</TableCell>
+                  </TableRow>
+                ))}
+                {experts.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={3} align="center">
+                      No experts found
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Grid>
       </Grid>
-      <Snackbar open={msmeUploadStatus === 'success'} autoHideDuration={3000} onClose={() => setMsmeUploadStatus('')}><Alert severity="success">MSME Excel uploaded!</Alert></Snackbar>
-      <Snackbar open={msmeUploadStatus === 'error'} autoHideDuration={3000} onClose={() => setMsmeUploadStatus('')}><Alert severity="error">MSME upload failed!</Alert></Snackbar>
-      <Snackbar open={expertUploadStatus === 'success'} autoHideDuration={3000} onClose={() => setExpertUploadStatus('')}><Alert severity="success">Expert Excel uploaded!</Alert></Snackbar>
-      <Snackbar open={expertUploadStatus === 'error'} autoHideDuration={3000} onClose={() => setExpertUploadStatus('')}><Alert severity="error">Expert upload failed!</Alert></Snackbar>
+      
+      <Snackbar open={msmeUploadStatus === 'success'} autoHideDuration={3000} onClose={() => setMsmeUploadStatus('')}>
+        <Alert severity="success">MSME Excel uploaded!</Alert>
+      </Snackbar>
+      <Snackbar open={msmeUploadStatus === 'error'} autoHideDuration={3000} onClose={() => setMsmeUploadStatus('')}>
+        <Alert severity="error">MSME upload failed!</Alert>
+      </Snackbar>
+      <Snackbar open={expertUploadStatus === 'success'} autoHideDuration={3000} onClose={() => setExpertUploadStatus('')}>
+        <Alert severity="success">Expert Excel uploaded!</Alert>
+      </Snackbar>
+      <Snackbar open={expertUploadStatus === 'error'} autoHideDuration={3000} onClose={() => setExpertUploadStatus('')}>
+        <Alert severity="error">Expert upload failed!</Alert>
+      </Snackbar>
     </Container>
   );
 }

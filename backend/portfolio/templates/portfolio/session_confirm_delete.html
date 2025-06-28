@@ -1,0 +1,10 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Delete Session</h2>
+<p>Are you sure you want to delete "{{ session.title }}"?</p>
+<form method="post" class="mt-4">
+  {% csrf_token %}
+  <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Yes, delete</button>
+  <a href="{% url 'session_list' %}" class="ml-4 text-blue-700 hover:underline">Cancel</a>
+</form>
+{% endblock %} 

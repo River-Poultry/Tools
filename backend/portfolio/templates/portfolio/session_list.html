@@ -1,0 +1,24 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Training Sessions</h2>
+<a href="{% url 'session_create' %}" class="inline-block mb-4 px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-600">Create New Session</a>
+<table class="min-w-full bg-white rounded shadow">
+  <tr class="bg-gray-100">
+    <th class="py-2 px-4">Title</th><th class="py-2 px-4">Date</th><th class="py-2 px-4">Location</th><th class="py-2 px-4">Actions</th>
+  </tr>
+  {% for session in sessions %}
+  <tr class="border-b">
+    <td class="py-2 px-4">{{ session.title }}</td>
+    <td class="py-2 px-4">{{ session.date }}</td>
+    <td class="py-2 px-4">{{ session.location }}</td>
+    <td class="py-2 px-4">
+      <a href="{% url 'attendance_mark' session.id %}" class="text-blue-700 hover:underline">Mark Attendance</a> |
+      <a href="{% url 'session_update' session.id %}" class="text-yellow-600 hover:underline">Edit</a> |
+      <a href="{% url 'session_delete' session.id %}" class="text-red-600 hover:underline">Delete</a>
+    </td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4" class="py-4 text-center text-gray-400">No sessions found.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %} 

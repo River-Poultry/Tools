@@ -20,6 +20,13 @@ urlpatterns = [
     path('bge-leaderboard/', views.bge_leaderboard, name='bge_leaderboard'),
     path('bge-signup/', views.bge_signup, name='bge_signup'),
     path('bge-approval/', views.bge_approval_list, name='bge_approval_list'),
+    path('bge-signups/', views.bge_signups_list, name='bge_signups_list'),
     path('bge-approve/<int:bge_id>/', views.bge_approve, name='bge_approve'),
     path('bge-reject/<int:bge_id>/', views.bge_reject, name='bge_reject'),
+    path('sessions/', views.session_list, name='session_list'),
+    path('sessions/create/', views.session_create, name='session_create'),
+    path('sessions/<int:pk>/edit/', views.session_update, name='session_update'),
+    path('sessions/<int:pk>/delete/', views.session_delete, name='session_delete'),
+    path('sessions/<int:session_id>/attendance/', views.attendance_mark, name='attendance_mark'),
+    path('sessions/analytics/', views.session_analytics, name='session_analytics'),
 ] 
