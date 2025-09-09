@@ -1,0 +1,60 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { TrendingUp, Ruler } from 'lucide-react';
+import styled from 'styled-components';
+
+const Nav = styled.nav`
+  background: #2c3e50;
+  padding: 0 20px;
+`;
+
+const NavList = styled.ul`
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+`;
+
+const NavItem = styled.li<{ active: boolean }>`
+  margin: 0;
+  
+  a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: ${props => props.active ? '#3498db' : 'white'};
+    text-decoration: none;
+    padding: 15px 20px;
+    font-weight: 600;
+    border-bottom: 3px solid ${props => props.active ? '#3498db' : 'transparent'};
+    
+    &:hover {
+      background: #34495e;
+    }
+  }
+`;
+
+const Navigation: React.FC = () => {
+  const location = useLocation();
+
+  return (
+    <Nav>
+      <NavList>
+        <NavItem active={location.pathname === '/budget'}>
+          <Link to="/budget">
+            <TrendingUp size={18} />
+            Budget Tracker
+          </Link>
+        </NavItem>
+        <NavItem active={location.pathname === '/measurement'}>
+          <Link to="/measurement">
+            <Ruler size={18} />
+            Room Measurement
+          </Link>
+        </NavItem>
+      </NavList>
+    </Nav>
+  );
+};
+
+export default Navigation;

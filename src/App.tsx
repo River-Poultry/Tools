@@ -1,26 +1,28 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import BudgetTracker from './components/BudgetTracker';
+import RoomMeasurement from './components/RoomMeasurement';
+import Navigation from './components/Navigation';
+import styled from 'styled-components';
 
-function App() {
+const AppContainer = styled.div`
+  min-height: 100vh;
+  background: #ecf0f1;
+`;
+
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <AppContainer>
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<BudgetTracker />} />
+          <Route path="/budget" element={<BudgetTracker />} />
+          <Route path="/measurement" element={<RoomMeasurement />} />
+        </Routes>
+      </AppContainer>
+    </Router>
   );
-}
+};
 
 export default App;
