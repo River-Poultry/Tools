@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BudgetItem } from '../types'; // Fixed import path
-import { Plus, TrendingUp } from 'lucide-react';
+import { Plus, TrendingUp, Trash2 } from 'lucide-react';
 import styled from 'styled-components';
 import BudgetChart from './BudgetChart';
 
@@ -8,11 +8,11 @@ const Container = styled.div`
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
-  background: #fff; /* white background */
+  background: #fff;
 `;
 
 const Header = styled.h2`
-  color: #000; /* black text */
+  color: #000;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -20,7 +20,7 @@ const Header = styled.h2`
 `;
 
 const Form = styled.form`
-  background: #fff; /* white background */
+  background: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -39,7 +39,7 @@ const FormGroup = styled.div`
 const Label = styled.label`
   margin-bottom: 5px;
   font-weight: 600;
-  color: #000; /* black text */
+  color: #000;
 `;
 
 const Input = styled.input`
@@ -47,7 +47,7 @@ const Input = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  color: #000; /* black text */
+  color: #000;
 `;
 
 const Select = styled.select`
@@ -55,13 +55,13 @@ const Select = styled.select`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  color: #000; /* black text */
+  color: #000;
 `;
 
 const Button = styled.button`
   padding: 10px 15px;
-  background: #e74c3c; /* red */
-  color: #fff; /* white text */
+  background: #e74c3c;
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -71,22 +71,36 @@ const Button = styled.button`
   font-weight: 600;
 
   &:hover {
-    background: #c0392b; /* darker red */
+    background: #c0392b;
+  }
+`;
+
+const DeleteButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #e74c3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: #c0392b;
   }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  background: #fff; /* white */
+  background: #fff;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const TableHeader = styled.th`
-  background: #000; /* black background */
-  color: #fff; /* white text */
+  background: #000;
+  color: #fff;
   padding: 12px;
   text-align: left;
 `;
@@ -100,7 +114,7 @@ const TableRow = styled.tr`
 const TableCell = styled.td`
   padding: 12px;
   border-bottom: 1px solid #eee;
-  color: #000; /* black text */
+  color: #000;
 `;
 
 const IncomeCell = styled(TableCell)`
@@ -121,7 +135,7 @@ const Summary = styled.div`
 `;
 
 const SummaryCard = styled.div`
-  background: #fff; /* white */
+  background: #fff;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -130,7 +144,7 @@ const SummaryCard = styled.div`
 
 const SummaryTitle = styled.h3`
   margin: 0 0 10px 0;
-  color: #000; /* black */
+  color: #000;
 `;
 
 const SummaryAmount = styled.p<{ positive?: boolean }>`
@@ -148,6 +162,25 @@ const BudgetTracker: React.FC = () => {
     type: 'expense',
     category: ''
   });
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const savedItems = localStorage.getItem('budgetItems');
+    if (savedItems) {
+      const parsed = JSON.parse(savedItems);
+      // convert dates back to Date objects
+      const withDates = parsed.map((item: any) => ({
+        ...item,
+        date: new Date(item.date),
+      }));
+      setBudgetItems(withDates);
+    }
+  }, []);
+
+  // Save to localStorage whenever budgetItems changes
+  useEffect(() => {
+    localStorage.setItem('budgetItems', JSON.stringify(budgetItems));
+  }, [budgetItems]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,6 +202,10 @@ const BudgetTracker: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleDelete = (id: string) => {
+    setBudgetItems(budgetItems.filter(item => item.id !== id));
   };
 
   const totalIncome = budgetItems
@@ -268,6 +305,7 @@ const BudgetTracker: React.FC = () => {
             <TableHeader>Category</TableHeader>
             <TableHeader>Type</TableHeader>
             <TableHeader>Amount</TableHeader>
+            <TableHeader>Action</TableHeader>
           </tr>
         </thead>
         <tbody>
@@ -282,6 +320,11 @@ const BudgetTracker: React.FC = () => {
               ) : (
                 <ExpenseCell>-${item.amount.toFixed(2)}</ExpenseCell>
               )}
+              <TableCell>
+                <DeleteButton onClick={() => handleDelete(item.id)}>
+                  <Trash2 size={18} />
+                </DeleteButton>
+              </TableCell>
             </TableRow>
           ))}
         </tbody>
