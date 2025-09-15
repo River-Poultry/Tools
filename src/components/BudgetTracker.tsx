@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BudgetItem } from '../types'; // Fixed import path
-import { Plus, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, TrendingUp } from 'lucide-react';
 import styled from 'styled-components';
 import BudgetChart from './BudgetChart';
 
@@ -8,10 +8,11 @@ const Container = styled.div`
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
+  background: #fff; /* white background */
 `;
 
 const Header = styled.h2`
-  color: #2c3e50;
+  color: #000; /* black text */
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -19,7 +20,7 @@ const Header = styled.h2`
 `;
 
 const Form = styled.form`
-  background: white;
+  background: #fff; /* white background */
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -38,7 +39,7 @@ const FormGroup = styled.div`
 const Label = styled.label`
   margin-bottom: 5px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #000; /* black text */
 `;
 
 const Input = styled.input`
@@ -46,6 +47,7 @@ const Input = styled.input`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+  color: #000; /* black text */
 `;
 
 const Select = styled.select`
@@ -53,36 +55,38 @@ const Select = styled.select`
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+  color: #000; /* black text */
 `;
 
 const Button = styled.button`
   padding: 10px 15px;
-  background: #3498db;
-  color: white;
+  background: #e74c3c; /* red */
+  color: #fff; /* white text */
   border: none;
   border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 5px;
-  
+  font-weight: 600;
+
   &:hover {
-    background: #2980b9;
+    background: #c0392b; /* darker red */
   }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: #fff; /* white */
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 `;
 
 const TableHeader = styled.th`
-  background: #34495e;
-  color: white;
+  background: #000; /* black background */
+  color: #fff; /* white text */
   padding: 12px;
   text-align: left;
 `;
@@ -96,6 +100,7 @@ const TableRow = styled.tr`
 const TableCell = styled.td`
   padding: 12px;
   border-bottom: 1px solid #eee;
+  color: #000; /* black text */
 `;
 
 const IncomeCell = styled(TableCell)`
@@ -116,7 +121,7 @@ const Summary = styled.div`
 `;
 
 const SummaryCard = styled.div`
-  background: white;
+  background: #fff; /* white */
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -125,164 +130,164 @@ const SummaryCard = styled.div`
 
 const SummaryTitle = styled.h3`
   margin: 0 0 10px 0;
-  color: #2c3e50;
+  color: #000; /* black */
 `;
 
 const SummaryAmount = styled.p<{ positive?: boolean }>`
   font-size: 24px;
   font-weight: 600;
   margin: 0;
-  color: ${props => props.positive ? '#27ae60' : props.positive === false ? '#e74c3c' : '#2c3e50'};
+  color: ${props => props.positive ? '#27ae60' : props.positive === false ? '#e74c3c' : '#000'};
 `;
 
 const BudgetTracker: React.FC = () => {
-    const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
-    const [formData, setFormData] = useState({
-        name: '',
-        amount: '',
-        type: 'expense',
-        category: ''
+  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    amount: '',
+    type: 'expense',
+    category: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newItem: BudgetItem = {
+      id: Date.now().toString(),
+      name: formData.name,
+      amount: parseFloat(formData.amount),
+      type: formData.type as 'income' | 'expense',
+      category: formData.category,
+      date: new Date()
+    };
+
+    setBudgetItems([...budgetItems, newItem]);
+    setFormData({ name: '', amount: '', type: 'expense', category: '' });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
     });
+  };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        const newItem: BudgetItem = {
-            id: Date.now().toString(),
-            name: formData.name,
-            amount: parseFloat(formData.amount),
-            type: formData.type as 'income' | 'expense',
-            category: formData.category,
-            date: new Date()
-        };
+  const totalIncome = budgetItems
+    .filter(item => item.type === 'income')
+    .reduce((sum, item) => sum + item.amount, 0);
 
-        setBudgetItems([...budgetItems, newItem]);
-        setFormData({ name: '', amount: '', type: 'expense', category: '' });
-    };
+  const totalExpenses = budgetItems
+    .filter(item => item.type === 'expense')
+    .reduce((sum, item) => sum + item.amount, 0);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
-    };
+  const netProfit = totalIncome - totalExpenses;
 
-    const totalIncome = budgetItems
-        .filter(item => item.type === 'income')
-        .reduce((sum, item) => sum + item.amount, 0);
+  const categories = ['Housing', 'Food', 'Transportation', 'Entertainment', 'Utilities', 'Other'];
 
-    const totalExpenses = budgetItems
-        .filter(item => item.type === 'expense')
-        .reduce((sum, item) => sum + item.amount, 0);
+  return (
+    <Container>
+      <Header>
+        <TrendingUp size={24} />
+        Budget Tracker
+      </Header>
 
-    const netProfit = totalIncome - totalExpenses;
+      <Summary>
+        <SummaryCard>
+          <SummaryTitle>Total Income</SummaryTitle>
+          <SummaryAmount positive>{totalIncome.toFixed(2)}</SummaryAmount>
+        </SummaryCard>
 
-    const categories = ['Housing', 'Food', 'Transportation', 'Entertainment', 'Utilities', 'Other'];
+        <SummaryCard>
+          <SummaryTitle>Total Expenses</SummaryTitle>
+          <SummaryAmount positive={false}>{totalExpenses.toFixed(2)}</SummaryAmount>
+        </SummaryCard>
 
-    return (
-        <Container>
-            <Header>
-                <TrendingUp size={24} />
-                Budget Tracker
-            </Header>
+        <SummaryCard>
+          <SummaryTitle>Net Profit/Loss</SummaryTitle>
+          <SummaryAmount positive={netProfit > 0}>
+            {netProfit.toFixed(2)}
+          </SummaryAmount>
+        </SummaryCard>
+      </Summary>
 
-            <Summary>
-                <SummaryCard>
-                    <SummaryTitle>Total Income</SummaryTitle>
-                    <SummaryAmount positive>{totalIncome.toFixed(2)}</SummaryAmount>
-                </SummaryCard>
+      <Form onSubmit={handleSubmit}>
+        <FormGroup>
+          <Label>Name</Label>
+          <Input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </FormGroup>
 
-                <SummaryCard>
-                    <SummaryTitle>Total Expenses</SummaryTitle>
-                    <SummaryAmount positive={false}>{totalExpenses.toFixed(2)}</SummaryAmount>
-                </SummaryCard>
+        <FormGroup>
+          <Label>Amount</Label>
+          <Input
+            type="number"
+            name="amount"
+            value={formData.amount}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+            required
+          />
+        </FormGroup>
 
-                <SummaryCard>
-                    <SummaryTitle>Net Profit/Loss</SummaryTitle>
-                    <SummaryAmount positive={netProfit > 0}>
-                        {netProfit.toFixed(2)}
-                    </SummaryAmount>
-                </SummaryCard>
-            </Summary>
+        <FormGroup>
+          <Label>Type</Label>
+          <Select name="type" value={formData.type} onChange={handleChange}>
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </Select>
+        </FormGroup>
 
-            <Form onSubmit={handleSubmit}>
-                <FormGroup>
-                    <Label>Name</Label>
-                    <Input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                    />
-                </FormGroup>
+        <FormGroup>
+          <Label>Category</Label>
+          <Select name="category" value={formData.category} onChange={handleChange} required>
+            <option value="">Select a category</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </Select>
+        </FormGroup>
 
-                <FormGroup>
-                    <Label>Amount</Label>
-                    <Input
-                        type="number"
-                        name="amount"
-                        value={formData.amount}
-                        onChange={handleChange}
-                        min="0"
-                        step="0.01"
-                        required
-                    />
-                </FormGroup>
+        <Button type="submit">
+          <Plus size={16} />
+          Add
+        </Button>
+      </Form>
 
-                <FormGroup>
-                    <Label>Type</Label>
-                    <Select name="type" value={formData.type} onChange={handleChange}>
-                        <option value="expense">Expense</option>
-                        <option value="income">Income</option>
-                    </Select>
-                </FormGroup>
+      <BudgetChart budgetItems={budgetItems} />
 
-                <FormGroup>
-                    <Label>Category</Label>
-                    <Select name="category" value={formData.category} onChange={handleChange} required>
-                        <option value="">Select a category</option>
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </Select>
-                </FormGroup>
-
-                <Button type="submit">
-                    <Plus size={16} />
-                    Add
-                </Button>
-            </Form>
-
-            <BudgetChart budgetItems={budgetItems} />
-
-            <Table>
-                <thead>
-                    <tr>
-                        <TableHeader>Date</TableHeader>
-                        <TableHeader>Name</TableHeader>
-                        <TableHeader>Category</TableHeader>
-                        <TableHeader>Type</TableHeader>
-                        <TableHeader>Amount</TableHeader>
-                    </tr>
-                </thead>
-                <tbody>
-                    {budgetItems.map(item => (
-                        <TableRow key={item.id}>
-                            <TableCell>{item.date.toLocaleDateString()}</TableCell>
-                            <TableCell>{item.name}</TableCell>
-                            <TableCell>{item.category}</TableCell>
-                            <TableCell>{item.type}</TableCell>
-                            {item.type === 'income' ? (
-                                <IncomeCell>+${item.amount.toFixed(2)}</IncomeCell>
-                            ) : (
-                                <ExpenseCell>-${item.amount.toFixed(2)}</ExpenseCell>
-                            )}
-                        </TableRow>
-                    ))}
-                </tbody>
-            </Table>
-        </Container>
-    );
+      <Table>
+        <thead>
+          <tr>
+            <TableHeader>Date</TableHeader>
+            <TableHeader>Name</TableHeader>
+            <TableHeader>Category</TableHeader>
+            <TableHeader>Type</TableHeader>
+            <TableHeader>Amount</TableHeader>
+          </tr>
+        </thead>
+        <tbody>
+          {budgetItems.map(item => (
+            <TableRow key={item.id}>
+              <TableCell>{item.date.toLocaleDateString()}</TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell>{item.category}</TableCell>
+              <TableCell>{item.type}</TableCell>
+              {item.type === 'income' ? (
+                <IncomeCell>+${item.amount.toFixed(2)}</IncomeCell>
+              ) : (
+                <ExpenseCell>-${item.amount.toFixed(2)}</ExpenseCell>
+              )}
+            </TableRow>
+          ))}
+        </tbody>
+      </Table>
+    </Container>
+  );
 };
 
 export default BudgetTracker;
