@@ -38,16 +38,16 @@ const Navigation: React.FC = () => {
   return (
     <Nav>
       <NavList>
-        <NavItem active={location.pathname === '/budget'}>
-          <Link to="/budget">
-            <TrendingUp size={18} />
-            Budget Tracker
-          </Link>
-        </NavItem>
         <NavItem active={location.pathname === '/measurement'}>
           <Link to="/measurement">
             <Ruler size={18} />
             Room Measurement
+          </Link>
+        </NavItem>
+        <NavItem active={location.pathname === '/budget'}>
+          <Link to="/budget">
+            <TrendingUp size={18} />
+            Budget Tracker
           </Link>
         </NavItem>
       </NavList>

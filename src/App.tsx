@@ -7,7 +7,7 @@ import styled from 'styled-components';
 
 const AppContainer = styled.div`
   min-height: 100vh;
-  background: #ecf0f1;
+  background: #ffffffff;
 `;
 
 const App: React.FC = () => {
@@ -16,9 +16,10 @@ const App: React.FC = () => {
       <AppContainer>
         <Navigation />
         <Routes>
-          <Route path="/" element={<BudgetTracker />} />
-          <Route path="/budget" element={<BudgetTracker />} />
+          <Route path="/" element={<RoomMeasurement />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
+          <Route path="/budget" element={<BudgetTracker />} />
+
         </Routes>
       </AppContainer>
     </Router>
