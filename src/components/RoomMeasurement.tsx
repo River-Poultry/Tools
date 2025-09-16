@@ -11,7 +11,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.h2`
-  color: #2c3e50;
+  color: #050505ff;
   margin-bottom: 20px;
   display: flex;
   align-items: center;
@@ -38,26 +38,26 @@ const FormGroup = styled.div`
 const Label = styled.label`
   margin-bottom: 5px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #000000ff;
 `;
 
 const Input = styled.input`
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #181818ff;
   border-radius: 4px;
   font-size: 16px;
 `;
 
 const Select = styled.select`
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #212020ff;
   border-radius: 4px;
   font-size: 16px;
 `;
 
 const Button = styled.button`
   padding: 10px 15px;
-  background: #3498db;
+  background: #d90e0eff;
   color: white;
   border: none;
   border-radius: 4px;
@@ -67,7 +67,7 @@ const Button = styled.button`
   gap: 5px;
   
   &:hover {
-    background: #2980b9;
+    background: #d31414ff;
   }
 `;
 

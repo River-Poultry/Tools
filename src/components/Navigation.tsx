@@ -22,15 +22,13 @@ const NavItem = styled.li<{ active: boolean }>`
     display: flex;
     align-items: center;
     gap: 8px;
-    color: ${props => props.active ? '#3498db' : 'white'};
+    color: ${props => props.active ? '#000000ff' : 'white'};
     text-decoration: none;
     padding: 15px 20px;
     font-weight: 600;
-    border-bottom: 3px solid ${props => props.active ? '#3498db' : 'transparent'};
+    border-bottom: 3px solid ${props => props.active ? '#000000ff' : 'transparent'};
     
-    &:hover {
-      background: #34495e;
-    }
+    
   }
 `;
 
