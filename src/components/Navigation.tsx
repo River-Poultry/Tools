@@ -4,7 +4,7 @@ import { TrendingUp, Ruler, TrendingUpDownIcon } from 'lucide-react';
 import styled from 'styled-components';
 
 const Nav = styled.nav`
-  background: #f3c362ff;
+  background: #eff1a0ff;
   padding: 0 20px;
 `;
 

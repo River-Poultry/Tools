@@ -64,7 +64,7 @@ const Vaccination: React.FC = () => {
 
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
-            {/* Hero Section */}
+
             <Box
                 sx={{
                     bgcolor: "#638f65ff",
@@ -90,7 +90,7 @@ const Vaccination: React.FC = () => {
                 </Typography>
             </Box>
 
-            {/* Selection Card */}
+
             <Card
                 sx={{
                     maxWidth: 600,
@@ -115,7 +115,7 @@ const Vaccination: React.FC = () => {
                                 value={type}
                                 onChange={(e) => {
                                     setType(e.target.value);
-                                    setAge(""); // reset age when type changes
+                                    setAge("");
                                 }}
                             >
                                 <MenuItem value="broilers"> Broilers</MenuItem>
@@ -179,7 +179,7 @@ const Vaccination: React.FC = () => {
                                 </Table>
                             </Paper>
 
-                            {/* PDF Download */}
+
                             <Box textAlign="right">
                                 <PdfDownloader data={filteredVaccines} type={type} age={age} />
                             </Box>

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { RoomMeasurement, RoomDimension } from '../types'; // Fixed import path
+import { RoomMeasurement, RoomDimension } from '../types';
 import { Ruler, Calculator, Plus } from 'lucide-react';
 import styled from 'styled-components';
 
-// ... rest of the component remains the same
+
 const Container = styled.div`
   padding: 20px;
   max-width: 1000px;

@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoImg from "../assets/logo.png"; // import from src/assets
+import logoImg from "../assets/logo.png";
 
 interface PdfDownloaderProps {
     data: { age: string; vaccine: string; route: string; notes: string }[];
@@ -15,7 +15,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, age }) => {
     const generatePdf = () => {
         const doc = new jsPDF();
 
-        // Add logo directly
+
         doc.addImage(logoImg, "PNG", 10, 5, 40, 20);
 
         doc.setFontSize(16);
@@ -23,7 +23,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, age }) => {
         doc.setFontSize(12);
         doc.text(`Chicken Type: ${type.toUpperCase()} | Age: ${age}`, 70, 28);
 
-        // Table
+
         autoTable(doc, {
             startY: 40,
             head: [["Age/Time", "Vaccine", "Route", "Notes"]],
