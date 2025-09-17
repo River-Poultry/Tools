@@ -14,10 +14,9 @@ import {
     Paper,
     Card,
     CardContent,
-    Button,
     Stack,
 } from "@mui/material";
-import { Agriculture, LocalHospital, Download } from "@mui/icons-material";
+import { Agriculture, LocalHospital } from "@mui/icons-material";
 import PdfDownloader from "../components/PdfDownloader";
 
 type VaccineEntry = {
@@ -63,11 +62,11 @@ const Vaccination: React.FC = () => {
     const filteredVaccines = age ? vaccines.filter((v) => v.age === age) : [];
 
     return (
-        <Box>
+        <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
             {/* Hero Section */}
             <Box
                 sx={{
-                    bgcolor: "primary.main",
+                    bgcolor: "#2e7d32",
                     color: "white",
                     py: 5,
                     px: 3,
@@ -79,14 +78,24 @@ const Vaccination: React.FC = () => {
                     Vaccination Planner
                 </Typography>
                 <Typography variant="h6">
-                    Stronger chickens, healthier farms, better profits 🥚🐓
+                    Healthy chickens, strong profits, happy farmers 🌱🐔
                 </Typography>
             </Box>
 
             {/* Selection Card */}
-            <Card sx={{ maxWidth: 600, mx: "auto", mt: -4, p: 3, borderRadius: 3, boxShadow: 4 }}>
+            <Card
+                sx={{
+                    maxWidth: 600,
+                    mx: "auto",
+                    mt: -4,
+                    p: 3,
+                    borderRadius: 3,
+                    boxShadow: 6,
+                    bgcolor: "white",
+                }}
+            >
                 <CardContent>
-                    <Typography variant="h5" gutterBottom color="secondary">
+                    <Typography variant="h5" gutterBottom color="success.main">
                         Select Your Options
                     </Typography>
 
@@ -129,19 +138,19 @@ const Vaccination: React.FC = () => {
 
             {/* Results Section */}
             {type && age && (
-                <Box maxWidth={900} mx="auto" mt={4}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 4 }}>
+                <Box maxWidth={900} mx="auto" mt={5}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 6, bgcolor: "white" }}>
                         <CardContent>
                             <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                                <LocalHospital color="error" sx={{ fontSize: 40 }} />
-                                <Typography variant="h5" color="primary">
+                                <LocalHospital sx={{ fontSize: 40, color: "#f9a825" }} />
+                                <Typography variant="h5" color="success.main">
                                     Vaccination Details for {type.toUpperCase()} at {age}
                                 </Typography>
                             </Stack>
 
                             <Paper sx={{ overflowX: "auto" }}>
                                 <Table>
-                                    <TableHead sx={{ bgcolor: "primary.light" }}>
+                                    <TableHead sx={{ bgcolor: "#f9fbe7" }}>
                                         <TableRow>
                                             <TableCell sx={{ fontWeight: "bold" }}>Age/Time</TableCell>
                                             <TableCell sx={{ fontWeight: "bold" }}>Vaccine</TableCell>
