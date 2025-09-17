@@ -14,7 +14,10 @@ import {
     Paper,
     Card,
     CardContent,
+    Button,
+    Stack,
 } from "@mui/material";
+import { Agriculture, LocalHospital, Download } from "@mui/icons-material";
 import PdfDownloader from "../components/PdfDownloader";
 
 type VaccineEntry = {
@@ -60,85 +63,111 @@ const Vaccination: React.FC = () => {
     const filteredVaccines = age ? vaccines.filter((v) => v.age === age) : [];
 
     return (
-        <Box p={3}>
-            <Card sx={{ p: 3, mb: 3, bgcolor: "#f5f5f5", borderRadius: 3 }}>
+        <Box>
+            {/* Hero Section */}
+            <Box
+                sx={{
+                    bgcolor: "primary.main",
+                    color: "white",
+                    py: 5,
+                    px: 3,
+                    textAlign: "center",
+                }}
+            >
+                <Agriculture sx={{ fontSize: 60 }} />
+                <Typography variant="h3" fontWeight="bold" gutterBottom>
+                    Vaccination Planner
+                </Typography>
+                <Typography variant="h6">
+                    Stronger chickens, healthier farms, better profits 🥚🐓
+                </Typography>
+            </Box>
+
+            {/* Selection Card */}
+            <Card sx={{ maxWidth: 600, mx: "auto", mt: -4, p: 3, borderRadius: 3, boxShadow: 4 }}>
                 <CardContent>
-                    <Typography variant="h4" gutterBottom color="primary">
-                        🐔 Vaccination Planner
+                    <Typography variant="h5" gutterBottom color="secondary">
+                        Select Your Options
                     </Typography>
-                    <Typography variant="body1" color="textSecondary">
-                        Healthy chickens mean better profits! 🥚
-                        Use this planner to know when to vaccinate, protect your flock, and grow your farm with confidence.
-                    </Typography>
+
+                    <Stack spacing={3}>
+                        <FormControl fullWidth>
+                            <InputLabel id="type-label">Chicken Type</InputLabel>
+                            <Select
+                                labelId="type-label"
+                                value={type}
+                                onChange={(e) => {
+                                    setType(e.target.value);
+                                    setAge(""); // reset age when type changes
+                                }}
+                            >
+                                <MenuItem value="broilers">🐓 Broilers</MenuItem>
+                                <MenuItem value="layers">🥚 Layers / Pullets</MenuItem>
+                                <MenuItem value="sasso">🌾 Sasso / Kuroilers</MenuItem>
+                            </Select>
+                        </FormControl>
+
+                        {type && (
+                            <FormControl fullWidth>
+                                <InputLabel id="age-label">Select Age/Time</InputLabel>
+                                <Select
+                                    labelId="age-label"
+                                    value={age}
+                                    onChange={(e) => setAge(e.target.value)}
+                                >
+                                    {ages.map((a, index) => (
+                                        <MenuItem key={index} value={a}>
+                                            {a}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        )}
+                    </Stack>
                 </CardContent>
             </Card>
 
-            {/* Chicken type selection */}
-            <FormControl fullWidth sx={{ mb: 2 }}>
-                <InputLabel id="type-label">Chicken Type</InputLabel>
-                <Select
-                    labelId="type-label"
-                    value={type}
-                    onChange={(e) => {
-                        setType(e.target.value);
-                        setAge(""); // reset age when type changes
-                    }}
-                >
-                    <MenuItem value="broilers">Broilers</MenuItem>
-                    <MenuItem value="layers">Layers / Pullets</MenuItem>
-                    <MenuItem value="sasso">Sasso / Kuroilers</MenuItem>
-                </Select>
-            </FormControl>
-
-            {/* Age selection */}
-            {type && (
-                <FormControl fullWidth sx={{ mb: 3 }}>
-                    <InputLabel id="age-label">Select Age/Time</InputLabel>
-                    <Select
-                        labelId="age-label"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                    >
-                        {ages.map((a, index) => (
-                            <MenuItem key={index} value={a}>
-                                {a}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
-            )}
-
-            {/* Show details only if type and age selected */}
+            {/* Results Section */}
             {type && age && (
-                <Box>
-                    <Paper sx={{ p: 2 }}>
-                        <Typography variant="h6" gutterBottom color="secondary">
-                            Vaccination Details for {type.toUpperCase()} at {age}
-                        </Typography>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Age/Time</TableCell>
-                                    <TableCell>Vaccine</TableCell>
-                                    <TableCell>Route</TableCell>
-                                    <TableCell>Notes</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredVaccines.map((v, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{v.age}</TableCell>
-                                        <TableCell>{v.vaccine}</TableCell>
-                                        <TableCell>{v.route}</TableCell>
-                                        <TableCell>{v.notes}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Paper>
+                <Box maxWidth={900} mx="auto" mt={4}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 4 }}>
+                        <CardContent>
+                            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                                <LocalHospital color="error" sx={{ fontSize: 40 }} />
+                                <Typography variant="h5" color="primary">
+                                    Vaccination Details for {type.toUpperCase()} at {age}
+                                </Typography>
+                            </Stack>
 
-                    {/* PDF Download */}
-                    <PdfDownloader data={filteredVaccines} type={type} age={age} />
+                            <Paper sx={{ overflowX: "auto" }}>
+                                <Table>
+                                    <TableHead sx={{ bgcolor: "primary.light" }}>
+                                        <TableRow>
+                                            <TableCell sx={{ fontWeight: "bold" }}>Age/Time</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold" }}>Vaccine</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold" }}>Route</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold" }}>Notes</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {filteredVaccines.map((v, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{v.age}</TableCell>
+                                                <TableCell>{v.vaccine}</TableCell>
+                                                <TableCell>{v.route}</TableCell>
+                                                <TableCell>{v.notes}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </Paper>
+
+                            {/* PDF Download */}
+                            <Box textAlign="right">
+                                <PdfDownloader data={filteredVaccines} type={type} age={age} />
+                            </Box>
+                        </CardContent>
+                    </Card>
                 </Box>
             )}
         </Box>
