@@ -1,33 +1,31 @@
 import React from "react";
 import { Button } from "@mui/material";
-import { jsPDF } from "jspdf";
+import { Download } from "@mui/icons-material";
+import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
-type VaccineEntry = {
-    age: string;
-    vaccine: string;
-    route: string;
-    notes: string;
-};
+import logoImg from "../assets/logo.png"; // import from src/assets
 
 interface PdfDownloaderProps {
-    data: VaccineEntry[];
+    data: { age: string; vaccine: string; route: string; notes: string }[];
     type: string;
     age: string;
 }
 
 const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, age }) => {
-    const handleDownload = () => {
+    const generatePdf = () => {
         const doc = new jsPDF();
 
-        doc.setFontSize(16);
-        doc.text("🐔 Vaccination Planner Report", 14, 20);
-        doc.setFontSize(12);
-        doc.text(`Chicken Type: ${type}`, 14, 30);
-        doc.text(`Selected Age: ${age}`, 14, 38);
+        // Add logo directly
+        doc.addImage(logoImg, "PNG", 10, 5, 40, 20);
 
+        doc.setFontSize(16);
+        doc.text("Vaccination Schedule", 70, 20);
+        doc.setFontSize(12);
+        doc.text(`Chicken Type: ${type.toUpperCase()} | Age: ${age}`, 70, 28);
+
+        // Table
         autoTable(doc, {
-            startY: 45,
+            startY: 40,
             head: [["Age/Time", "Vaccine", "Route", "Notes"]],
             body: data.map((v) => [v.age, v.vaccine, v.route, v.notes]),
         });
@@ -38,11 +36,12 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, age }) => {
     return (
         <Button
             variant="contained"
-            color="secondary"
-            onClick={handleDownload}
+            color="success"
+            startIcon={<Download />}
             sx={{ mt: 2 }}
+            onClick={generatePdf}
         >
-            📄 Download PDF
+            Download PDF
         </Button>
     );
 };

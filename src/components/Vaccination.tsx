@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { Agriculture, LocalHospital } from "@mui/icons-material";
 import PdfDownloader from "../components/PdfDownloader";
+import logo from "../assets/logo.png";
 
 type VaccineEntry = {
     age: string;
@@ -66,7 +67,7 @@ const Vaccination: React.FC = () => {
             {/* Hero Section */}
             <Box
                 sx={{
-                    bgcolor: "#2e7d32",
+                    bgcolor: "#638f65ff",
                     color: "white",
                     py: 5,
                     px: 3,
@@ -74,8 +75,8 @@ const Vaccination: React.FC = () => {
                 }}
             >
                 <img
-                    src="../assets/logo.png"
-                    alt="Logo"
+                    src={logo}
+                    alt="Company Logo"
                     style={{ width: 100, height: "auto", marginBottom: "10px" }}
                 />
                 <Typography variant="h3" fontWeight="bold" gutterBottom>
