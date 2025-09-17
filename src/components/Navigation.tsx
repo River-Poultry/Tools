@@ -6,6 +6,7 @@ import styled from 'styled-components';
 const Nav = styled.nav`
   background: #eff1a0ff;
   padding: 0 20px;
+  
 `;
 
 const NavList = styled.ul`
