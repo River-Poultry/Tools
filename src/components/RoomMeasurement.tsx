@@ -13,7 +13,7 @@ import {
     Stack,
 } from "@mui/material";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
-import logo from "../assets/logo.png"; // 👈 your company logo
+import logo from "../assets/logo.png";
 
 const spaceRequirements: Record<string, number> = {
     broilers: 0.09, // m² per bird
@@ -55,16 +55,16 @@ const HouseMeasurement: React.FC = () => {
             {/* Hero Section */}
             <Box
                 sx={{
-                    bgcolor: "#2e7d32",
+                    bgcolor: "#638f65ff",
                     color: "white",
-                    py: 4,
+                    py: 10,
                     textAlign: "center",
                 }}
             >
                 <img
                     src={logo}
                     alt="Company Logo"
-                    style={{ width: 80, height: "auto", marginBottom: "10px" }}
+                    style={{ width: 100, height: "auto", marginBottom: "10px" }}
                 />
                 <Typography variant="h3" fontWeight="bold">
                     House Measurement Tool
