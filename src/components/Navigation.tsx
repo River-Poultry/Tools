@@ -39,7 +39,7 @@ const Navigation: React.FC = () => {
     <Nav>
       <NavList>
         <NavItem active={location.pathname === '/Vaccination'}>
-          <Link to="/vaccination">
+          <Link to="/Vaccination">
             <TrendingUpDownIcon size={18} />
             Vaccination Planner
           </Link>
