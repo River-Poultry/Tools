@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Ruler } from 'lucide-react';
+import { TrendingUp, Ruler, TrendingUpDownIcon } from 'lucide-react';
 import styled from 'styled-components';
 
 const Nav = styled.nav`
@@ -39,8 +39,8 @@ const Navigation: React.FC = () => {
     <Nav>
       <NavList>
         <NavItem active={location.pathname === '/Vaccination'}>
-          <Link to="/Vaccination">
-            <Ruler size={18} />
+          <Link to="/vaccination">
+            <TrendingUpDownIcon size={18} />
             Vaccination Planner
           </Link>
         </NavItem>
