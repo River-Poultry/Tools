@@ -6,6 +6,9 @@ import styled from 'styled-components';
 const Nav = styled.nav`
   background: #eff1a0ff;
   padding: 0 20px;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   
 `;
 

@@ -70,7 +70,9 @@ const HouseMeasurement: React.FC = () => {
                     House Measurement Tool
                 </Typography>
                 <Typography variant="h6">
-                    Plan better, raise healthier chickens 🐔🌱
+                    Plan better, raise healthier chickens with the right space.
+
+
                 </Typography>
             </Box>
 
@@ -130,10 +132,10 @@ const HouseMeasurement: React.FC = () => {
                                         setResult("");
                                     }}
                                 >
-                                    <MenuItem value="broilers">🐓 Broilers</MenuItem>
-                                    <MenuItem value="layers">🥚 Layers</MenuItem>
-                                    <MenuItem value="sasso">🌾 Sasso</MenuItem>
-                                    <MenuItem value="kuroilers">🐤 Kuroilers</MenuItem>
+                                    <MenuItem value="broilers"> Broilers</MenuItem>
+                                    <MenuItem value="layers"> Layers</MenuItem>
+                                    <MenuItem value="sasso"> Sasso</MenuItem>
+                                    <MenuItem value="kuroilers"> Kuroilers</MenuItem>
                                 </Select>
                             </FormControl>
 
