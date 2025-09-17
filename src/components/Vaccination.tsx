@@ -78,10 +78,7 @@ const Vaccination: React.FC = () => {
                     Vaccination Planner
                 </Typography>
                 <Typography variant="h6">
-                    Use this planner to know when to vaccinate, protect your flock, and grow your farm with confidence.
-                </Typography>
-                <Typography variant="h6">
-                    Healthy chickens, strong profits, happy farmers
+                    Healthy chickens, strong profits, happy farmers 🌱🐔
                 </Typography>
             </Box>
 
