@@ -6,14 +6,16 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    TextField,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TableRow,
     Paper,
+    Card,
+    CardContent,
 } from "@mui/material";
+import PdfDownloader from "../components/PdfDownloader";
 
 type VaccineEntry = {
     age: string;
@@ -25,7 +27,7 @@ type VaccineEntry = {
 const schedules: Record<string, VaccineEntry[]> = {
     broilers: [
         { age: "Day 1", vaccine: "Marek’s disease", route: "SC / hatchery", notes: "Protection against tumors/paralysis" },
-        { age: "Day 1", vaccine: "Newcastle + IB", route: "Spray / Eye-drop", notes: "Initial respiratory protection" },
+        { age: "Day 1", vaccine: "Newcastle + IB", route: "Spray / Eye-drop", notes: "Respiratory protection" },
         { age: "Day 7–10", vaccine: "Infectious Bursal Disease (Gumboro)", route: "Water / Eye-drop", notes: "Protect immune organs" },
         { age: "Day 14–21", vaccine: "Newcastle + IB (Booster)", route: "Water / Spray", notes: "Reinforce protection" },
         { age: "Day 21–28 (if risk)", vaccine: "Additional boosters (IBD/respiratory)", route: "Water / Spray", notes: "Maintain immunity" },
@@ -50,33 +52,37 @@ const schedules: Record<string, VaccineEntry[]> = {
 };
 
 const Vaccination: React.FC = () => {
-    const [type, setType] = useState<string>("broilers");
-    const [age, setAge] = useState<number | "">("");
+    const [type, setType] = useState<string>("");
+    const [age, setAge] = useState<string>("");
 
-    const vaccines = schedules[type] || [];
-
-    // Optional: filter by age if user enters it
-    const filteredVaccines =
-        age === ""
-            ? vaccines
-            : vaccines.filter((v) => {
-                // crude check: match any entry with that week/day number
-                return v.age.includes(age.toString());
-            });
+    const vaccines = type ? schedules[type] || [] : [];
+    const ages = Array.from(new Set(vaccines.map((v) => v.age)));
+    const filteredVaccines = age ? vaccines.filter((v) => v.age === age) : [];
 
     return (
         <Box p={3}>
-            <Typography variant="h4" gutterBottom>
-                🐔 Vaccination Planner
-            </Typography>
+            <Card sx={{ p: 3, mb: 3, bgcolor: "#f5f5f5", borderRadius: 3 }}>
+                <CardContent>
+                    <Typography variant="h4" gutterBottom color="primary">
+                        🐔 Vaccination Planner
+                    </Typography>
+                    <Typography variant="body1" color="textSecondary">
+                        Healthy chickens mean better profits! 🥚
+                        Use this planner to know when to vaccinate, protect your flock, and grow your farm with confidence.
+                    </Typography>
+                </CardContent>
+            </Card>
 
+            {/* Chicken type selection */}
             <FormControl fullWidth sx={{ mb: 2 }}>
                 <InputLabel id="type-label">Chicken Type</InputLabel>
                 <Select
                     labelId="type-label"
                     value={type}
-                    label="Chicken Type"
-                    onChange={(e) => setType(e.target.value)}
+                    onChange={(e) => {
+                        setType(e.target.value);
+                        setAge(""); // reset age when type changes
+                    }}
                 >
                     <MenuItem value="broilers">Broilers</MenuItem>
                     <MenuItem value="layers">Layers / Pullets</MenuItem>
@@ -84,39 +90,57 @@ const Vaccination: React.FC = () => {
                 </Select>
             </FormControl>
 
-            <TextField
-                label="Flock Age (Day/Week)"
-                type="number"
-                value={age}
-                onChange={(e) =>
-                    setAge(e.target.value === "" ? "" : Number(e.target.value))
-                }
-                fullWidth
-                sx={{ mb: 3 }}
-            />
-
-            <Paper>
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Age/Time</TableCell>
-                            <TableCell>Vaccine</TableCell>
-                            <TableCell>Route</TableCell>
-                            <TableCell>Notes</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {filteredVaccines.map((v, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{v.age}</TableCell>
-                                <TableCell>{v.vaccine}</TableCell>
-                                <TableCell>{v.route}</TableCell>
-                                <TableCell>{v.notes}</TableCell>
-                            </TableRow>
+            {/* Age selection */}
+            {type && (
+                <FormControl fullWidth sx={{ mb: 3 }}>
+                    <InputLabel id="age-label">Select Age/Time</InputLabel>
+                    <Select
+                        labelId="age-label"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                    >
+                        {ages.map((a, index) => (
+                            <MenuItem key={index} value={a}>
+                                {a}
+                            </MenuItem>
                         ))}
-                    </TableBody>
-                </Table>
-            </Paper>
+                    </Select>
+                </FormControl>
+            )}
+
+            {/* Show details only if type and age selected */}
+            {type && age && (
+                <Box>
+                    <Paper sx={{ p: 2 }}>
+                        <Typography variant="h6" gutterBottom color="secondary">
+                            Vaccination Details for {type.toUpperCase()} at {age}
+                        </Typography>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Age/Time</TableCell>
+                                    <TableCell>Vaccine</TableCell>
+                                    <TableCell>Route</TableCell>
+                                    <TableCell>Notes</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {filteredVaccines.map((v, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{v.age}</TableCell>
+                                        <TableCell>{v.vaccine}</TableCell>
+                                        <TableCell>{v.route}</TableCell>
+                                        <TableCell>{v.notes}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </Paper>
+
+                    {/* PDF Download */}
+                    <PdfDownloader data={filteredVaccines} type={type} age={age} />
+                </Box>
+            )}
         </Box>
     );
 };

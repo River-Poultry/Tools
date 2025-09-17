@@ -38,10 +38,10 @@ const Navigation: React.FC = () => {
   return (
     <Nav>
       <NavList>
-        <NavItem active={location.pathname === '/Vaccination'}>
-          <Link to="/Vaccination">
+        <NavItem active={location.pathname === '/'}>
+          <Link to="/">
             <TrendingUpDownIcon size={18} />
-            Vaccination Planner
+            Vaccination Schedule
           </Link>
         </NavItem>
         <NavItem active={location.pathname === '/measurement'}>
