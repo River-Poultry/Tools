@@ -73,7 +73,11 @@ const Vaccination: React.FC = () => {
                     textAlign: "center",
                 }}
             >
-                <Agriculture sx={{ fontSize: 60 }} />
+                <img
+                    src="../assets/logo.png"
+                    alt="Logo"
+                    style={{ width: 100, height: "auto", marginBottom: "10px" }}
+                />
                 <Typography variant="h3" fontWeight="bold" gutterBottom>
                     Vaccination Planner
                 </Typography>
