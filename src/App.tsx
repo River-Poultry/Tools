@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import BudgetTracker from './components/BudgetTracker';
 import RoomMeasurement from './components/RoomMeasurement';
 import Navigation from './components/Navigation';
+import Vaccination from "./components/Vaccination";
 import styled from 'styled-components';
 
 const AppContainer = styled.div`
@@ -16,7 +17,7 @@ const App: React.FC = () => {
       <AppContainer>
         <Navigation />
         <Routes>
-          <Route path="/" element={<RoomMeasurement />} />
+          <Route path="/" element={<Vaccination />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
           <Route path="/budget" element={<BudgetTracker />} />
 

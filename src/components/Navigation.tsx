@@ -38,6 +38,12 @@ const Navigation: React.FC = () => {
   return (
     <Nav>
       <NavList>
+        <NavItem active={location.pathname === '/Vaccination'}>
+          <Link to="/Vaccination">
+            <Ruler size={18} />
+            Vaccination Planner
+          </Link>
+        </NavItem>
         <NavItem active={location.pathname === '/measurement'}>
           <Link to="/measurement">
             <Ruler size={18} />
