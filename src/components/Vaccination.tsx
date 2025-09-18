@@ -201,7 +201,16 @@ const Vaccination: React.FC = () => {
                             </Typography>
 
                             <Box textAlign={isMobile ? "center" : "right"}>
-                                <PdfDownloader data={vaccines} type={type} age={"All"} />
+                                <PdfDownloader
+                                    data={vaccines.map((v) => ({
+                                        ...v,
+                                        date: getDate(v), // add calculated calendar date
+                                    }))}
+                                    type={type}
+                                    arrivalDate={arrivalDate.format("DD MMM YYYY")}
+                                    saleDate={saleDate}
+                                />
+
                             </Box>
                         </CardContent>
                     </Card>

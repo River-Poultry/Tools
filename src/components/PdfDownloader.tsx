@@ -1,7 +1,8 @@
 import React from "react";
 import { Button } from "@mui/material";
 import jsPDF from "jspdf";
-import "jspdf-autotable";
+
+import autoTable from "jspdf-autotable";
 import logo from "../assets/logo.png";
 
 type VaccineEntry = {
