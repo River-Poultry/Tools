@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
     Box,
     Typography,
@@ -7,7 +7,6 @@ import {
     Select,
     FormControl,
     InputLabel,
-    Button,
     Card,
     CardContent,
     Stack,
@@ -16,7 +15,7 @@ import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import HeroSection from "./HeroSection";
 
 const spaceRequirements: Record<string, number> = {
-    broilers: 0.09, // m² per bird
+    broilers: 0.09,
     layers: 0.18,
     sasso: 0.14,
     kuroilers: 0.14,
@@ -27,23 +26,34 @@ const HouseMeasurement: React.FC = () => {
     const [birds, setBirds] = useState<number | "">("");
     const [result, setResult] = useState<string>("");
 
-    const calculate = () => {
-        if (!type || !birds) {
-            setResult("⚠️ Please select chicken type and enter number of birds.");
-            return;
+    const resultRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (type && birds) {
+            const requiredSpace = spaceRequirements[type] * Number(birds);
+            const width = Math.sqrt(requiredSpace / 2);
+            const length = width * 2;
+
+            setResult(
+                `✅ You need approximately ${requiredSpace.toFixed(
+                    2
+                )} m² to accommodate ${birds} ${type}.\nRecommended house dimensions: ${length.toFixed(
+                    2
+                )}m (length) × ${width.toFixed(2)}m (width).`
+            );
+        } else {
+            setResult("");
         }
+    }, [type, birds]);
 
-        const requiredSpace = spaceRequirements[type] * Number(birds);
-
-        setResult(
-            `✅ You need approximately ${requiredSpace.toFixed(
-                2
-            )} m² to accommodate ${birds} ${type}.`
-        );
-    };
+    useEffect(() => {
+        if (resultRef.current) {
+            resultRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [result]);
 
     return (
-        <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh" }}>
+        <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
             {/* Hero Section */}
             <HeroSection
                 title="House Measurement Tool"
@@ -59,13 +69,13 @@ const HouseMeasurement: React.FC = () => {
                     justifyContent: "center",
                     alignItems: "flex-start",
                     minHeight: "calc(100vh - 150px)",
-                    p: 3,
+                    px: 5, // enlarge horizontally
                 }}
             >
                 <Card
                     sx={{
                         width: "100%",
-                        maxWidth: 500,
+                        maxWidth: 700, // wider form
                         borderRadius: 3,
                         boxShadow: 6,
                         p: 3,
@@ -74,12 +84,7 @@ const HouseMeasurement: React.FC = () => {
                     }}
                 >
                     <CardContent>
-                        <Stack direction="row" spacing={2} alignItems="center" mb={3}>
-                            <HomeWorkIcon sx={{ fontSize: 40, color: "#2e7d32" }} />
-                            <Typography variant="h5" color="success.main">
-                                Enter Flock Details
-                            </Typography>
-                        </Stack>
+
 
                         {/* Inputs */}
                         <Stack spacing={3}>
@@ -87,15 +92,10 @@ const HouseMeasurement: React.FC = () => {
                                 <InputLabel>Chicken Type</InputLabel>
                                 <Select
                                     value={type}
-                                    onChange={(e) => {
-                                        setType(e.target.value);
-                                        setResult("");
-                                    }}
+                                    onChange={(e) => setType(e.target.value)}
                                     sx={{
-                                        borderRadius: "50px", // circular edges
-                                        "& .MuiSelect-select": {
-                                            padding: "14px 20px",
-                                        },
+                                        borderRadius: "50px",
+                                        "& .MuiSelect-select": { padding: "14px 20px" },
                                     }}
                                 >
                                     <MenuItem value="broilers">Broilers</MenuItem>
@@ -114,31 +114,24 @@ const HouseMeasurement: React.FC = () => {
                                     onChange={(e) => setBirds(Number(e.target.value))}
                                 />
                             )}
-
-                            <Button
-                                variant="contained"
-                                color="success"
-                                size="large"
-                                onClick={calculate}
-                            >
-                                Calculate
-                            </Button>
                         </Stack>
 
                         {/* Results */}
                         {result && (
                             <Card
+                                ref={resultRef}
                                 sx={{
                                     mt: 4,
                                     p: 3,
                                     borderRadius: 2,
-                                    bgcolor: result.includes("✅") ? "#e8f5e9" : "#ffebee",
+                                    whiteSpace: "pre-line",
+                                    bgcolor: "#e8f5e9",
                                 }}
                             >
                                 <Typography
                                     variant="h6"
                                     sx={{ fontWeight: "bold" }}
-                                    color={result.includes("✅") ? "success.main" : "error.main"}
+                                    color="success.main"
                                 >
                                     {result}
                                 </Typography>
