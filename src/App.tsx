@@ -19,7 +19,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Vaccination />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
-          <Route path="/budget" element={<BudgetTracker />} />
+          {/* <Route path="/budget" element={<BudgetTracker />} /> */}
 
         </Routes>
       </AppContainer>

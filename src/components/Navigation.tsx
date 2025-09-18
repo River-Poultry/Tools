@@ -54,12 +54,12 @@ const Navigation: React.FC = () => {
             Room Measurement
           </Link>
         </NavItem>
-        <NavItem active={location.pathname === '/budget'}>
+        {/* <NavItem active={location.pathname === '/budget'}>
           <Link to="/budget">
             <TrendingUp size={18} />
             Budget Tracker
           </Link>
-        </NavItem>
+        </NavItem> */}
       </NavList>
     </Nav>
   );
