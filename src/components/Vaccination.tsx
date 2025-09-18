@@ -233,19 +233,19 @@ const Vaccination: React.FC = () => {
                                 <Table size={isMobile ? "small" : "medium"}>
                                     <TableHead sx={{ bgcolor: "#f9fbe7" }}>
                                         <TableRow>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
                                                 Age/Time
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
                                                 Vaccine
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
                                                 Route
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
                                                 Notes
                                             </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "1rem" }}>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
                                                 Date
                                             </TableCell>
                                         </TableRow>
@@ -253,24 +253,17 @@ const Vaccination: React.FC = () => {
                                     <TableBody>
                                         {vaccines.map((v, index) => (
                                             <TableRow key={index}>
-                                                <TableCell sx={{ fontSize: "1rem" }}>{v.age}</TableCell>
-                                                <TableCell sx={{ fontSize: "1rem" }}>
-                                                    {v.vaccine}
-                                                </TableCell>
-                                                <TableCell sx={{ fontSize: "1rem" }}>
-                                                    {v.route}
-                                                </TableCell>
-                                                <TableCell sx={{ fontSize: "1rem" }}>
-                                                    {v.notes}
-                                                </TableCell>
-                                                <TableCell sx={{ fontSize: "1rem" }}>
-                                                    {getDate(v)}
-                                                </TableCell>
+                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.age}</TableCell>
+                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.vaccine}</TableCell>
+                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.route}</TableCell>
+                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.notes}</TableCell>
+                                                <TableCell sx={{ fontSize: "0.85rem" }}>{getDate(v)}</TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
                             </Paper>
+
 
                             <Typography
                                 variant="h6"

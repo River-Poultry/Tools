@@ -1,15 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Ruler, TrendingUpDownIcon } from 'lucide-react';
+import { TrendingUp, Ruler, TrendingUpDown } from 'lucide-react';
 import styled from 'styled-components';
 
 const Nav = styled.nav`
-  background: #eff1a0ff;
+  background: #f1f2b0ff;
   padding: 0 20px;
   position: sticky;
   top: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
 `;
 
 const NavList = styled.ul`
@@ -21,18 +20,17 @@ const NavList = styled.ul`
 
 const NavItem = styled.li<{ active: boolean }>`
   margin: 0;
-  
+
   a {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: ${props => props.active ? '#000000ff' : 'white'};
+    color: #000000ff; /* always black */
     text-decoration: none;
     padding: 15px 20px;
     font-weight: 600;
-    border-bottom: 3px solid ${props => props.active ? '#000000ff' : 'transparent'};
-    
-    
+    border-bottom: 3px solid
+      ${props => (props.active ? '#000000ff' : 'transparent')};
   }
 `;
 
@@ -44,7 +42,7 @@ const Navigation: React.FC = () => {
       <NavList>
         <NavItem active={location.pathname === '/'}>
           <Link to="/">
-            <TrendingUpDownIcon size={18} />
+            <TrendingUpDown size={18} />
             Vaccination Schedule
           </Link>
         </NavItem>
