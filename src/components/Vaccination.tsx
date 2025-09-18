@@ -15,8 +15,10 @@ import {
     Card,
     CardContent,
     Stack,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
-import { Agriculture, LocalHospital } from "@mui/icons-material";
+import { LocalHospital } from "@mui/icons-material";
 import PdfDownloader from "../components/PdfDownloader";
 import logo from "../assets/logo.png";
 
@@ -58,52 +60,68 @@ const Vaccination: React.FC = () => {
     const [type, setType] = useState<string>("");
     const [age, setAge] = useState<string>("");
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     const vaccines = type ? schedules[type] || [] : [];
     const ages = Array.from(new Set(vaccines.map((v) => v.age)));
     const filteredVaccines = age ? vaccines.filter((v) => v.age === age) : [];
 
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
-
+            {/* Hero Section */}
             <Box
                 sx={{
                     bgcolor: "#638f65ff",
                     color: "white",
-                    py: 5,
-                    px: 3,
+                    py: isMobile ? 3 : 5,
+                    px: 2,
                     textAlign: "center",
                 }}
             >
                 <img
                     src={logo}
                     alt="Company Logo"
-                    style={{ width: 100, height: "auto", marginBottom: "10px" }}
+                    style={{
+                        width: isMobile ? 70 : 100,
+                        height: "auto",
+                        marginBottom: "10px",
+                    }}
                 />
-                <Typography variant="h3" fontWeight="bold" gutterBottom>
+                <Typography
+                    variant={isMobile ? "h4" : "h3"}
+                    fontWeight="bold"
+                    gutterBottom
+                >
                     Vaccination Planner
                 </Typography>
-                <Typography variant="h6">
-                    Use this planner to know when to vaccinate, protect your flock, and grow your farm with confidence.
+                <Typography variant={isMobile ? "body1" : "h6"}>
+                    Use this planner to know when to vaccinate, protect your flock, and
+                    grow your farm with confidence.
                 </Typography>
-                <Typography variant="h6">
+                <Typography variant={isMobile ? "body1" : "h6"}>
                     Healthy chickens, strong profits, happy farmers
                 </Typography>
             </Box>
 
-
+            {/* Selection Card */}
             <Card
                 sx={{
                     maxWidth: 600,
                     mx: "auto",
                     mt: -4,
-                    p: 3,
+                    p: isMobile ? 2 : 3,
                     borderRadius: 3,
                     boxShadow: 6,
                     bgcolor: "white",
                 }}
             >
                 <CardContent>
-                    <Typography variant="h5" gutterBottom color="success.main">
+                    <Typography
+                        variant={isMobile ? "h6" : "h5"}
+                        gutterBottom
+                        color="success.main"
+                    >
                         Select Your Options
                     </Typography>
 
@@ -118,9 +136,9 @@ const Vaccination: React.FC = () => {
                                     setAge("");
                                 }}
                             >
-                                <MenuItem value="broilers"> Broilers</MenuItem>
-                                <MenuItem value="layers"> Layers / Pullets</MenuItem>
-                                <MenuItem value="sasso"> Sasso / Kuroilers</MenuItem>
+                                <MenuItem value="broilers">Broilers</MenuItem>
+                                <MenuItem value="layers">Layers / Pullets</MenuItem>
+                                <MenuItem value="sasso">Sasso / Kuroilers</MenuItem>
                             </Select>
                         </FormControl>
 
@@ -146,18 +164,26 @@ const Vaccination: React.FC = () => {
 
             {/* Results Section */}
             {type && age && (
-                <Box maxWidth={900} mx="auto" mt={5}>
+                <Box maxWidth={900} mx="auto" mt={5} px={isMobile ? 1 : 0}>
                     <Card sx={{ borderRadius: 3, boxShadow: 6, bgcolor: "white" }}>
                         <CardContent>
-                            <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                            <Stack
+                                direction={isMobile ? "column" : "row"}
+                                spacing={2}
+                                alignItems={isMobile ? "flex-start" : "center"}
+                                mb={2}
+                            >
                                 <LocalHospital sx={{ fontSize: 40, color: "#f9a825" }} />
-                                <Typography variant="h5" color="success.main">
+                                <Typography
+                                    variant={isMobile ? "h6" : "h5"}
+                                    color="success.main"
+                                >
                                     Vaccination Details for {type.toUpperCase()} at {age}
                                 </Typography>
                             </Stack>
 
                             <Paper sx={{ overflowX: "auto" }}>
-                                <Table>
+                                <Table size={isMobile ? "small" : "medium"}>
                                     <TableHead sx={{ bgcolor: "#f9fbe7" }}>
                                         <TableRow>
                                             <TableCell sx={{ fontWeight: "bold" }}>Age/Time</TableCell>
@@ -179,8 +205,7 @@ const Vaccination: React.FC = () => {
                                 </Table>
                             </Paper>
 
-
-                            <Box textAlign="right">
+                            <Box textAlign={isMobile ? "center" : "right"}>
                                 <PdfDownloader data={filteredVaccines} type={type} age={age} />
                             </Box>
                         </CardContent>
