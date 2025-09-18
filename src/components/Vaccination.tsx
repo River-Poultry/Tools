@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
     Box,
     Typography,
@@ -22,7 +22,6 @@ import { LocalHospital } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
 import PdfDownloader from "../components/PdfDownloader";
-import logo from "../assets/logo.png";
 import HeroSection from "../components/HeroSection";
 
 type VaccineEntry = {
@@ -67,6 +66,7 @@ const saleDays: Record<string, number> = {
 const Vaccination: React.FC = () => {
     const [type, setType] = useState<string>("");
     const [arrivalDate, setArrivalDate] = useState<Dayjs | null>(null);
+    const resultRef = useRef<HTMLDivElement>(null);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -90,6 +90,13 @@ const Vaccination: React.FC = () => {
         type && arrivalDate
             ? arrivalDate.add(saleDays[type], "day").format("DD MMM YYYY")
             : "";
+
+    // Auto-scroll to results when both type and arrivalDate are selected
+    useEffect(() => {
+        if (type && arrivalDate && resultRef.current) {
+            resultRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [type, arrivalDate]);
 
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
@@ -125,7 +132,7 @@ const Vaccination: React.FC = () => {
                                 value={type}
                                 onChange={(e) => setType(e.target.value)}
                                 sx={{
-                                    borderRadius: "50px", // circular edges
+                                    borderRadius: "50px",
                                     fontSize: "1.1rem",
                                     "& .MuiSelect-select": {
                                         padding: "14px 20px",
@@ -154,15 +161,8 @@ const Vaccination: React.FC = () => {
                                         fullWidth: true,
                                         sx: {
                                             borderRadius: "50px",
-                                            "& .MuiOutlinedInput-root": {
-                                                borderRadius: "50px",
-                                                fontSize: "1.1rem",
-                                                padding: "4px 12px",
-                                            },
-                                            "& .MuiInputLabel-root": {
-                                                fontSize: "1.1rem",
-                                                fontWeight: 600,
-                                            },
+                                            "& .MuiOutlinedInput-root": { borderRadius: "50px", fontSize: "1.1rem", padding: "4px 12px" },
+                                            "& .MuiInputLabel-root": { fontSize: "1.1rem", fontWeight: 600 },
                                         },
                                     },
                                 }}
@@ -174,7 +174,7 @@ const Vaccination: React.FC = () => {
 
             {/* Results */}
             {type && arrivalDate && (
-                <Box maxWidth={900} mx="auto" mt={6} px={isMobile ? 2 : 0}>
+                <Box ref={resultRef} maxWidth={900} mx="auto" mt={6} px={isMobile ? 2 : 0}>
                     <Card sx={{ borderRadius: 4, boxShadow: 6, bgcolor: "white" }}>
                         <CardContent>
                             <Stack direction="row" spacing={2} alignItems="center" mb={3}>
@@ -193,21 +193,11 @@ const Vaccination: React.FC = () => {
                                 <Table size={isMobile ? "small" : "medium"}>
                                     <TableHead sx={{ bgcolor: "#f9fbe7" }}>
                                         <TableRow>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                Age/Time
-                                            </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                Vaccine
-                                            </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                Route
-                                            </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                Notes
-                                            </TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>
-                                                Date
-                                            </TableCell>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Age/Time</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Vaccine</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Route</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Notes</TableCell>
+                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Date</TableCell>
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
@@ -224,21 +214,13 @@ const Vaccination: React.FC = () => {
                                 </Table>
                             </Paper>
 
-
-                            <Typography
-                                variant="h6"
-                                color="error"
-                                sx={{ mt: 4, fontWeight: "bold", fontSize: "1.3rem" }}
-                            >
+                            <Typography variant="h6" color="error" sx={{ mt: 4, fontWeight: "bold", fontSize: "1.3rem" }}>
                                 Estimated Sale/Stop Date: {saleDate}
                             </Typography>
 
                             <Box textAlign={isMobile ? "center" : "right"} mt={3}>
                                 <PdfDownloader
-                                    data={vaccines.map((v) => ({
-                                        ...v,
-                                        date: getDate(v),
-                                    }))}
+                                    data={vaccines.map((v) => ({ ...v, date: getDate(v) }))}
                                     type={type}
                                     arrivalDate={arrivalDate.format("DD MMM YYYY")}
                                     saleDate={saleDate}
