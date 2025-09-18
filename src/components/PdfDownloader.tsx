@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import logoImg from "../assets/logo.png"; // import from src/assets
+import logoImg from "../assets/logo.png";
 
 interface PdfDownloaderProps {
     data: { age: string; vaccine: string; route: string; notes: string; date?: string }[];
@@ -16,8 +16,22 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
     const generatePdf = () => {
         const doc = new jsPDF();
 
-        // Add logo
-        doc.addImage(logoImg, "PNG", 10, 5, 40, 20);
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        // Add watermark logo (centered, light opacity)
+        doc.setGState(new (doc as any).GState({ opacity: 0.1 })); // set transparency
+        const watermarkWidth = 100;
+        const watermarkHeight = 50;
+        doc.addImage(
+            logoImg,
+            "PNG",
+            (pageWidth - watermarkWidth) / 2,
+            (pageHeight - watermarkHeight) / 2,
+            watermarkWidth,
+            watermarkHeight
+        );
+        doc.setGState(new (doc as any).GState({ opacity: 1 })); // reset opacity
 
         // Add title and info
         doc.setFontSize(16);
@@ -32,6 +46,13 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
             startY: 50,
             head: [["Age/Time", "Vaccine", "Route", "Notes", "Date"]],
             body: data.map((v) => [v.age, v.vaccine, v.route, v.notes, v.date || ""]),
+            didDrawPage: (data) => {
+                // Footer
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                const footerText = "Powered by RiverPoultry and SmartVet";
+                doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
+            },
         });
 
         doc.save(`Vaccination_${type}_${arrivalDate}.pdf`);
