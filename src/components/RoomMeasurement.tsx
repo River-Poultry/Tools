@@ -36,7 +36,9 @@ const HouseMeasurement: React.FC = () => {
         const requiredSpace = spaceRequirements[type] * Number(birds);
 
         setResult(
-            `✅ You need approximately ${requiredSpace.toFixed(2)} m² to accommodate ${birds} ${type}.`
+            `✅ You need approximately ${requiredSpace.toFixed(
+                2
+            )} m² to accommodate ${birds} ${type}.`
         );
     };
 
@@ -89,6 +91,12 @@ const HouseMeasurement: React.FC = () => {
                                         setType(e.target.value);
                                         setResult("");
                                     }}
+                                    sx={{
+                                        borderRadius: "50px", // circular edges
+                                        "& .MuiSelect-select": {
+                                            padding: "14px 20px",
+                                        },
+                                    }}
                                 >
                                     <MenuItem value="broilers">Broilers</MenuItem>
                                     <MenuItem value="layers">Layers</MenuItem>
@@ -97,13 +105,15 @@ const HouseMeasurement: React.FC = () => {
                                 </Select>
                             </FormControl>
 
-                            <TextField
-                                label="Number of Birds"
-                                type="number"
-                                fullWidth
-                                value={birds}
-                                onChange={(e) => setBirds(Number(e.target.value))}
-                            />
+                            {type && (
+                                <TextField
+                                    label="Number of Birds"
+                                    type="number"
+                                    fullWidth
+                                    value={birds}
+                                    onChange={(e) => setBirds(Number(e.target.value))}
+                                />
+                            )}
 
                             <Button
                                 variant="contained"
