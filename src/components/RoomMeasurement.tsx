@@ -13,7 +13,7 @@ import {
     Stack,
 } from "@mui/material";
 import HomeWorkIcon from "@mui/icons-material/HomeWork";
-import logo from "../assets/logo.png";
+import HeroSection from "./HeroSection";
 
 const spaceRequirements: Record<string, number> = {
     broilers: 0.09, // m² per bird
@@ -23,58 +23,32 @@ const spaceRequirements: Record<string, number> = {
 };
 
 const HouseMeasurement: React.FC = () => {
-    const [length, setLength] = useState<number | "">("");
-    const [width, setWidth] = useState<number | "">("");
     const [type, setType] = useState<string>("");
     const [birds, setBirds] = useState<number | "">("");
     const [result, setResult] = useState<string>("");
 
     const calculate = () => {
-        if (!length || !width || !type || !birds) {
-            setResult("⚠️ Please fill in all fields.");
+        if (!type || !birds) {
+            setResult("⚠️ Please select chicken type and enter number of birds.");
             return;
         }
 
-        const area = Number(length) * Number(width); // house area
-        const requiredSpace = spaceRequirements[type]; // m² per bird
-        const maxCapacity = Math.floor(area / requiredSpace);
+        const requiredSpace = spaceRequirements[type] * Number(birds);
 
-        if (Number(birds) <= maxCapacity) {
-            setResult(
-                `✅ Your house can accommodate ${birds} ${type} comfortably. (Max capacity: ${maxCapacity})`
-            );
-        } else {
-            setResult(
-                `❌ Not enough space. Your house can only hold about ${maxCapacity} ${type}.`
-            );
-        }
+        setResult(
+            `✅ You need approximately ${requiredSpace.toFixed(2)} m² to accommodate ${birds} ${type}.`
+        );
     };
 
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh" }}>
             {/* Hero Section */}
-            <Box
-                sx={{
-                    bgcolor: "#638f65ff",
-                    color: "white",
-                    py: 10,
-                    textAlign: "center",
-                }}
-            >
-                <img
-                    src={logo}
-                    alt="Company Logo"
-                    style={{ width: 100, height: "auto", marginBottom: "10px" }}
-                />
-                <Typography variant="h3" fontWeight="bold">
-                    House Measurement Tool
-                </Typography>
-                <Typography variant="h6">
-                    Plan better, raise healthier chickens with the right space.
-
-
-                </Typography>
-            </Box>
+            <HeroSection
+                title="House Measurement Tool"
+                subtitle="Tools that work as hard as you do."
+                description="Our digital tools help you calculate the space required for your flock efficiently."
+                note="Select the chicken type and number of birds to get the recommended house size."
+            />
 
             {/* Content Section */}
             <Box
@@ -89,7 +63,7 @@ const HouseMeasurement: React.FC = () => {
                 <Card
                     sx={{
                         width: "100%",
-                        maxWidth: 700,
+                        maxWidth: 500,
                         borderRadius: 3,
                         boxShadow: 6,
                         p: 3,
@@ -101,28 +75,12 @@ const HouseMeasurement: React.FC = () => {
                         <Stack direction="row" spacing={2} alignItems="center" mb={3}>
                             <HomeWorkIcon sx={{ fontSize: 40, color: "#2e7d32" }} />
                             <Typography variant="h5" color="success.main">
-                                Enter House Details
+                                Enter Flock Details
                             </Typography>
                         </Stack>
 
                         {/* Inputs */}
                         <Stack spacing={3}>
-                            <TextField
-                                label="House Length (m)"
-                                type="number"
-                                fullWidth
-                                value={length}
-                                onChange={(e) => setLength(Number(e.target.value))}
-                            />
-
-                            <TextField
-                                label="House Width (m)"
-                                type="number"
-                                fullWidth
-                                value={width}
-                                onChange={(e) => setWidth(Number(e.target.value))}
-                            />
-
                             <FormControl fullWidth>
                                 <InputLabel>Chicken Type</InputLabel>
                                 <Select
@@ -132,10 +90,10 @@ const HouseMeasurement: React.FC = () => {
                                         setResult("");
                                     }}
                                 >
-                                    <MenuItem value="broilers"> Broilers</MenuItem>
-                                    <MenuItem value="layers"> Layers</MenuItem>
-                                    <MenuItem value="sasso"> Sasso</MenuItem>
-                                    <MenuItem value="kuroilers"> Kuroilers</MenuItem>
+                                    <MenuItem value="broilers">Broilers</MenuItem>
+                                    <MenuItem value="layers">Layers</MenuItem>
+                                    <MenuItem value="sasso">Sasso</MenuItem>
+                                    <MenuItem value="kuroilers">Kuroilers</MenuItem>
                                 </Select>
                             </FormControl>
 

@@ -23,6 +23,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
 import PdfDownloader from "../components/PdfDownloader";
 import logo from "../assets/logo.png";
+import HeroSection from "../components/HeroSection";
 
 type VaccineEntry = {
     age: string;
@@ -93,53 +94,12 @@ const Vaccination: React.FC = () => {
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
             {/* Hero Section */}
-            <Box
-                sx={{
-                    bgcolor: "#638f65ff",
-                    color: "white",
-                    py: isMobile ? 3 : 6,
-                    textAlign: "center",
-                    px: 2,
-                }}
-            >
-                <img
-                    src={logo}
-                    alt="Company Logo"
-                    style={{
-                        width: isMobile ? 70 : 110,
-                        height: "auto",
-                        marginBottom: "15px",
-                    }}
-                />
-                <Typography
-                    variant={isMobile ? "h4" : "h3"}
-                    fontWeight="bold"
-                    gutterBottom
-                >
-                    Vaccination Planner
-                </Typography>
-                <Typography
-                    variant={isMobile ? "body1" : "h6"}
-                    sx={{ mb: 1, fontSize: "1.2rem" }}
-                >
-                    Tools that work as hard as you do.
-                </Typography>
-                <Typography
-                    variant={isMobile ? "body2" : "body1"}
-                    sx={{ mb: 1, px: isMobile ? 1 : 8, fontSize: "1.05rem" }}
-                >
-                    Our digital tools help you manage flock health, manage feed, and track
-                    growth, giving you the insights to make smarter farming decisions and
-                    increase profits.
-                </Typography>
-                <Typography
-                    variant={isMobile ? "body2" : "body1"}
-                    sx={{ px: isMobile ? 1 : 8, fontSize: "1.05rem" }}
-                >
-                    Enter chicken arrival date and type to get your full vaccination plan.
-                </Typography>
-            </Box>
-
+            <HeroSection
+                title="Vaccination Planner"
+                subtitle="Tools that work as hard as you do."
+                description="Our digital tools help you manage flock health, manage feed, and track growth, giving you the insights to make smarter farming decisions and increase profits."
+                note="Enter chicken arrival date and type to get your full vaccination plan."
+            />
             {/* Selection */}
             <Card
                 sx={{
