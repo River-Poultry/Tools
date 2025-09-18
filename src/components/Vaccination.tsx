@@ -17,7 +17,6 @@ import {
     Stack,
     useMediaQuery,
     useTheme,
-    TextField,
 } from "@mui/material";
 import { LocalHospital } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -30,8 +29,8 @@ type VaccineEntry = {
     vaccine: string;
     route: string;
     notes: string;
-    days?: number; // exact day for easier calculation
-    startDay?: number; // for ranges like 7–10
+    days?: number;
+    startDay?: number;
     endDay?: number;
 };
 
@@ -59,9 +58,9 @@ const schedules: Record<string, VaccineEntry[]> = {
 };
 
 const saleDays: Record<string, number> = {
-    broilers: 42, // ~6 weeks
-    layers: 500, // kept long-term, assume pre-lay at 16–18 weeks
-    sasso: 120, // ~4 months for dual-purpose
+    broilers: 42,
+    layers: 500,
+    sasso: 120,
 };
 
 const Vaccination: React.FC = () => {
@@ -86,10 +85,9 @@ const Vaccination: React.FC = () => {
         return "";
     };
 
-    const saleDate =
-        type && arrivalDate
-            ? arrivalDate.add(saleDays[type], "day").format("DD MMM YYYY")
-            : "";
+    const saleDate = type && arrivalDate
+        ? arrivalDate.add(saleDays[type], "day").format("DD MMM YYYY")
+        : "";
 
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
@@ -145,12 +143,15 @@ const Vaccination: React.FC = () => {
                             </Select>
                         </FormControl>
 
-                        <DatePicker
-                            label="Chicken Arrival Date"
-                            value={arrivalDate}
-                            onChange={(newValue) => setArrivalDate(newValue)}
-                            slotProps={{ textField: { fullWidth: true } }}
-                        />
+                        {/* Only show date field if type is selected */}
+                        {type && (
+                            <DatePicker
+                                label="Chicken Arrival Date"
+                                value={arrivalDate}
+                                onChange={(newValue) => setArrivalDate(newValue)}
+                                slotProps={{ textField: { fullWidth: true } }}
+                            />
+                        )}
                     </Stack>
                 </CardContent>
             </Card>
@@ -200,17 +201,17 @@ const Vaccination: React.FC = () => {
                                 Estimated Sale/Stop Date: {saleDate}
                             </Typography>
 
+                            {/* Only show PDF button if both type and date are selected */}
                             <Box textAlign={isMobile ? "center" : "right"}>
                                 <PdfDownloader
                                     data={vaccines.map((v) => ({
                                         ...v,
-                                        date: getDate(v), // add calculated calendar date
+                                        date: getDate(v),
                                     }))}
                                     type={type}
                                     arrivalDate={arrivalDate.format("DD MMM YYYY")}
                                     saleDate={saleDate}
                                 />
-
                             </Box>
                         </CardContent>
                     </Card>
