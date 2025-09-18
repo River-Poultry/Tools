@@ -58,7 +58,7 @@ const HouseMeasurement: React.FC = () => {
             <HeroSection
                 title="House Measurement Tool"
                 subtitle="Tools that work as hard as you do."
-                description="Our digital tools help you calculate the space required for your flock efficiently."
+                description="Our digital tools help you manage flock health, manage feed, and track growth, giving you the insights to make smarter farming decisions and increase profits."
                 note="Select the chicken type and number of birds to get the recommended house size."
             />
 
