@@ -16,12 +16,12 @@ const NavContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 20px;
+  height: 60px; /* better height for header */
 `;
 
 const Logo = styled.div`
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: #000;
 `;
 
@@ -43,7 +43,7 @@ const NavList = styled.ul<{ open: boolean }>`
   @media (max-width: 768px) {
     flex-direction: column;
     position: absolute;
-    top: 60px;
+    top: 60px; /* just below header */
     left: 0;
     right: 0;
     background: #f1f2b0ff;
@@ -90,15 +90,15 @@ const Navigation: React.FC = () => {
   return (
     <Nav>
       <NavContainer>
+        <Logo>Farm Tools</Logo>
 
-
-        {/* Hamburger button (mobile only) */}
+        {/* Hamburger (only visible on mobile) */}
         <Hamburger onClick={() => setOpen(!open)}>
           {open ? <X size={28} /> : <Menu size={28} />}
         </Hamburger>
       </NavContainer>
 
-      {/* Navigation Items */}
+      {/* Nav Items */}
       <NavList open={open}>
         <NavItem active={location.pathname === "/"}>
           <Link to="/" onClick={() => setOpen(false)}>
@@ -112,13 +112,6 @@ const Navigation: React.FC = () => {
             Room Measurement
           </Link>
         </NavItem>
-        {/* Future Item */}
-        {/* <NavItem active={location.pathname === '/budget'}>
-          <Link to="/budget" onClick={() => setOpen(false)}>
-            <TrendingUp size={18} />
-            Budget Tracker
-          </Link>
-        </NavItem> */}
       </NavList>
     </Nav>
   );
