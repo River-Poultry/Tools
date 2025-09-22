@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@mui/material";
+import { Button, useMediaQuery, useTheme } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -13,48 +13,58 @@ interface PdfDownloaderProps {
 }
 
 const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, saleDate }) => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
     const generatePdf = () => {
         const doc = new jsPDF();
-
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
 
-        // Add watermark logo (centered, light opacity)
-        doc.setGState(new (doc as any).GState({ opacity: 0.1 })); // set transparency
-        const watermarkWidth = 100;
-        const watermarkHeight = 50;
+        // --- Watermark Logo ---
+        const img = new Image();
+        img.src = logoImg;
         doc.addImage(
-            logoImg,
+            img,
             "PNG",
-            (pageWidth - watermarkWidth) / 2,
-            (pageHeight - watermarkHeight) / 2,
-            watermarkWidth,
-            watermarkHeight
+            (pageWidth - 80) / 2,
+            (pageHeight - 80) / 2,
+            80,
+            80,
+            undefined,
+            "FAST"
         );
-        doc.setGState(new (doc as any).GState({ opacity: 1 })); // reset opacity
 
-        // Add title and info
-        doc.setFontSize(16);
-        doc.text("Vaccination Schedule", 70, 20);
+        // --- Header Title ---
+        doc.setFontSize(18);
+        doc.setTextColor(40, 100, 60);
+        doc.text("Vaccination Planner Report", pageWidth / 2, 20, { align: "center" });
+
+        // --- Info Section ---
         doc.setFontSize(12);
-        doc.text(`Chicken Type: ${type.toUpperCase()}`, 70, 28);
-        doc.text(`Arrival Date: ${arrivalDate}`, 70, 34);
-        doc.text(`Estimated Sale/Stop Date: ${saleDate}`, 70, 40);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Chicken Type: ${type.toUpperCase()}`, 14, 35);
+        doc.text(`Arrival Date: ${arrivalDate}`, 14, 42);
+        doc.text(`Estimated Sale/Stop Date: ${saleDate}`, 14, 49);
 
-        // Add table using autoTable
+        // --- Vaccination Table ---
         autoTable(doc, {
-            startY: 50,
+            startY: 60,
             head: [["Age/Time", "Vaccine", "Route", "Notes", "Date"]],
             body: data.map((v) => [v.age, v.vaccine, v.route, v.notes, v.date || ""]),
-            didDrawPage: (data) => {
-                // Footer
+            styles: { fontSize: 10, cellPadding: 3 },
+            headStyles: { fillColor: [99, 143, 101], textColor: 255, halign: "center" },
+            bodyStyles: { valign: "middle" },
+            didDrawPage: () => {
+                // --- Footer ---
                 doc.setFontSize(10);
-                doc.setTextColor(150);
+                doc.setTextColor(100);
                 const footerText = "Powered by RiverPoultry and SmartVet";
                 doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
             },
         });
 
+        // --- Save File ---
         doc.save(`Vaccination_${type}_${arrivalDate}.pdf`);
     };
 
@@ -63,7 +73,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
             variant="contained"
             color="success"
             startIcon={<Download />}
-            sx={{ mt: 2 }}
+            sx={{ mt: 2, width: isMobile ? "100%" : "auto" }}
             onClick={generatePdf}
         >
             Download PDF
