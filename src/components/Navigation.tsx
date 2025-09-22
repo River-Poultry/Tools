@@ -16,7 +16,7 @@ const NavContainer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
+  height: 20px;
 `;
 
 const Logo = styled.div`
