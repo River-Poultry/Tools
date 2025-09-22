@@ -1,7 +1,7 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { TrendingUp, Ruler, TrendingUpDown } from 'lucide-react';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, Ruler, TrendingUpDown } from "lucide-react";
+import styled from "styled-components";
 
 const Nav = styled.nav`
   background: #f1f2b0ff;
@@ -12,45 +12,72 @@ const Nav = styled.nav`
   z-index: 1000;
 `;
 
-const NavList = styled.ul`
+const NavContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+`;
+
+const Logo = styled.div`
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #000;
+`;
+
+const Hamburger = styled.div`
+  display: none;
+  cursor: pointer;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+const NavList = styled.ul<{ open: boolean }>`
   list-style: none;
   display: flex;
   margin: 0;
   padding: 0;
 
   @media (max-width: 768px) {
-    flex-direction: column;   /* stack items */
-    width: 100%;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: #f1f2b0ff;
+    max-height: ${({ open }) => (open ? "300px" : "0")};
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
 const NavItem = styled.li<{ active: boolean }>`
   margin: 0;
-  flex: 1; /* equal width on desktop */
 
   a {
     display: flex;
     align-items: center;
-    justify-content: center; /* center text + icon */
     gap: 8px;
-    color: #000000ff;
+    color: #000;
     text-decoration: none;
     padding: 15px 20px;
     font-weight: 600;
+    border-bottom: 3px solid
+      ${(props) => (props.active ? "#000" : "transparent")};
     transition: background 0.2s ease;
 
-    border-bottom: 3px solid
-      ${(props) => (props.active ? '#000000ff' : 'transparent')};
-
     &:hover {
-      background: #e6e7a8; /* subtle hover effect */
+      background: #e6e7a8;
     }
   }
 
   @media (max-width: 768px) {
     a {
-      justify-content: flex-start; /* align left on mobile */
-      border-bottom: 1px solid #ddd; /* separate items */
+      justify-content: flex-start;
+      border-bottom: 1px solid #ddd;
       width: 100%;
     }
   }
@@ -58,24 +85,36 @@ const NavItem = styled.li<{ active: boolean }>`
 
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const [open, setOpen] = useState(false);
 
   return (
     <Nav>
-      <NavList>
-        <NavItem active={location.pathname === '/'}>
-          <Link to="/">
+      <NavContainer>
+
+
+        {/* Hamburger button (mobile only) */}
+        <Hamburger onClick={() => setOpen(!open)}>
+          {open ? <X size={28} /> : <Menu size={28} />}
+        </Hamburger>
+      </NavContainer>
+
+      {/* Navigation Items */}
+      <NavList open={open}>
+        <NavItem active={location.pathname === "/"}>
+          <Link to="/" onClick={() => setOpen(false)}>
             <TrendingUpDown size={18} />
             Vaccination Schedule
           </Link>
         </NavItem>
-        <NavItem active={location.pathname === '/measurement'}>
-          <Link to="/measurement">
+        <NavItem active={location.pathname === "/measurement"}>
+          <Link to="/measurement" onClick={() => setOpen(false)}>
             <Ruler size={18} />
             Room Measurement
           </Link>
         </NavItem>
+        {/* Future Item */}
         {/* <NavItem active={location.pathname === '/budget'}>
-          <Link to="/budget">
+          <Link to="/budget" onClick={() => setOpen(false)}>
             <TrendingUp size={18} />
             Budget Tracker
           </Link>
