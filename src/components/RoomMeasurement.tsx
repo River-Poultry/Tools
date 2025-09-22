@@ -10,8 +10,9 @@ import {
     Card,
     CardContent,
     Stack,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
-import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import HeroSection from "./HeroSection";
 
 const spaceRequirements: Record<string, number> = {
@@ -27,6 +28,9 @@ const HouseMeasurement: React.FC = () => {
     const [result, setResult] = useState<string>("");
 
     const resultRef = useRef<HTMLDivElement>(null);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     useEffect(() => {
         if (type && birds) {
@@ -58,8 +62,8 @@ const HouseMeasurement: React.FC = () => {
             <HeroSection
                 title="House Measurement Tool"
                 subtitle="Tools that work as hard as you do."
-                description="Our digital tools help you manage flock health, manage feed, and track growth, giving you the insights to make smarter farming decisions and increase profits."
-                note="Select the chicken type and number of birds to get the recommended house size."
+                description="Plan better poultry houses by entering your bird numbers and type — we’ll calculate the required space instantly."
+                note="Select chicken type and number of birds to get recommendations."
             />
 
             {/* Content Section */}
@@ -69,23 +73,21 @@ const HouseMeasurement: React.FC = () => {
                     justifyContent: "center",
                     alignItems: "flex-start",
                     minHeight: "calc(100vh - 150px)",
-                    px: 5, // enlarge horizontally
+                    px: isMobile ? 2 : 5,
                 }}
             >
                 <Card
                     sx={{
                         width: "100%",
-                        maxWidth: 700, // wider form
+                        maxWidth: 700,
                         borderRadius: 3,
                         boxShadow: 6,
-                        p: 3,
+                        p: isMobile ? 2 : 3,
                         mt: -6,
                         bgcolor: "white",
                     }}
                 >
                     <CardContent>
-
-
                         {/* Inputs */}
                         <Stack spacing={3}>
                             <FormControl fullWidth>
@@ -95,7 +97,9 @@ const HouseMeasurement: React.FC = () => {
                                     onChange={(e) => setType(e.target.value)}
                                     sx={{
                                         borderRadius: "50px",
-                                        "& .MuiSelect-select": { padding: "14px 20px" },
+                                        "& .MuiSelect-select": {
+                                            padding: isMobile ? "12px 16px" : "14px 20px",
+                                        },
                                     }}
                                 >
                                     <MenuItem value="broilers">Broilers</MenuItem>
@@ -112,6 +116,7 @@ const HouseMeasurement: React.FC = () => {
                                     fullWidth
                                     value={birds}
                                     onChange={(e) => setBirds(Number(e.target.value))}
+                                    InputProps={{ sx: { borderRadius: "50px" } }}
                                 />
                             )}
                         </Stack>
@@ -122,14 +127,14 @@ const HouseMeasurement: React.FC = () => {
                                 ref={resultRef}
                                 sx={{
                                     mt: 4,
-                                    p: 3,
+                                    p: isMobile ? 2 : 3,
                                     borderRadius: 2,
                                     whiteSpace: "pre-line",
-                                    bgcolor: "#e8f5e9",
+                                    bgcolor: "#f1f8e9",
                                 }}
                             >
                                 <Typography
-                                    variant="h6"
+                                    variant={isMobile ? "body1" : "h6"}
                                     sx={{ fontWeight: "bold" }}
                                     color="success.main"
                                 >

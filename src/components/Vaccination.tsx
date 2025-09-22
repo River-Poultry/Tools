@@ -87,11 +87,9 @@ const Vaccination: React.FC = () => {
     };
 
     const saleDate =
-        type && arrivalDate
-            ? arrivalDate.add(saleDays[type], "day").format("DD MMM YYYY")
-            : "";
+        type && arrivalDate ? arrivalDate.add(saleDays[type], "day").format("DD MMM YYYY") : "";
 
-    // Auto-scroll to results when both type and arrivalDate are selected
+    // Auto-scroll when results appear
     useEffect(() => {
         if (type && arrivalDate && resultRef.current) {
             resultRef.current.scrollIntoView({ behavior: "smooth" });
@@ -107,6 +105,7 @@ const Vaccination: React.FC = () => {
                 description="Our digital tools help you manage flock health, manage feed, and track growth, giving you the insights to make smarter farming decisions and increase profits."
                 note="Enter chicken arrival date and type to get your full vaccination plan."
             />
+
             {/* Selection */}
             <Card
                 sx={{
@@ -121,12 +120,7 @@ const Vaccination: React.FC = () => {
                 <CardContent>
                     <Stack spacing={3}>
                         <FormControl fullWidth>
-                            <InputLabel
-                                id="type-label"
-                                sx={{ fontSize: "1.1rem", fontWeight: 600 }}
-                            >
-                                Chicken Type
-                            </InputLabel>
+                            <InputLabel id="type-label">Chicken Type</InputLabel>
                             <Select
                                 labelId="type-label"
                                 value={type}
@@ -134,20 +128,12 @@ const Vaccination: React.FC = () => {
                                 sx={{
                                     borderRadius: "50px",
                                     fontSize: "1.1rem",
-                                    "& .MuiSelect-select": {
-                                        padding: "14px 20px",
-                                    },
+                                    "& .MuiSelect-select": { padding: "14px 20px" },
                                 }}
                             >
-                                <MenuItem value="broilers" sx={{ fontSize: "1.1rem" }}>
-                                    Broilers
-                                </MenuItem>
-                                <MenuItem value="layers" sx={{ fontSize: "1.1rem" }}>
-                                    Layers / Pullets
-                                </MenuItem>
-                                <MenuItem value="sasso" sx={{ fontSize: "1.1rem" }}>
-                                    Sasso / Kuroilers
-                                </MenuItem>
+                                <MenuItem value="broilers">Broilers</MenuItem>
+                                <MenuItem value="layers">Layers / Pullets</MenuItem>
+                                <MenuItem value="sasso">Sasso / Kuroilers</MenuItem>
                             </Select>
                         </FormControl>
 
@@ -161,8 +147,7 @@ const Vaccination: React.FC = () => {
                                         fullWidth: true,
                                         sx: {
                                             borderRadius: "50px",
-                                            "& .MuiOutlinedInput-root": { borderRadius: "50px", fontSize: "1.1rem", padding: "4px 12px" },
-                                            "& .MuiInputLabel-root": { fontSize: "1.1rem", fontWeight: 600 },
+                                            "& .MuiOutlinedInput-root": { borderRadius: "50px" },
                                         },
                                     },
                                 }}
@@ -179,45 +164,62 @@ const Vaccination: React.FC = () => {
                         <CardContent>
                             <Stack direction="row" spacing={2} alignItems="center" mb={3}>
                                 <LocalHospital sx={{ fontSize: 40, color: "#f9a825" }} />
-                                <Typography
-                                    variant="h5"
-                                    color="success.main"
-                                    fontWeight="bold"
-                                    sx={{ fontSize: "1.5rem" }}
-                                >
+                                <Typography variant="h5" color="success.main" fontWeight="bold">
                                     Vaccination Schedule for {type.toUpperCase()}
                                 </Typography>
                             </Stack>
 
-                            <Paper sx={{ overflowX: "auto" }}>
-                                <Table size={isMobile ? "small" : "medium"}>
-                                    <TableHead sx={{ bgcolor: "#f9fbe7" }}>
-                                        <TableRow>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Age/Time</TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Vaccine</TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Route</TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Notes</TableCell>
-                                            <TableCell sx={{ fontWeight: "bold", fontSize: "0.9rem" }}>Date</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody>
-                                        {vaccines.map((v, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.age}</TableCell>
-                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.vaccine}</TableCell>
-                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.route}</TableCell>
-                                                <TableCell sx={{ fontSize: "0.85rem" }}>{v.notes}</TableCell>
-                                                <TableCell sx={{ fontSize: "0.85rem" }}>{getDate(v)}</TableCell>
+                            {/* Responsive Layout */}
+                            {isMobile ? (
+                                // Card layout for mobile
+                                <Stack spacing={2}>
+                                    {vaccines.map((v, index) => (
+                                        <Card key={index} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+                                            <Typography variant="subtitle2" fontWeight="bold">
+                                                {v.age} — {getDate(v)}
+                                            </Typography>
+                                            <Typography variant="body2">💉 {v.vaccine}</Typography>
+                                            <Typography variant="body2">🛠 Route: {v.route}</Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                {v.notes}
+                                            </Typography>
+                                        </Card>
+                                    ))}
+                                </Stack>
+                            ) : (
+                                // Table for desktop
+                                <Paper sx={{ overflowX: "auto" }}>
+                                    <Table>
+                                        <TableHead sx={{ bgcolor: "#f9fbe7" }}>
+                                            <TableRow>
+                                                <TableCell sx={{ fontWeight: "bold" }}>Age/Time</TableCell>
+                                                <TableCell sx={{ fontWeight: "bold" }}>Vaccine</TableCell>
+                                                <TableCell sx={{ fontWeight: "bold" }}>Route</TableCell>
+                                                <TableCell sx={{ fontWeight: "bold" }}>Notes</TableCell>
+                                                <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </Paper>
+                                        </TableHead>
+                                        <TableBody>
+                                            {vaccines.map((v, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{v.age}</TableCell>
+                                                    <TableCell>{v.vaccine}</TableCell>
+                                                    <TableCell>{v.route}</TableCell>
+                                                    <TableCell>{v.notes}</TableCell>
+                                                    <TableCell>{getDate(v)}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </Paper>
+                            )}
 
-                            <Typography variant="h6" color="error" sx={{ mt: 4, fontWeight: "bold", fontSize: "1.3rem" }}>
+                            {/* Sale Date */}
+                            <Typography variant="h6" color="error" sx={{ mt: 4, fontWeight: "bold" }}>
                                 Estimated Sale/Stop Date: {saleDate}
                             </Typography>
 
+                            {/* PDF Download */}
                             <Box textAlign={isMobile ? "center" : "right"} mt={3}>
                                 <PdfDownloader
                                     data={vaccines.map((v) => ({ ...v, date: getDate(v) }))}
