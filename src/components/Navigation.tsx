@@ -12,19 +12,22 @@ const Nav = styled.nav`
   z-index: 1000;
 `;
 
-const NavContainer = styled.div`
+const NavContainer = styled.div<{ open: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px; /* better height for header */
+  height: 60px;
+  position: relative;
 `;
 
+// Logo
 const Logo = styled.div`
   font-weight: 700;
   font-size: 1.3rem;
   color: #000;
 `;
 
+// Hamburger icon for mobile
 const Hamburger = styled.div`
   display: none;
   cursor: pointer;
@@ -34,16 +37,18 @@ const Hamburger = styled.div`
   }
 `;
 
+// Navigation items
 const NavList = styled.ul<{ open: boolean }>`
   list-style: none;
   display: flex;
   margin: 0;
   padding: 0;
+  gap: 20px; /* spacing between items */
 
   @media (max-width: 768px) {
     flex-direction: column;
     position: absolute;
-    top: 60px; /* just below header */
+    top: 60px;
     left: 0;
     right: 0;
     background: #f1f2b0ff;
@@ -54,6 +59,7 @@ const NavList = styled.ul<{ open: boolean }>`
   }
 `;
 
+// Individual nav item
 const NavItem = styled.li<{ active: boolean }>`
   margin: 0;
 
@@ -89,30 +95,30 @@ const Navigation: React.FC = () => {
 
   return (
     <Nav>
-      <NavContainer>
+      <NavContainer open={open}>
         <Logo>Farm Tools</Logo>
+
+        {/* Navigation Items */}
+        <NavList open={open}>
+          <NavItem active={location.pathname === "/"}>
+            <Link to="/" onClick={() => setOpen(false)}>
+              <TrendingUpDown size={18} />
+              Vaccination Schedule
+            </Link>
+          </NavItem>
+          <NavItem active={location.pathname === "/measurement"}>
+            <Link to="/measurement" onClick={() => setOpen(false)}>
+              <Ruler size={18} />
+              Room Measurement
+            </Link>
+          </NavItem>
+        </NavList>
 
         {/* Hamburger (only visible on mobile) */}
         <Hamburger onClick={() => setOpen(!open)}>
           {open ? <X size={28} /> : <Menu size={28} />}
         </Hamburger>
       </NavContainer>
-
-      {/* Nav Items */}
-      <NavList open={open}>
-        <NavItem active={location.pathname === "/"}>
-          <Link to="/" onClick={() => setOpen(false)}>
-            <TrendingUpDown size={18} />
-            Vaccination Schedule
-          </Link>
-        </NavItem>
-        <NavItem active={location.pathname === "/measurement"}>
-          <Link to="/measurement" onClick={() => setOpen(false)}>
-            <Ruler size={18} />
-            Room Measurement
-          </Link>
-        </NavItem>
-      </NavList>
     </Nav>
   );
 };
