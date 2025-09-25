@@ -17,8 +17,14 @@ import {
     Stack,
     useMediaQuery,
     useTheme,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    IconButton,
+    Button,
 } from "@mui/material";
-import { LocalHospital } from "@mui/icons-material";
+import { LocalHospital, Close, Visibility, Download } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
 import PdfDownloader from "../components/PdfDownloader";
@@ -49,8 +55,8 @@ const schedules: Record<string, VaccineEntry[]> = {
         { age: "Week 4–5", vaccine: "Fowl Pox, Cholera", route: "Wing-web / IM", notes: "Long-term health", startDay: 28, endDay: 35 },
         { age: "Week 6–8", vaccine: "ND + IB (Booster)", route: "Water / Spray", notes: "Reinforcement", startDay: 42, endDay: 56 },
     ],
-    sasso: [
-        { age: "Day 1", vaccine: "Marek’s; Newcastle + IB", route: "SC / Spray", notes: "Same as broilers", days: 1 },
+    "sasso/kroilers": [
+        { age: "Day 1", vaccine: "Marek's; Newcastle + IB", route: "SC / Spray", notes: "Same as broilers", days: 1 },
         { age: "Week 1–2", vaccine: "IBD (Gumboro)", route: "Water / Eye-drop", notes: "Early immunity", startDay: 7, endDay: 14 },
         { age: "Week 4–6", vaccine: "Fowl Pox, Cholera", route: "Wing-web / IM", notes: "Local disease risk", startDay: 28, endDay: 42 },
         { age: "Week 6–8", vaccine: "ND + IB (Booster)", route: "Water / Spray", notes: "Reinforcement", startDay: 42, endDay: 56 },
@@ -60,12 +66,13 @@ const schedules: Record<string, VaccineEntry[]> = {
 const saleDays: Record<string, number> = {
     broilers: 42,
     layers: 500,
-    sasso: 120,
+    "sasso/kroilers": 120,
 };
 
 const Vaccination: React.FC = () => {
     const [type, setType] = useState<string>("");
     const [arrivalDate, setArrivalDate] = useState<Dayjs | null>(null);
+    const [previewOpen, setPreviewOpen] = useState(false);
     const resultRef = useRef<HTMLDivElement>(null);
 
     const theme = useTheme();
@@ -95,6 +102,197 @@ const Vaccination: React.FC = () => {
             resultRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [type, arrivalDate]);
+
+    // Preview component
+    const PreviewDialog = () => {
+        if (!type || !arrivalDate) return null;
+
+        const getPrimaryDiseases = (data: VaccineEntry[]) => {
+            const diseases = new Set();
+            data.forEach(v => {
+                if (v.vaccine.includes('Newcastle')) diseases.add('Newcastle Disease');
+                if (v.vaccine.includes('IB')) diseases.add('Infectious Bronchitis');
+                if (v.vaccine.includes('IBD') || v.vaccine.includes('Gumboro')) diseases.add('Infectious Bursal Disease');
+                if (v.vaccine.includes('Marek')) diseases.add("Marek's Disease");
+                if (v.vaccine.includes('Pox')) diseases.add('Fowl Pox');
+                if (v.vaccine.includes('Cholera')) diseases.add('Fowl Cholera');
+            });
+            return Array.from(diseases).join(', ');
+        };
+
+        const getRoutes = (data: VaccineEntry[]) => {
+            const routes = new Set();
+            data.forEach(v => {
+                if (v.route.includes('Water')) routes.add('Water');
+                if (v.route.includes('Spray')) routes.add('Spray');
+                if (v.route.includes('Eye-drop')) routes.add('Eye-drop');
+                if (v.route.includes('SC')) routes.add('Subcutaneous');
+                if (v.route.includes('IM')) routes.add('Intramuscular');
+                if (v.route.includes('Wing-web')) routes.add('Wing-web');
+            });
+            return Array.from(routes).join(', ');
+        };
+
+        return (
+            <Dialog
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                maxWidth="md"
+                fullWidth
+                fullScreen={isMobile}
+            >
+                <DialogTitle sx={{ bgcolor: '#f1f2b0', color: '#286844', fontWeight: 'bold' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <LocalHospital sx={{ fontSize: 24 }} />
+                            Poultry Vaccination Report Preview
+                        </Box>
+                        <IconButton onClick={() => setPreviewOpen(false)} size="small">
+                            <Close />
+                        </IconButton>
+                    </Box>
+                </DialogTitle>
+                
+                <DialogContent sx={{ p: 0 }}>
+                    <Box sx={{ p: 2 }}>
+                        {/* Basic Information */}
+                        <Card sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
+                            <Box sx={{ bgcolor: '#f1f2b0', p: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#286844', fontWeight: 'bold' }}>
+                                    BASIC INFORMATION
+                                </Typography>
+                            </Box>
+                            <Box sx={{ p: 2 }}>
+                                <Stack spacing={1}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Bird Type:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{type.toUpperCase()}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Arrival Date:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{arrivalDate.format("DD MMM YYYY")}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Production Period:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                            {type === 'broilers' ? '42 days' : type === 'layers' ? '500 days' : '120 days'}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Estimated Sale/Stop Date:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{saleDate}</Typography>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        </Card>
+
+                        {/* Vaccination Schedule */}
+                        <Card sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
+                            <Box sx={{ bgcolor: '#f1f2b0', p: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#286844', fontWeight: 'bold' }}>
+                                    VACCINATION SCHEDULE
+                                </Typography>
+                            </Box>
+                            <Box sx={{ p: 2 }}>
+                                <Stack spacing={2}>
+                                    {vaccines.map((vaccine, index) => (
+                                        <Card key={index} variant="outlined" sx={{ p: 2, bgcolor: '#f9f9f9' }}>
+                                            <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                {index + 1}. {vaccine.age} - {getDate(vaccine)}
+                                            </Typography>
+                                            <Stack spacing={0.5}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="body2">Vaccine:</Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{vaccine.vaccine}</Typography>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="body2">Route:</Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{vaccine.route}</Typography>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                                    <Typography variant="body2">Notes:</Typography>
+                                                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{vaccine.notes}</Typography>
+                                                </Box>
+                                            </Stack>
+                                        </Card>
+                                    ))}
+                                </Stack>
+                            </Box>
+                        </Card>
+
+                        {/* Technical Summary */}
+                        <Card sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
+                            <Box sx={{ bgcolor: '#f1f2b0', p: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#286844', fontWeight: 'bold' }}>
+                                    TECHNICAL SUMMARY
+                                </Typography>
+                            </Box>
+                            <Box sx={{ p: 2 }}>
+                                <Stack spacing={1}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Total Vaccinations:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{vaccines.length} vaccines</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Vaccination Period:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                                            {vaccines[0]?.age || 'Day 1'} to {vaccines[vaccines.length - 1]?.age || 'Final'}
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Primary Diseases Covered:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{getPrimaryDiseases(vaccines)}</Typography>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <Typography variant="body2">Administration Routes:</Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{getRoutes(vaccines)}</Typography>
+                                    </Box>
+                                </Stack>
+                            </Box>
+                        </Card>
+
+                        {/* Important Notes */}
+                        <Card sx={{ mb: 2, border: '1px solid #e0e0e0' }}>
+                            <Box sx={{ bgcolor: '#f1f2b0', p: 1.5, borderBottom: '1px solid #e0e0e0' }}>
+                                <Typography variant="subtitle1" sx={{ color: '#286844', fontWeight: 'bold' }}>
+                                    IMPORTANT NOTES
+                                </Typography>
+                            </Box>
+                            <Box sx={{ p: 2 }}>
+                                <Stack spacing={1}>
+                                    <Typography variant="body2">• Follow manufacturer's instructions for each vaccine</Typography>
+                                    <Typography variant="body2">• Maintain proper cold chain storage (2-8°C)</Typography>
+                                    <Typography variant="body2">• Use clean, sterile equipment for administration</Typography>
+                                    <Typography variant="body2">• Monitor birds for adverse reactions post-vaccination</Typography>
+                                    <Typography variant="body2">• Keep vaccination records for traceability</Typography>
+                                    <Typography variant="body2">• Consult veterinarian for any health concerns</Typography>
+                                </Stack>
+                            </Box>
+                        </Card>
+                    </Box>
+                </DialogContent>
+                
+                <DialogActions sx={{ p: 2, bgcolor: '#f9f9f9' }}>
+                    <Button onClick={() => setPreviewOpen(false)} variant="outlined">
+                        Close Preview
+                    </Button>
+                    <Button 
+                        onClick={() => {
+                            setPreviewOpen(false);
+                            // Trigger PDF download
+                            const downloadButton = document.querySelector('[data-pdf-download]') as HTMLButtonElement;
+                            if (downloadButton) downloadButton.click();
+                        }} 
+                        variant="contained" 
+                        color="success"
+                        startIcon={<Download />}
+                    >
+                        Download PDF
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        );
+    };
 
     return (
         <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
@@ -133,7 +331,7 @@ const Vaccination: React.FC = () => {
                             >
                                 <MenuItem value="broilers">Broilers</MenuItem>
                                 <MenuItem value="layers">Layers / Pullets</MenuItem>
-                                <MenuItem value="sasso">Sasso / Kuroilers</MenuItem>
+                                <MenuItem value="sasso/kroilers">Sasso / Kroilers</MenuItem>
                             </Select>
                         </FormControl>
 
@@ -219,8 +417,15 @@ const Vaccination: React.FC = () => {
                                 Estimated Sale/Stop Date: {saleDate}
                             </Typography>
 
-                            {/* PDF Download */}
-                            <Box textAlign={isMobile ? "center" : "right"} mt={3}>
+                            {/* Contact Information */}
+                            <Box mt={3}>
+                                <Typography variant="h6" sx={{ mb: 2, color: '#286844', fontWeight: 'bold' }}>
+                                    Contact Information
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                    Enter your contact details to download a PDF report.
+                                </Typography>
+                                
                                 <PdfDownloader
                                     data={vaccines.map((v) => ({ ...v, date: getDate(v) }))}
                                     type={type}
@@ -228,10 +433,26 @@ const Vaccination: React.FC = () => {
                                     saleDate={saleDate}
                                 />
                             </Box>
+
+                            {/* Preview Button */}
+                            <Box textAlign={isMobile ? "center" : "right"} mt={2}>
+                                <Button
+                                    variant="outlined"
+                                    color="success"
+                                    startIcon={<Visibility />}
+                                    onClick={() => setPreviewOpen(true)}
+                                    sx={{ width: isMobile ? "100%" : "auto" }}
+                                >
+                                    Preview Report
+                                </Button>
+                            </Box>
                         </CardContent>
                     </Card>
                 </Box>
             )}
+
+            {/* Preview Dialog */}
+            <PreviewDialog />
         </Box>
     );
 };

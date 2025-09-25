@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import BudgetTracker from './components/BudgetTracker';
+import BudgetCalculator from './components/BudgetCalculator';
 import RoomMeasurement from './components/RoomMeasurement';
 import Navigation from './components/Navigation';
 import Vaccination from "./components/Vaccination";
@@ -19,8 +19,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Vaccination />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
-          {/* <Route path="/budget" element={<BudgetTracker />} /> */}
-
+          <Route path="/budget-calculator" element={<BudgetCalculator />} />
         </Routes>
       </AppContainer>
     </Router>

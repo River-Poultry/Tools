@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Ruler, TrendingUpDown } from "lucide-react";
+import { Menu, X, Ruler, TrendingUpDown, Calculator } from "lucide-react";
 import styled from "styled-components";
+import logo from "../assets/logo.png";
 
 const Nav = styled.nav`
   background: #f1f2b0ff;
@@ -22,9 +23,18 @@ const NavContainer = styled.div<{ open: boolean }>`
 
 // Logo
 const Logo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-weight: 700;
   font-size: 1.3rem;
   color: #000;
+`;
+
+const LogoImage = styled.img`
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 `;
 
 // Hamburger icon for mobile
@@ -96,7 +106,10 @@ const Navigation: React.FC = () => {
   return (
     <Nav>
       <NavContainer open={open}>
-        <Logo>Farm Tools</Logo>
+        <Logo>
+          <LogoImage src={logo} alt="River Poultry Logo" />
+          Farm Tools
+        </Logo>
 
         {/* Navigation Items */}
         <NavList open={open}>
@@ -110,6 +123,12 @@ const Navigation: React.FC = () => {
             <Link to="/measurement" onClick={() => setOpen(false)}>
               <Ruler size={18} />
               Room Measurement
+            </Link>
+          </NavItem>
+          <NavItem active={location.pathname === "/budget-calculator"}>
+            <Link to="/budget-calculator" onClick={() => setOpen(false)}>
+              <Calculator size={18} />
+              Budget Calculator
             </Link>
           </NavItem>
         </NavList>
