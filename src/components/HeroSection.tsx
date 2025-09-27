@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
-import logo from "../assets/logo.png";
 
 interface HeroSectionProps {
     title: string;
@@ -29,16 +28,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
                 boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
             }}
         >
-            {/* Company Logo */}
-            <img
-                src={logo}
-                alt="Company Logo"
-                style={{
-                    width: isMobile ? 70 : 120,
-                    height: "auto",
-                    marginBottom: "20px",
-                }}
-            />
 
             {/* Main Title */}
             <Typography
