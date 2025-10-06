@@ -23,12 +23,26 @@ import {
     DialogActions,
     IconButton,
     Button,
+    Chip,
+    Alert,
+    Snackbar,
 } from "@mui/material";
-import { LocalHospital, Close, Visibility, Download } from "@mui/icons-material";
+import { 
+    LocalHospital, 
+    Close, 
+    Visibility, 
+    Download, 
+    CalendarToday, 
+    Notifications,
+    CheckCircle,
+    Warning
+} from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import PdfDownloader from "../components/PdfDownloader";
 import HeroSection from "../components/HeroSection";
+import { analyticsService } from "../services/analyticsService";
 
 type VaccineEntry = {
     age: string;
@@ -39,6 +53,18 @@ type VaccineEntry = {
     startDay?: number;
     endDay?: number;
 };
+
+type VaccinationReminder = {
+    id: string;
+    batchId: string;
+    batchName: string;
+    vaccine: string;
+    scheduledDate: Dayjs;
+    status: 'pending' | 'completed' | 'overdue';
+    notes?: string;
+    createdAt: Dayjs;
+};
+
 
 const schedules: Record<string, VaccineEntry[]> = {
     broilers: [
@@ -73,6 +99,9 @@ const Vaccination: React.FC = () => {
     const [type, setType] = useState<string>("");
     const [arrivalDate, setArrivalDate] = useState<Dayjs | null>(null);
     const [previewOpen, setPreviewOpen] = useState(false);
+    const [reminders, setReminders] = useState<VaccinationReminder[]>([]);
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
     const resultRef = useRef<HTMLDivElement>(null);
 
     const theme = useTheme();
@@ -96,12 +125,83 @@ const Vaccination: React.FC = () => {
     const saleDate =
         type && arrivalDate ? arrivalDate.add(saleDays[type], "day").format("DD MMM YYYY") : "";
 
-    // Auto-scroll when results appear
+    // Auto-scroll when results appear and track usage
     useEffect(() => {
         if (type && arrivalDate && resultRef.current) {
             resultRef.current.scrollIntoView({ behavior: "smooth" });
+            
+            // Track vaccination schedule generation
+            analyticsService.trackVaccinationSchedule(type, 1000); // Default batch size
         }
     }, [type, arrivalDate]);
+
+    // Calendar integration functions
+    const addToCalendar = (vaccine: VaccineEntry, batchName: string = "Batch 1") => {
+        if (!arrivalDate) return;
+
+        const scheduledDate = vaccine.days 
+            ? arrivalDate.add(vaccine.days - 1, "day")
+            : vaccine.startDay 
+                ? arrivalDate.add(vaccine.startDay - 1, "day")
+                : arrivalDate;
+
+        const reminder: VaccinationReminder = {
+            id: `${Date.now()}-${Math.random()}`,
+            batchId: `batch-${Date.now()}`,
+            batchName,
+            vaccine: vaccine.vaccine,
+            scheduledDate,
+            status: 'pending',
+            notes: vaccine.notes,
+            createdAt: dayjs(),
+        };
+
+        setReminders(prev => [...prev, reminder]);
+        setSnackbarMessage(`Vaccination reminder added to calendar for ${vaccine.vaccine}`);
+        setSnackbarOpen(true);
+        
+        // Track calendar integration usage
+        analyticsService.trackToolUsage({
+            toolName: 'vaccination',
+            action: 'calculate',
+            metadata: {
+                action: 'add_to_calendar',
+                vaccine: vaccine.vaccine,
+                poultryType: type,
+            },
+        });
+    };
+
+    const markAsCompleted = (reminderId: string) => {
+        setReminders(prev => 
+            prev.map(reminder => 
+                reminder.id === reminderId 
+                    ? { ...reminder, status: 'completed' as const }
+                    : reminder
+            )
+        );
+        setSnackbarMessage("Vaccination marked as completed");
+        setSnackbarOpen(true);
+    };
+
+    const getUpcomingReminders = () => {
+        const today = dayjs();
+        return reminders
+            .filter(reminder => 
+                reminder.status === 'pending' && 
+                reminder.scheduledDate.isAfter(today.subtract(1, 'day'))
+            )
+            .sort((a, b) => a.scheduledDate.diff(b.scheduledDate))
+            .slice(0, 5);
+    };
+
+    const getOverdueReminders = () => {
+        const today = dayjs();
+        return reminders.filter(reminder => 
+            reminder.status === 'pending' && 
+            reminder.scheduledDate.isBefore(today)
+        );
+    };
 
     // Preview component
     const PreviewDialog = () => {
@@ -295,13 +395,13 @@ const Vaccination: React.FC = () => {
     };
 
     return (
-        <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
+        <Box sx={{ bgcolor: "#f8f9fa", minHeight: "100vh", pb: 5 }}>
             {/* Hero Section */}
             <HeroSection
-                title="Vaccination Planner"
-                subtitle="Tools that work as hard as you do."
-                description="Our digital tools help you manage flock health, manage feed, and track growth, giving you the insights to make smarter farming decisions and increase profits."
-                note="Enter chicken arrival date and type to get your full vaccination plan."
+                title="Vaccination Schedule Generator"
+                subtitle="Professional vaccination planning for all poultry types"
+                description="Generate comprehensive vaccination schedules for broilers, layers, and sasso/kroilers. Get expert-recommended timelines and protocols with calendar integration."
+                note="Enter chicken arrival date and type to get your full vaccination plan with calendar reminders."
             />
 
             {/* Selection */}
@@ -378,9 +478,19 @@ const Vaccination: React.FC = () => {
                                             </Typography>
                                             <Typography variant="body2">💉 {v.vaccine}</Typography>
                                             <Typography variant="body2">🛠 Route: {v.route}</Typography>
-                                            <Typography variant="body2" color="text.secondary">
+                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                                                 {v.notes}
                                             </Typography>
+                                            <Button
+                                                size="small"
+                                                startIcon={<CalendarToday />}
+                                                onClick={() => addToCalendar(v)}
+                                                variant="outlined"
+                                                color="primary"
+                                                fullWidth
+                                            >
+                                                Add to Calendar
+                                            </Button>
                                         </Card>
                                     ))}
                                 </Stack>
@@ -395,6 +505,7 @@ const Vaccination: React.FC = () => {
                                                 <TableCell sx={{ fontWeight: "bold" }}>Route</TableCell>
                                                 <TableCell sx={{ fontWeight: "bold" }}>Notes</TableCell>
                                                 <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
+                                                <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
@@ -405,6 +516,18 @@ const Vaccination: React.FC = () => {
                                                     <TableCell>{v.route}</TableCell>
                                                     <TableCell>{v.notes}</TableCell>
                                                     <TableCell>{getDate(v)}</TableCell>
+                                                    <TableCell>
+                                                        <Button
+                                                            size="small"
+                                                            startIcon={<CalendarToday />}
+                                                            onClick={() => addToCalendar(v)}
+                                                            variant="outlined"
+                                                            color="primary"
+                                                            sx={{ mr: 1 }}
+                                                        >
+                                                            Add to Calendar
+                                                        </Button>
+                                                    </TableCell>
                                                 </TableRow>
                                             ))}
                                         </TableBody>
@@ -451,8 +574,117 @@ const Vaccination: React.FC = () => {
                 </Box>
             )}
 
+            {/* Vaccination Reminders Section */}
+            {reminders.length > 0 && (
+                <Box maxWidth={900} mx="auto" mt={4} px={isMobile ? 2 : 0}>
+                    <Card sx={{ borderRadius: 4, boxShadow: 6, bgcolor: "white" }}>
+                        <CardContent>
+                            <Stack direction="row" spacing={2} alignItems="center" mb={3}>
+                                <Notifications sx={{ fontSize: 40, color: "#ff9800" }} />
+                                <Typography variant="h5" color="warning.main" fontWeight="bold">
+                                    Vaccination Reminders
+                                </Typography>
+                            </Stack>
+
+                            {/* Overdue Reminders */}
+                            {getOverdueReminders().length > 0 && (
+                                <Box mb={3}>
+                                    <Typography variant="h6" color="error" sx={{ mb: 2 }}>
+                                        <Warning sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                        Overdue Vaccinations
+                                    </Typography>
+                                    <Stack spacing={2}>
+                                        {getOverdueReminders().map((reminder) => (
+                                            <Card key={reminder.id} sx={{ bgcolor: '#ffebee', border: '1px solid #f44336' }}>
+                                                <CardContent sx={{ py: 2 }}>
+                                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                        <Box>
+                                                            <Typography variant="subtitle1" fontWeight="bold">
+                                                                {reminder.vaccine}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {reminder.batchName} • Due: {reminder.scheduledDate.format('DD MMM YYYY')}
+                                                            </Typography>
+                                                            {reminder.notes && (
+                                                                <Typography variant="body2" sx={{ mt: 1 }}>
+                                                                    {reminder.notes}
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                        <Button
+                                                            size="small"
+                                                            startIcon={<CheckCircle />}
+                                                            onClick={() => markAsCompleted(reminder.id)}
+                                                            variant="contained"
+                                                            color="success"
+                                                        >
+                                                            Mark Complete
+                                                        </Button>
+                                                    </Stack>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </Stack>
+                                </Box>
+                            )}
+
+                            {/* Upcoming Reminders */}
+                            {getUpcomingReminders().length > 0 && (
+                                <Box>
+                                    <Typography variant="h6" color="primary" sx={{ mb: 2 }}>
+                                        <CalendarToday sx={{ mr: 1, verticalAlign: 'middle' }} />
+                                        Upcoming Vaccinations
+                                    </Typography>
+                                    <Stack spacing={2}>
+                                        {getUpcomingReminders().map((reminder) => (
+                                            <Card key={reminder.id} sx={{ bgcolor: '#e3f2fd', border: '1px solid #2196f3' }}>
+                                                <CardContent sx={{ py: 2 }}>
+                                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                                        <Box>
+                                                            <Typography variant="subtitle1" fontWeight="bold">
+                                                                {reminder.vaccine}
+                                                            </Typography>
+                                                            <Typography variant="body2" color="text.secondary">
+                                                                {reminder.batchName} • Scheduled: {reminder.scheduledDate.format('DD MMM YYYY')}
+                                                            </Typography>
+                                                            {reminder.notes && (
+                                                                <Typography variant="body2" sx={{ mt: 1 }}>
+                                                                    {reminder.notes}
+                                                                </Typography>
+                                                            )}
+                                                        </Box>
+                                                        <Chip 
+                                                            label={reminder.scheduledDate.diff(dayjs(), 'days') === 0 ? 'Today' : 
+                                                                   reminder.scheduledDate.diff(dayjs(), 'days') === 1 ? 'Tomorrow' :
+                                                                   `${reminder.scheduledDate.diff(dayjs(), 'days')} days`}
+                                                            color={reminder.scheduledDate.diff(dayjs(), 'days') <= 1 ? 'warning' : 'default'}
+                                                        />
+                                                    </Stack>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </Stack>
+                                </Box>
+                            )}
+                        </CardContent>
+                    </Card>
+                </Box>
+            )}
+
             {/* Preview Dialog */}
             <PreviewDialog />
+
+            {/* Snackbar for notifications */}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={() => setSnackbarOpen(false)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };
