@@ -778,6 +778,7 @@ const HouseMeasurement: React.FC = () => {
                     alignItems: "flex-start",
                     minHeight: "calc(100vh - 150px)",
                     px: isMobile ? 2 : 5,
+                    pt: isMobile ? 2 : 3,
                 }}
             >
                 <Card
@@ -787,22 +788,46 @@ const HouseMeasurement: React.FC = () => {
                         borderRadius: 3,
                         boxShadow: 6,
                         p: isMobile ? 2 : 3,
-                        mt: -6,
+                        mt: isMobile ? -2 : -3,
                         bgcolor: "white",
+                        position: "relative",
+                        zIndex: 1,
                     }}
                 >
                     <CardContent>
                         {/* Inputs */}
                         <Stack spacing={3}>
                             <FormControl fullWidth>
-                                <InputLabel>Chicken Type</InputLabel>
+                                <InputLabel sx={{ 
+                                    color: '#286844',
+                                    fontWeight: 500,
+                                    '&.Mui-focused': {
+                                        color: '#286844',
+                                    }
+                                }}>
+                                    Chicken Type
+                                </InputLabel>
                                 <Select
                                     value={type}
                                     onChange={(e) => setType(e.target.value)}
                                     sx={{
-                                        borderRadius: "50px",
-                                        "& .MuiSelect-select": {
+                                        borderRadius: 2,
+                                        backgroundColor: '#f8f9fa',
+                                        fontSize: "1.1rem",
+                                        '& .MuiSelect-select': {
                                             padding: isMobile ? "12px 16px" : "14px 20px",
+                                            borderRadius: 2,
+                                        },
+                                        '& .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#e0e0e0',
+                                            borderWidth: 1,
+                                        },
+                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#286844',
+                                        },
+                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#286844',
+                                            borderWidth: 2,
                                         },
                                     }}
                                 >
@@ -820,7 +845,35 @@ const HouseMeasurement: React.FC = () => {
                                     fullWidth
                                     value={birds}
                                     onChange={(e) => setBirds(Number(e.target.value))}
-                                    InputProps={{ sx: { borderRadius: "50px" } }}
+                                    InputLabelProps={{
+                                        sx: {
+                                            color: '#286844',
+                                            fontWeight: 500,
+                                            '&.Mui-focused': {
+                                                color: '#286844',
+                                            }
+                                        }
+                                    }}
+                                    InputProps={{ 
+                                        sx: { 
+                                            borderRadius: 2,
+                                            backgroundColor: '#f8f9fa',
+                                        } 
+                                    }}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            '& fieldset': {
+                                                borderColor: '#e0e0e0',
+                                            },
+                                            '&:hover fieldset': {
+                                                borderColor: '#286844',
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: '#286844',
+                                                borderWidth: 2,
+                                            },
+                                        },
+                                    }}
                                 />
                             )}
                         </Stack>

@@ -5,6 +5,7 @@ import RoomMeasurement from './components/RoomMeasurement';
 import Navigation from './components/Navigation';
 import Vaccination from "./components/Vaccination";
 import ToolsOverview from './components/ToolsOverview';
+import AdminDashboard from './components/AdminDashboard';
 import styled from 'styled-components';
 
 const AppContainer = styled.div`
@@ -22,6 +23,7 @@ const App: React.FC = () => {
           <Route path="/vaccination" element={<Vaccination />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
           <Route path="/budget-calculator" element={<BudgetCalculator />} />
+          <Route path="/dev/analytics" element={<AdminDashboard />} />
         </Routes>
       </AppContainer>
     </Router>

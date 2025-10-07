@@ -43,7 +43,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         >
             {/* Main Title */}
             <Typography
-                variant={isMobile ? "h6" : "h5"}
+                variant={isMobile ? "h5" : "h4"}
                 fontWeight="bold"
                 gutterBottom
                 sx={{ textShadow: "1px 1px 3px rgba(0,0,0,0.3)" }}

@@ -37,7 +37,7 @@ const LogoContainer = styled.div<{ scrolled: boolean }>`
   outline: none !important;
   
   img {
-    height: 50px;
+    height: 45px;
     width: auto;
     display: block;
     background: transparent !important;

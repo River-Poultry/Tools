@@ -43,6 +43,7 @@ import dayjs from "dayjs";
 import PdfDownloader from "../components/PdfDownloader";
 import HeroSection from "../components/HeroSection";
 import { analyticsService } from "../services/analyticsService";
+import { calendarService } from "../services/calendarService";
 
 type VaccineEntry = {
     age: string;
@@ -75,17 +76,23 @@ const schedules: Record<string, VaccineEntry[]> = {
         { age: "Day 21–28 (if risk)", vaccine: "Additional boosters", route: "Water / Spray", notes: "Maintain immunity", startDay: 21, endDay: 28 },
     ],
     layers: [
-        { age: "Day 1", vaccine: "Marek’s disease", route: "SC / hatchery", notes: "Early protection", days: 1 },
+        { age: "Day 1", vaccine: "Marek's disease", route: "SC / hatchery", notes: "Early protection", days: 1 },
         { age: "Day 1", vaccine: "Newcastle + IB", route: "Spray / Eye-drop", notes: "Respiratory coverage", days: 1 },
         { age: "Week 2–3", vaccine: "IBD (Gumboro)", route: "Water / Eye-drop", notes: "Build immunity", startDay: 14, endDay: 21 },
         { age: "Week 4–5", vaccine: "Fowl Pox, Cholera", route: "Wing-web / IM", notes: "Long-term health", startDay: 28, endDay: 35 },
+        { age: "Week 5–6", vaccine: "Fowl Typhoid (1st Dose)", route: "Drinking Water", notes: "Early protection - establish immunity", startDay: 35, endDay: 42 },
         { age: "Week 6–8", vaccine: "ND + IB (Booster)", route: "Water / Spray", notes: "Reinforcement", startDay: 42, endDay: 56 },
+        { age: "Week 14–15", vaccine: "Fowl Typhoid (Booster)", route: "IM / SC", notes: "Booster dose - breast muscle or neck", startDay: 98, endDay: 105 },
+        { age: "Week 24–26", vaccine: "Fowl Typhoid (Production Booster)", route: "Drinking Water", notes: "Production phase booster", startDay: 168, endDay: 182 },
+        { age: "Week 34–36", vaccine: "Fowl Typhoid (Production Booster)", route: "Drinking Water", notes: "Production phase booster", startDay: 238, endDay: 252 },
     ],
     "sasso/kroilers": [
         { age: "Day 1", vaccine: "Marek's; Newcastle + IB", route: "SC / Spray", notes: "Same as broilers", days: 1 },
         { age: "Week 1–2", vaccine: "IBD (Gumboro)", route: "Water / Eye-drop", notes: "Early immunity", startDay: 7, endDay: 14 },
         { age: "Week 4–6", vaccine: "Fowl Pox, Cholera", route: "Wing-web / IM", notes: "Local disease risk", startDay: 28, endDay: 42 },
+        { age: "Week 5–6", vaccine: "Fowl Typhoid (1st Dose)", route: "Drinking Water", notes: "Early protection - establish immunity", startDay: 35, endDay: 42 },
         { age: "Week 6–8", vaccine: "ND + IB (Booster)", route: "Water / Spray", notes: "Reinforcement", startDay: 42, endDay: 56 },
+        { age: "Week 14–15", vaccine: "Fowl Typhoid (Booster)", route: "IM / SC", notes: "Booster dose - breast muscle or neck", startDay: 98, endDay: 105 },
     ],
 };
 
@@ -135,8 +142,8 @@ const Vaccination: React.FC = () => {
         }
     }, [type, arrivalDate]);
 
-    // Calendar integration functions
-    const addToCalendar = (vaccine: VaccineEntry, batchName: string = "Batch 1") => {
+    // Enhanced calendar integration functions
+    const addToCalendar = async (vaccine: VaccineEntry, batchName: string = "Batch 1") => {
         if (!arrivalDate) return;
 
         const scheduledDate = vaccine.days 
@@ -161,15 +168,75 @@ const Vaccination: React.FC = () => {
         setSnackbarOpen(true);
         
         // Track calendar integration usage
-        analyticsService.trackToolUsage({
-            toolName: 'vaccination',
-            action: 'calculate',
-            metadata: {
-                action: 'add_to_calendar',
-                vaccine: vaccine.vaccine,
-                poultryType: type,
+        await analyticsService.trackCalendarIntegration('vaccination', 'ics', 'vaccination_reminder');
+    };
+
+    // Add all vaccinations to calendar at once
+    const addAllToCalendar = async () => {
+        if (!arrivalDate || !type) {
+            setSnackbarMessage(`Please select poultry type and arrival date first.`);
+            setSnackbarOpen(true);
+            return;
+        }
+
+        try {
+            const calendarEvents = calendarService.createVaccinationEvents(
+                vaccines,
+                arrivalDate,
+                type,
+                "Batch 1"
+            );
+
+            // Download .ics file
+            calendarService.downloadICS(calendarEvents, `${type}-vaccination-schedule.ics`);
+            
+            setSnackbarMessage(`All ${calendarEvents.length} vaccination dates added to calendar! Check your downloads.`);
+            setSnackbarOpen(true);
+            
+            // Track calendar integration usage
+            await analyticsService.trackCalendarIntegration('vaccination', 'ics', 'full_schedule');
+        } catch (error) {
+            console.error('Error creating calendar events:', error);
+            setSnackbarMessage(`Error creating calendar events. Please try again.`);
+            setSnackbarOpen(true);
+        }
+    };
+
+    // Generate calendar links for individual vaccination
+    const getCalendarLinks = (vaccine: VaccineEntry) => {
+        if (!arrivalDate) return null;
+
+        const scheduledDate = vaccine.days 
+            ? arrivalDate.add(vaccine.days - 1, "day")
+            : vaccine.startDay 
+                ? arrivalDate.add(vaccine.startDay - 1, "day")
+                : arrivalDate;
+
+        const event = {
+            id: `vaccination-${Date.now()}`,
+            title: `${vaccine.vaccine} - ${type?.toUpperCase()}`,
+            description: [
+                `Poultry Type: ${type?.toUpperCase()}`,
+                `Age: ${vaccine.age}`,
+                `Vaccine: ${vaccine.vaccine}`,
+                `Route: ${vaccine.route}`,
+                `Notes: ${vaccine.notes}`,
+                '',
+                'Generated by River Poultry Tools',
+                'Visit: https://tools-bay-five.vercel.app'
+            ].join('\n'),
+            startDate: scheduledDate,
+            endDate: scheduledDate.add(1, 'hour'),
+            location: 'Poultry Farm',
+            reminder: {
+                minutes: 60,
+                type: 'both' as const
             },
-        });
+            category: 'Vaccination',
+            priority: 'high' as const
+        };
+
+        return calendarService.generateCalendarLinks(event);
     };
 
     const markAsCompleted = (reminderId: string) => {
@@ -405,28 +472,57 @@ const Vaccination: React.FC = () => {
             />
 
             {/* Selection */}
-            <Card
-                sx={{
-                    maxWidth: 700,
-                    mx: "auto",
-                    mt: -4,
-                    p: isMobile ? 2 : 4,
-                    borderRadius: 4,
-                    boxShadow: 6,
-                }}
-            >
+            <Box sx={{ px: isMobile ? 2 : 5, pt: isMobile ? 2 : 3 }}>
+                <Card
+                    sx={{
+                        maxWidth: 700,
+                        mx: "auto",
+                        mt: isMobile ? -2 : -3,
+                        p: isMobile ? 2 : 4,
+                        borderRadius: 4,
+                        boxShadow: 6,
+                        position: "relative",
+                        zIndex: 1,
+                    }}
+                >
                 <CardContent>
                     <Stack spacing={3}>
                         <FormControl fullWidth>
-                            <InputLabel id="type-label">Chicken Type</InputLabel>
+                            <InputLabel 
+                                id="type-label"
+                                sx={{ 
+                                    color: '#286844',
+                                    fontWeight: 500,
+                                    '&.Mui-focused': {
+                                        color: '#286844',
+                                    }
+                                }}
+                            >
+                                Chicken Type
+                            </InputLabel>
                             <Select
                                 labelId="type-label"
                                 value={type}
                                 onChange={(e) => setType(e.target.value)}
                                 sx={{
-                                    borderRadius: "50px",
+                                    borderRadius: 2,
+                                    backgroundColor: '#f8f9fa',
                                     fontSize: "1.1rem",
-                                    "& .MuiSelect-select": { padding: "14px 20px" },
+                                    '& .MuiSelect-select': { 
+                                        padding: isMobile ? "12px 16px" : "14px 20px",
+                                        borderRadius: 2,
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#e0e0e0',
+                                        borderWidth: 1,
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#286844',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        borderColor: '#286844',
+                                        borderWidth: 2,
+                                    },
                                 }}
                             >
                                 <MenuItem value="broilers">Broilers</MenuItem>
@@ -443,9 +539,31 @@ const Vaccination: React.FC = () => {
                                 slotProps={{
                                     textField: {
                                         fullWidth: true,
+                                        InputLabelProps: {
+                                            sx: {
+                                                color: '#286844',
+                                                fontWeight: 500,
+                                                '&.Mui-focused': {
+                                                    color: '#286844',
+                                                }
+                                            }
+                                        },
                                         sx: {
-                                            borderRadius: "50px",
-                                            "& .MuiOutlinedInput-root": { borderRadius: "50px" },
+                                            borderRadius: 2,
+                                            backgroundColor: '#f8f9fa',
+                                            "& .MuiOutlinedInput-root": { 
+                                                borderRadius: 2,
+                                                '& fieldset': {
+                                                    borderColor: '#e0e0e0',
+                                                },
+                                                '&:hover fieldset': {
+                                                    borderColor: '#286844',
+                                                },
+                                                '&.Mui-focused fieldset': {
+                                                    borderColor: '#286844',
+                                                    borderWidth: 2,
+                                                },
+                                            },
                                         },
                                     },
                                 }}
@@ -454,6 +572,7 @@ const Vaccination: React.FC = () => {
                     </Stack>
                 </CardContent>
             </Card>
+            </Box>
 
             {/* Results */}
             {type && arrivalDate && (
@@ -539,6 +658,105 @@ const Vaccination: React.FC = () => {
                             <Typography variant="h6" color="error" sx={{ mt: 4, fontWeight: "bold" }}>
                                 Estimated Sale/Stop Date: {saleDate}
                             </Typography>
+
+                            {/* Calendar Integration Section */}
+                            <Box mt={4}>
+                                <Typography variant="h6" sx={{ mb: 2, color: '#286844', fontWeight: 'bold' }}>
+                                    📅 Add to Your Calendar
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                                    Get notifications on your phone or computer for all vaccination dates. Choose your preferred calendar platform:
+                                </Typography>
+                                
+                                <Stack direction={isMobile ? "column" : "row"} spacing={2} sx={{ mb: 3 }}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        startIcon={<CalendarToday />}
+                                        onClick={addAllToCalendar}
+                                        sx={{ 
+                                            borderRadius: 2,
+                                            textTransform: 'none',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Download All Dates (.ics)
+                                    </Button>
+                                    
+                                    <Button
+                                        variant="outlined"
+                                        color="success"
+                                        startIcon={<Notifications />}
+                                        onClick={() => {
+                                            // Show calendar platform options
+                                            const links = getCalendarLinks(vaccines[0]);
+                                            if (links) {
+                                                // For demo, we'll show the Google Calendar link
+                                                window.open(links.google, '_blank');
+                                            }
+                                        }}
+                                        sx={{ 
+                                            borderRadius: 2,
+                                            textTransform: 'none',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Add to Google Calendar
+                                    </Button>
+                                </Stack>
+
+                                {/* Individual vaccination calendar options */}
+                                <Typography variant="subtitle2" sx={{ mb: 2, color: '#286844', fontWeight: 'bold' }}>
+                                    Or add individual vaccinations:
+                                </Typography>
+                                
+                                {isMobile ? (
+                                    // Mobile: Show calendar options for each vaccine
+                                    <Stack spacing={2}>
+                                        {vaccines.map((vaccine, index) => {
+                                            const links = getCalendarLinks(vaccine);
+                                            return (
+                                                <Card key={index} variant="outlined" sx={{ p: 2 }}>
+                                                    <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                                                        {vaccine.vaccine} - {getDate(vaccine)}
+                                                    </Typography>
+                                                    <Stack direction="row" spacing={1} flexWrap="wrap">
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            onClick={() => links && window.open(links.google, '_blank')}
+                                                            sx={{ fontSize: '0.75rem', minWidth: 'auto' }}
+                                                        >
+                                                            Google
+                                                        </Button>
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            onClick={() => links && window.open(links.outlook, '_blank')}
+                                                            sx={{ fontSize: '0.75rem', minWidth: 'auto' }}
+                                                        >
+                                                            Outlook
+                                                        </Button>
+                                                        <Button
+                                                            size="small"
+                                                            variant="outlined"
+                                                            onClick={() => links && window.open(links.apple, '_blank')}
+                                                            sx={{ fontSize: '0.75rem', minWidth: 'auto' }}
+                                                        >
+                                                            Apple
+                                                        </Button>
+                                                    </Stack>
+                                                </Card>
+                                            );
+                                        })}
+                                    </Stack>
+                                ) : (
+                                    // Desktop: Add calendar column to existing table
+                                    <Typography variant="body2" color="text.secondary">
+                                        Use the "Add to Calendar" buttons in the table above for individual vaccinations.
+                                    </Typography>
+                                )}
+                            </Box>
 
                             {/* Contact Information */}
                             <Box mt={3}>

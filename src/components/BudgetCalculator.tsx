@@ -807,7 +807,17 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
         description="Follow the steps below to create a comprehensive budget for your poultry operation."
       />
 
-      <Card sx={{ maxWidth: 1000, mx: "auto", mt: -4, p: 3, borderRadius: 4, boxShadow: 6 }}>
+      <Box sx={{ px: 2, pt: 2 }}>
+        <Card sx={{ 
+          maxWidth: 1000, 
+          mx: "auto", 
+          mt: -2, 
+          p: 3, 
+          borderRadius: 4, 
+          boxShadow: 6,
+          position: "relative",
+          zIndex: 1,
+        }}>
         <CardContent>
           <Stepper activeStep={activeStep} orientation="vertical">
             
@@ -1441,6 +1451,7 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
           </Stepper>
         </CardContent>
       </Card>
+      </Box>
     </Box>
   );
 };

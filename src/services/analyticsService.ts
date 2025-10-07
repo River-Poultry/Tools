@@ -5,11 +5,22 @@ export interface ToolUsageEvent {
   userId?: string;
   sessionId: string;
   timestamp: Date;
-  action: 'view' | 'calculate' | 'download' | 'export';
+  action: 'view' | 'calculate' | 'download' | 'export' | 'calendar_add' | 'email_send';
   metadata?: {
     poultryType?: string;
     batchSize?: number;
     calculationType?: string;
+    location?: {
+      country?: string;
+      region?: string;
+      city?: string;
+      timezone?: string;
+    };
+    device?: {
+      type: 'mobile' | 'tablet' | 'desktop';
+      os?: string;
+      browser?: string;
+    };
     [key: string]: any;
   };
 }
@@ -22,12 +33,14 @@ export interface DashboardMetrics {
     roomMeasurement: number;
     budgetCalculator: number;
     pdfDownloader: number;
+    calendarIntegration: number;
   };
   recentActivity: {
     toolName: string;
     action: string;
     timestamp: Date;
     userAgent?: string;
+    location?: string;
   }[];
   popularPoultryTypes: {
     type: string;
@@ -37,21 +50,118 @@ export interface DashboardMetrics {
     month: string;
     usage: number;
     downloads: number;
+    calendarAdds: number;
+  }[];
+  locationStats: {
+    country: string;
+    count: number;
+    percentage: number;
+  }[];
+  deviceStats: {
+    type: 'mobile' | 'tablet' | 'desktop';
+    count: number;
+    percentage: number;
+  }[];
+  calendarIntegrationStats: {
+    platform: 'google' | 'outlook' | 'apple' | 'ics';
+    count: number;
   }[];
 }
 
 class AnalyticsService {
   private baseUrl: string;
   private sessionId: string;
+  private userLocation: any = null;
+  private deviceInfo: any = null;
 
   constructor() {
     // In production, this would be your actual backend URL
     this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
     this.sessionId = this.generateSessionId();
+    this.initializeLocationAndDevice();
   }
 
   private generateSessionId(): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private async initializeLocationAndDevice(): Promise<void> {
+    // Detect device information
+    this.deviceInfo = this.detectDevice();
+    
+    // Get user location (with privacy consent)
+    try {
+      this.userLocation = await this.getUserLocation();
+    } catch (error) {
+      console.log('Location access denied or unavailable');
+    }
+  }
+
+  private detectDevice() {
+    const userAgent = navigator.userAgent;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    const isTablet = /iPad|Android(?=.*\bMobile\b)/i.test(userAgent);
+    
+    let deviceType: 'mobile' | 'tablet' | 'desktop' = 'desktop';
+    if (isMobile) deviceType = 'mobile';
+    else if (isTablet) deviceType = 'tablet';
+
+    // Detect OS
+    let os = 'Unknown';
+    if (userAgent.includes('Windows')) os = 'Windows';
+    else if (userAgent.includes('Mac')) os = 'macOS';
+    else if (userAgent.includes('Linux')) os = 'Linux';
+    else if (userAgent.includes('Android')) os = 'Android';
+    else if (userAgent.includes('iOS')) os = 'iOS';
+
+    // Detect Browser
+    let browser = 'Unknown';
+    if (userAgent.includes('Chrome')) browser = 'Chrome';
+    else if (userAgent.includes('Firefox')) browser = 'Firefox';
+    else if (userAgent.includes('Safari')) browser = 'Safari';
+    else if (userAgent.includes('Edge')) browser = 'Edge';
+
+    return {
+      type: deviceType,
+      os,
+      browser
+    };
+  }
+
+  private async getUserLocation(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation not supported'));
+        return;
+      }
+
+      // Use IP-based location as fallback
+      this.getLocationFromIP().then(resolve).catch(reject);
+    });
+  }
+
+  private async getLocationFromIP(): Promise<any> {
+    try {
+      // Using a free IP geolocation service
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      
+      return {
+        country: data.country_name,
+        region: data.region,
+        city: data.city,
+        timezone: data.timezone,
+        ip: data.ip
+      };
+    } catch (error) {
+      console.error('Failed to get location from IP:', error);
+      return {
+        country: 'Unknown',
+        region: 'Unknown',
+        city: 'Unknown',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+    }
   }
 
   // Track tool usage events
@@ -61,6 +171,11 @@ class AnalyticsService {
       id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       sessionId: this.sessionId,
       timestamp: new Date(),
+      metadata: {
+        ...event.metadata,
+        location: this.userLocation,
+        device: this.deviceInfo
+      }
     };
 
     try {
@@ -96,6 +211,7 @@ class AnalyticsService {
         roomMeasurement: events.filter(e => e.toolName === 'roomMeasurement').length,
         budgetCalculator: events.filter(e => e.toolName === 'budgetCalculator').length,
         pdfDownloader: events.filter(e => e.toolName === 'pdfDownloader').length,
+        calendarIntegration: events.filter(e => e.action === 'calendar_add').length,
       };
 
       const recentActivity = events
@@ -105,6 +221,9 @@ class AnalyticsService {
           toolName: event.toolName,
           action: event.action,
           timestamp: new Date(event.timestamp),
+          location: event.metadata?.location ? 
+            `${event.metadata.location.city}, ${event.metadata.location.country}` : 
+            'Unknown'
         }));
 
       const poultryTypeCounts = events
@@ -123,6 +242,15 @@ class AnalyticsService {
       // Generate monthly stats for the last 6 months
       const monthlyStats = this.generateMonthlyStats(events);
 
+      // Calculate location statistics
+      const locationStats = this.calculateLocationStats(events);
+      
+      // Calculate device statistics
+      const deviceStats = this.calculateDeviceStats(events);
+      
+      // Calculate calendar integration statistics
+      const calendarIntegrationStats = this.calculateCalendarIntegrationStats(events);
+
       return {
         totalUsers: this.getUniqueUsers(events),
         totalSessions: this.getUniqueSessions(events),
@@ -130,6 +258,9 @@ class AnalyticsService {
         recentActivity,
         popularPoultryTypes,
         monthlyStats,
+        locationStats,
+        deviceStats,
+        calendarIntegrationStats,
       };
     } catch (error) {
       console.error('Failed to get dashboard metrics:', error);
@@ -175,10 +306,70 @@ class AnalyticsService {
         month: monthName,
         usage: monthEvents.length,
         downloads: monthEvents.filter(e => e.action === 'download').length,
+        calendarAdds: monthEvents.filter(e => e.action === 'calendar_add').length,
       });
     }
 
     return months;
+  }
+
+  private calculateLocationStats(events: ToolUsageEvent[]) {
+    const locationCounts = events
+      .filter(e => e.metadata?.location?.country)
+      .reduce((acc, event) => {
+        const country = event.metadata!.location!.country!;
+        acc[country] = (acc[country] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+    const total = Object.values(locationCounts).reduce((sum, count) => sum + count, 0);
+
+    return Object.entries(locationCounts)
+      .map(([country, count]) => ({
+        country,
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }
+
+  private calculateDeviceStats(events: ToolUsageEvent[]) {
+    const deviceCounts = events
+      .filter(e => e.metadata?.device?.type)
+      .reduce((acc, event) => {
+        const deviceType = event.metadata!.device!.type!;
+        acc[deviceType] = (acc[deviceType] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+    const total = Object.values(deviceCounts).reduce((sum, count) => sum + count, 0);
+
+    return Object.entries(deviceCounts)
+      .map(([type, count]) => ({
+        type: type as 'mobile' | 'tablet' | 'desktop',
+        count,
+        percentage: total > 0 ? Math.round((count / total) * 100) : 0
+      }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  private calculateCalendarIntegrationStats(events: ToolUsageEvent[]) {
+    const calendarEvents = events.filter(e => e.action === 'calendar_add');
+    const platformCounts = calendarEvents
+      .filter(e => e.metadata?.platform)
+      .reduce((acc, event) => {
+        const platform = event.metadata!.platform!;
+        acc[platform] = (acc[platform] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+    return Object.entries(platformCounts)
+      .map(([platform, count]) => ({
+        platform: platform as 'google' | 'outlook' | 'apple' | 'ics',
+        count
+      }))
+      .sort((a, b) => b.count - a.count);
   }
 
   private getDefaultMetrics(): DashboardMetrics {
@@ -190,10 +381,14 @@ class AnalyticsService {
         roomMeasurement: 0,
         budgetCalculator: 0,
         pdfDownloader: 0,
+        calendarIntegration: 0,
       },
       recentActivity: [],
       popularPoultryTypes: [],
       monthlyStats: [],
+      locationStats: [],
+      deviceStats: [],
+      calendarIntegrationStats: [],
     };
   }
 
@@ -244,6 +439,34 @@ class AnalyticsService {
       metadata: {
         documentType,
         sourceTool: toolName,
+      },
+    });
+  }
+
+  // Track calendar integration usage
+  async trackCalendarIntegration(
+    toolName: string, 
+    platform: 'google' | 'outlook' | 'apple' | 'ics',
+    eventType: string
+  ): Promise<void> {
+    await this.trackToolUsage({
+      toolName,
+      action: 'calendar_add',
+      metadata: {
+        platform,
+        eventType,
+        calendarIntegration: true,
+      },
+    });
+  }
+
+  // Track email sending
+  async trackEmailSend(toolName: string, emailType: string): Promise<void> {
+    await this.trackToolUsage({
+      toolName,
+      action: 'email_send',
+      metadata: {
+        emailType,
       },
     });
   }
