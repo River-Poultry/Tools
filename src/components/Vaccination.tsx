@@ -26,6 +26,9 @@ import {
     Chip,
     Alert,
     Snackbar,
+    Menu,
+    ListItemIcon,
+    ListItemText,
 } from "@mui/material";
 import { 
     LocalHospital, 
@@ -43,6 +46,7 @@ import dayjs from "dayjs";
 import PdfDownloader from "../components/PdfDownloader";
 import HeroSection from "../components/HeroSection";
 import { analyticsService } from "../services/analyticsService";
+import { buildGoogleCalendarUrl, downloadIcsForEvents, CalendarEvent } from "../utils/calendar";
 
 type VaccineEntry = {
     age: string;
@@ -103,6 +107,8 @@ const Vaccination: React.FC = () => {
     const [snackbarOpen, setSnackbarOpen] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState("");
     const resultRef = useRef<HTMLDivElement>(null);
+    const [calendarMenuAnchorEl, setCalendarMenuAnchorEl] = useState<HTMLElement | null>(null);
+    const [selectedVaccine, setSelectedVaccine] = useState<VaccineEntry | null>(null);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -135,13 +141,13 @@ const Vaccination: React.FC = () => {
         }
     }, [type, arrivalDate]);
 
-    // Calendar integration functions
-    const addToCalendar = (vaccine: VaccineEntry, batchName: string = "Batch 1") => {
+    // Local reminder helper (kept for in-app reminders)
+    const createLocalReminder = (vaccine: VaccineEntry, batchName: string = "Batch 1") => {
         if (!arrivalDate) return;
 
-        const scheduledDate = vaccine.days 
+        const scheduledDate = vaccine.days
             ? arrivalDate.add(vaccine.days - 1, "day")
-            : vaccine.startDay 
+            : vaccine.startDay
                 ? arrivalDate.add(vaccine.startDay - 1, "day")
                 : arrivalDate;
 
@@ -157,17 +163,99 @@ const Vaccination: React.FC = () => {
         };
 
         setReminders(prev => [...prev, reminder]);
-        setSnackbarMessage(`Vaccination reminder added to calendar for ${vaccine.vaccine}`);
+        setSnackbarMessage(`Vaccination reminder added for ${vaccine.vaccine}`);
         setSnackbarOpen(true);
-        
-        // Track calendar integration usage
-        analyticsService.trackToolUsage({
+    };
+
+    const openCalendarMenu = (event: React.MouseEvent<HTMLElement>, vaccine: VaccineEntry) => {
+        setSelectedVaccine(vaccine);
+        setCalendarMenuAnchorEl(event.currentTarget);
+    };
+
+    const closeCalendarMenu = () => setCalendarMenuAnchorEl(null);
+
+    const makeCalendarEvent = (v: VaccineEntry): CalendarEvent | null => {
+        if (!arrivalDate) return null;
+        const isRange = Boolean(v.startDay && v.endDay);
+        const start = v.days
+            ? arrivalDate.add(v.days - 1, 'day')
+            : v.startDay
+                ? arrivalDate.add(v.startDay - 1, 'day')
+                : arrivalDate;
+        const end = isRange && v.endDay
+            ? arrivalDate.add(v.endDay, 'day') // end is exclusive for all-day
+            : undefined;
+
+        const title = `Vaccination: ${v.vaccine} (${type.toUpperCase()})`;
+        const description = `Route: ${v.route}${v.notes ? `\nNotes: ${v.notes}` : ''}`;
+
+        return {
+            title,
+            description,
+            start,
+            end,
+            allDay: true,
+        };
+    };
+
+    const handleAddGoogleCalendar = async () => {
+        if (!selectedVaccine) return;
+        const ev = makeCalendarEvent(selectedVaccine);
+        if (!ev) return;
+        const url = buildGoogleCalendarUrl(ev);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        createLocalReminder(selectedVaccine);
+        await analyticsService.trackToolUsage({
             toolName: 'vaccination',
-            action: 'calculate',
+            action: 'export',
             metadata: {
-                action: 'add_to_calendar',
-                vaccine: vaccine.vaccine,
+                calendar_provider: 'google',
+                vaccine: selectedVaccine.vaccine,
                 poultryType: type,
+                bulk: false,
+            },
+        });
+        closeCalendarMenu();
+    };
+
+    const handleDownloadIcsSingle = async () => {
+        if (!selectedVaccine) return;
+        const ev = makeCalendarEvent(selectedVaccine);
+        if (!ev) return;
+        const safe = (s: string) => s.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
+        const filename = `vaccination-${safe(selectedVaccine.vaccine)}-${arrivalDate!.format('YYYYMMDD')}.ics`;
+        downloadIcsForEvents(filename, [ev]);
+        createLocalReminder(selectedVaccine);
+        await analyticsService.trackToolUsage({
+            toolName: 'vaccination',
+            action: 'export',
+            metadata: {
+                calendar_provider: 'ics',
+                vaccine: selectedVaccine.vaccine,
+                poultryType: type,
+                bulk: false,
+            },
+        });
+        closeCalendarMenu();
+    };
+
+    const exportAllAsIcs = async () => {
+        if (!arrivalDate || !type) return;
+        const events = vaccines
+            .map(v => makeCalendarEvent(v))
+            .filter(Boolean) as CalendarEvent[];
+        if (events.length === 0) return;
+        const safe = (s: string) => s.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-_]/g, '');
+        const filename = `vaccination-schedule-${safe(type)}-${arrivalDate.format('YYYYMMDD')}.ics`;
+        downloadIcsForEvents(filename, events);
+        await analyticsService.trackToolUsage({
+            toolName: 'vaccination',
+            action: 'export',
+            metadata: {
+                calendar_provider: 'ics',
+                poultryType: type,
+                bulk: true,
+                count: events.length,
             },
         });
     };
@@ -468,6 +556,19 @@ const Vaccination: React.FC = () => {
                             </Stack>
 
                             {/* Responsive Layout */}
+                            {/* Export all */}
+                            <Box display="flex" justifyContent="flex-end" mb={2}>
+                                <Button
+                                    size="small"
+                                    startIcon={<Download />}
+                                    onClick={exportAllAsIcs}
+                                    variant="contained"
+                                    color="primary"
+                                >
+                                    Export all (.ics)
+                                </Button>
+                            </Box>
+
                             {isMobile ? (
                                 // Card layout for mobile
                                 <Stack spacing={2}>
@@ -484,7 +585,7 @@ const Vaccination: React.FC = () => {
                                             <Button
                                                 size="small"
                                                 startIcon={<CalendarToday />}
-                                                onClick={() => addToCalendar(v)}
+                                                onClick={(e) => openCalendarMenu(e, v)}
                                                 variant="outlined"
                                                 color="primary"
                                                 fullWidth
@@ -520,7 +621,7 @@ const Vaccination: React.FC = () => {
                                                         <Button
                                                             size="small"
                                                             startIcon={<CalendarToday />}
-                                                            onClick={() => addToCalendar(v)}
+                                                            onClick={(e) => openCalendarMenu(e, v)}
                                                             variant="outlined"
                                                             color="primary"
                                                             sx={{ mr: 1 }}
@@ -673,6 +774,28 @@ const Vaccination: React.FC = () => {
 
             {/* Preview Dialog */}
             <PreviewDialog />
+
+            {/* Calendar provider menu */}
+            <Menu
+                anchorEl={calendarMenuAnchorEl}
+                open={Boolean(calendarMenuAnchorEl)}
+                onClose={closeCalendarMenu}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+            >
+                <MenuItem onClick={handleAddGoogleCalendar}>
+                    <ListItemIcon>
+                        <CalendarToday fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="Add to Google Calendar" />
+                </MenuItem>
+                <MenuItem onClick={handleDownloadIcsSingle}>
+                    <ListItemIcon>
+                        <Download fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary="Download .ics (Apple/Outlook)" />
+                </MenuItem>
+            </Menu>
 
             {/* Snackbar for notifications */}
             <Snackbar
