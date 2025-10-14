@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Poultry Management System{% endblock %}
+
+{% block branding %}
+<div class="river-poultry-branding">
+    <div class="brand-logo" style="display: flex; align-items: flex-end; gap: 15px; padding-bottom: 8px;">
+        <img src="{% static 'admin/img/river-poultry-logo-white.png' %}" alt="River Poultry" class="brand-logo-img" style="height: 40px; width: auto; margin-bottom: 4px;">
+        <div class="brand-text">
+            <h1 class="brand-title" style="margin: 0; padding: 0; line-height: 1.2;">Poultry Management System</h1>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block nav-breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    {% if title %} &rsaquo; {{ title }}{% endif %}
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<meta name="theme-color" content="#417690">
+<link rel="icon" type="image/x-icon" href="{% static 'admin/img/favicon.ico' %}">
+<link rel="icon" type="image/svg+xml" href="{% static 'admin/img/favicon.svg' %}">
+<link rel="apple-touch-icon" href="{% static 'admin/img/river-poultry-logo-original.png' %}">
+<link rel="shortcut icon" href="{% static 'admin/img/favicon.ico' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/django-enhanced.css' %}">
+{% endblock %}

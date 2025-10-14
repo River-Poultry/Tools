@@ -1,0 +1,104 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Poultry Management System Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1>Welcome to Poultry Management System</h1>
+    
+    <div class="dashboard-modules" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+        
+        <!-- Quick Stats Module -->
+        <div class="dashboard-module">
+            <h2>System Overview</h2>
+            <div class="dashboard-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="text-align: center; padding: 15px; background: #f8f8f8; border-radius: 4px; border-left: 4px solid #417690;">
+                        <div style="font-size: 24px; font-weight: bold; color: #417690;">{{ total_users|default:0 }}</div>
+                        <div style="font-size: 12px; color: #666; text-transform: uppercase;">Farmers</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8f8f8; border-radius: 4px; border-left: 4px solid #79aec8;">
+                        <div style="font-size: 24px; font-weight: bold; color: #79aec8;">{{ total_operations|default:0 }}</div>
+                        <div style="font-size: 12px; color: #666; text-transform: uppercase;">Operations</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8f8f8; border-radius: 4px; border-left: 4px solid #417690;">
+                        <div style="font-size: 24px; font-weight: bold; color: #417690;">{{ total_vaccinations|default:0 }}</div>
+                        <div style="font-size: 12px; color: #666; text-transform: uppercase;">Vaccinations</div>
+                    </div>
+                    <div style="text-align: center; padding: 15px; background: #f8f8f8; border-radius: 4px; border-left: 4px solid #79aec8;">
+                        <div style="font-size: 24px; font-weight: bold; color: #79aec8;">{{ total_veterinarians|default:0 }}</div>
+                        <div style="font-size: 12px; color: #666; text-transform: uppercase;">Veterinarians</div>
+                    </div>
+                </div>
+                </div>
+        </div>
+        
+        <!-- Quick Actions Module -->
+        <div class="dashboard-module">
+            <h2>Quick Actions</h2>
+            <div class="dashboard-content">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="/admin/users/user/add/" style="display: block; padding: 12px 15px; background: #417690; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background-color 0.2s;">
+                        <span style="margin-right: 8px;">👤</span> Add New Farmer
+                    </a>
+                    <a href="/admin/operations/poultryoperation/add/" style="display: block; padding: 12px 15px; background: #79aec8; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background-color 0.2s;">
+                        <span style="margin-right: 8px;">🏭</span> Create Farm Operation
+                    </a>
+                    <a href="/admin/vaccinations/vaccinationplan/add/" style="display: block; padding: 12px 15px; background: #417690; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background-color 0.2s;">
+                        <span style="margin-right: 8px;">💉</span> Schedule Vaccination
+                    </a>
+                    <a href="/admin/inventory/inventoryitem/add/" style="display: block; padding: 12px 15px; background: #79aec8; color: white; text-decoration: none; border-radius: 4px; font-weight: 500; transition: background-color 0.2s;">
+                        <span style="margin-right: 8px;">📦</span> Add Inventory Item
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Links Module -->
+        <div class="dashboard-module">
+            <h2>Management</h2>
+            <div class="dashboard-content">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <a href="/admin/users/user/" style="display: block; padding: 10px; background: #f8f8f8; color: #333; text-decoration: none; border-radius: 4px; text-align: center; border: 1px solid #ddd; transition: all 0.2s;">
+                        <div style="font-weight: 600; font-size: 14px;">Manage Farmers</div>
+                        <div style="font-size: 11px; color: #666;">View all farmers</div>
+                    </a>
+                    <a href="/admin/operations/poultryoperation/" style="display: block; padding: 10px; background: #f8f8f8; color: #333; text-decoration: none; border-radius: 4px; text-align: center; border: 1px solid #ddd; transition: all 0.2s;">
+                        <div style="font-weight: 600; font-size: 14px;">Farm Operations</div>
+                        <div style="font-size: 11px; color: #666;">Manage operations</div>
+                    </a>
+                    <a href="/admin/vaccinations/vaccinationplan/" style="display: block; padding: 10px; background: #f8f8f8; color: #333; text-decoration: none; border-radius: 4px; text-align: center; border: 1px solid #ddd; transition: all 0.2s;">
+                        <div style="font-weight: 600; font-size: 14px;">Vaccinations</div>
+                        <div style="font-size: 11px; color: #666;">View schedules</div>
+                    </a>
+                    <a href="/admin/inventory/inventoryitem/" style="display: block; padding: 10px; background: #f8f8f8; color: #333; text-decoration: none; border-radius: 4px; text-align: center; border: 1px solid #ddd; transition: all 0.2s;">
+                        <div style="font-weight: 600; font-size: 14px;">Inventory</div>
+                        <div style="font-size: 11px; color: #666;">Manage supplies</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+<style>
+.dashboard-module a:hover {
+    background-color: #205067 !important;
+    color: white !important;
+}
+
+.dashboard-module a[style*="background: #79aec8"]:hover {
+    background-color: #5a9bc4 !important;
+}
+
+.dashboard-module a[style*="background: #f8f8f8"]:hover {
+    background-color: #417690 !important;
+    color: white !important;
+    border-color: #417690 !important;
+}
+</style>
+{% endblock %}

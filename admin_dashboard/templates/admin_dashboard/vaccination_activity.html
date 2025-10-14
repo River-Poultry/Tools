@@ -1,0 +1,296 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Vaccination Activity - River Poultry Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 1.1em;
+        opacity: 0.9;
+    }
+    .submission-item {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: white;
+        transition: box-shadow 0.3s;
+    }
+    .submission-item:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .submission-header {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .submission-details {
+        color: #666;
+        font-size: 0.9em;
+        line-height: 1.4;
+    }
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+    .status-submitted { background: #fff3cd; color: #856404; }
+    .status-processed { background: #d1ecf1; color: #0c5460; }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-assigned_vet { background: #f8d7da; color: #721c24; }
+    
+    .vaccination-plan-item {
+        padding: 12px;
+        border-left: 4px solid #4CAF50;
+        margin-bottom: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    .template-usage-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #e8f5e8;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .monthly-trend-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: #e3f2fd;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .nav-tabs {
+        margin-bottom: 20px;
+    }
+    .nav-tab {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+        margin-right: 5px;
+        border-radius: 4px 4px 0 0;
+    }
+    .nav-tab.active {
+        background: white;
+        border-bottom: 1px solid white;
+    }
+    .nav-tab:hover {
+        background: #e9ecef;
+    }
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+    .pagination a {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 0 4px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+        border-radius: 4px;
+    }
+    .pagination a:hover {
+        background: #e9ecef;
+    }
+    .pagination .current {
+        background: #4CAF50;
+        color: white;
+        border-color: #4CAF50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>💉 Vaccination Activity Dashboard</h1>
+    <p>Detailed view of vaccination-related user activity and submissions</p>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="nav-tabs">
+    <a href="{% url 'admin_dashboard:user_activity_dashboard' %}" class="nav-tab">📊 Overview</a>
+    <a href="{% url 'admin_dashboard:vaccination_activity' %}" class="nav-tab active">💉 Vaccination Activity</a>
+    <a href="{% url 'admin_dashboard:geographic_analytics' %}" class="nav-tab">🌍 Geographic Analytics</a>
+    <a href="{% url 'admin_dashboard:real_time_monitor' %}" class="nav-tab">⚡ Real-Time Monitor</a>
+</div>
+
+<!-- Vaccination Statistics -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_submissions }}</div>
+            <div class="stat-label">Total Submissions</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ pending_submissions }}</div>
+            <div class="stat-label">Pending Review</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ processed_submissions }}</div>
+            <div class="stat-label">Processed</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ completed_submissions }}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Vaccination Submissions -->
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <h3>📋 Recent Vaccination Submissions</h3>
+            {% for submission in page_obj %}
+            <div class="submission-item">
+                <div class="submission-header">
+                    <span>{{ submission.batch_name }} - {{ submission.poultry_type|title }}</span>
+                    <span class="status-badge status-{{ submission.status }}">
+                        {{ submission.status|title }}
+                    </span>
+                </div>
+                <div class="submission-details">
+                    <strong>Farmer:</strong> {{ submission.farmer_name }} ({{ submission.farmer_email }})<br>
+                    <strong>Location:</strong> {{ submission.farm_location }}, {{ submission.country }}<br>
+                    <strong>Batch Details:</strong> {{ submission.batch_size|floatformat:0 }} birds arriving {{ submission.arrival_date }}<br>
+                    <strong>Vaccination Schedule:</strong> {{ submission.total_vaccinations }} vaccinations planned<br>
+                    <strong>Device:</strong> {{ submission.device_type|title }} | 
+                    <strong>Submitted:</strong> {{ submission.created_at|timesince }} ago
+                    {% if submission.assigned_veterinarian_name %}
+                        <br><strong>Assigned Vet:</strong> {{ submission.assigned_veterinarian_name }}
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p>No vaccination submissions found.</p>
+            {% endfor %}
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; First</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+                
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar Information -->
+    <div class="col-md-4">
+        <!-- Recent Vaccination Plans -->
+        <div class="dashboard-card">
+            <h3>📅 Recent Vaccination Plans</h3>
+            {% for plan in recent_plans %}
+            <div class="vaccination-plan-item">
+                <strong>{{ plan.vaccine_name }}</strong><br>
+                <small>
+                    Scheduled: {{ plan.scheduled_date }}<br>
+                    Status: {{ plan.status|title }}<br>
+                    Operation: {{ plan.operation.id }}
+                </small>
+            </div>
+            {% empty %}
+            <p>No recent vaccination plans found.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Template Usage -->
+        <div class="dashboard-card">
+            <h3>📋 Template Usage</h3>
+            {% for template in template_usage %}
+            <div class="template-usage-item">
+                <span>{{ template.vaccine_name }}</span>
+                <span class="badge badge-primary">{{ template.usage_count }} uses</span>
+            </div>
+            {% empty %}
+            <p>No template usage data available.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Monthly Trends -->
+        <div class="dashboard-card">
+            <h3>📈 Monthly Trends</h3>
+            {% for trend in monthly_trends %}
+            <div class="monthly-trend-item">
+                <span>{{ trend.month|date:"M Y" }}</span>
+                <span class="badge badge-info">{{ trend.count }} submissions</span>
+            </div>
+            {% empty %}
+            <p>No monthly trend data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh every 60 seconds
+setTimeout(function() {
+    location.reload();
+}, 60000);
+
+// Add interactivity to submission items
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.submission-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            // Could add modal or detailed view here
+            console.log('Submission clicked:', this);
+        });
+        item.style.cursor = 'pointer';
+    });
+});
+</script>
+{% endblock %}
+
+

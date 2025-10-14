@@ -1,0 +1,349 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}User Activity Dashboard - River Poultry Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 1.1em;
+        opacity: 0.9;
+    }
+    .activity-item {
+        padding: 10px;
+        border-left: 4px solid #4CAF50;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+    .tool-usage-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .geo-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: #e3f2fd;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .poultry-type-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: #f3e5f5;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .device-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: #fff3e0;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        background: #e8f5e8;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .recent-submission {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        background: white;
+    }
+    .submission-header {
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    .submission-details {
+        color: #666;
+        font-size: 0.9em;
+    }
+    .refresh-btn {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    .refresh-btn:hover {
+        background: #45a049;
+    }
+    .nav-tabs {
+        margin-bottom: 20px;
+    }
+    .nav-tab {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+        margin-right: 5px;
+        border-radius: 4px 4px 0 0;
+    }
+    .nav-tab.active {
+        background: white;
+        border-bottom: 1px solid white;
+    }
+    .nav-tab:hover {
+        background: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>🐔 River Poultry - User Activity Dashboard</h1>
+    <p>Real-time monitoring of frontend user activity and engagement</p>
+    <button class="refresh-btn" onclick="location.reload()">🔄 Refresh Data</button>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="nav-tabs">
+    <a href="{% url 'admin_dashboard:user_activity_dashboard' %}" class="nav-tab active">📊 Overview</a>
+    <a href="{% url 'admin_dashboard:vaccination_activity' %}" class="nav-tab">💉 Vaccination Activity</a>
+    <a href="{% url 'admin_dashboard:geographic_analytics' %}" class="nav-tab">🌍 Geographic Analytics</a>
+    <a href="{% url 'admin_dashboard:real_time_monitor' %}" class="nav-tab">⚡ Real-Time Monitor</a>
+</div>
+
+<!-- Key Statistics -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ active_today }}</div>
+            <div class="stat-label">Active Today</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ recent_submissions|length }}</div>
+            <div class="stat-label">Recent Submissions</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ tool_usage_stats|length }}</div>
+            <div class="stat-label">Active Tools</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent User Activity -->
+    <div class="col-md-6">
+        <div class="dashboard-card">
+            <h3>🕐 Recent User Activity (Last 24 Hours)</h3>
+            {% for activity in recent_activity %}
+            <div class="activity-item">
+                <strong>{{ activity.tool_name|title }}</strong> - {{ activity.action|title }}<br>
+                <small>
+                    Session: {{ activity.session_id|truncatechars:20 }} | 
+                    {{ activity.timestamp|timesince }} ago
+                    {% if activity.metadata.country %}
+                        | 📍 {{ activity.metadata.country }}
+                    {% endif %}
+                </small>
+            </div>
+            {% empty %}
+            <p>No recent activity found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Tool Usage Statistics -->
+    <div class="col-md-6">
+        <div class="dashboard-card">
+            <h3>🛠️ Tool Usage Statistics (Last 7 Days)</h3>
+            {% for tool in tool_usage_stats %}
+            <div class="tool-usage-item">
+                <span><strong>{{ tool.tool_name|title }}</strong></span>
+                <span class="badge badge-primary">{{ tool.count }} uses</span>
+            </div>
+            {% empty %}
+            <p>No tool usage data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Geographic Distribution -->
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <h3>🌍 Geographic Distribution</h3>
+            {% for geo in geographic_stats %}
+            <div class="geo-item">
+                <span>🇺🇳 {{ geo.country }}</span>
+                <span class="badge badge-info">{{ geo.count }} submissions</span>
+            </div>
+            {% empty %}
+            <p>No geographic data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Poultry Type Distribution -->
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <h3>🐔 Poultry Type Distribution</h3>
+            {% for poultry in poultry_type_stats %}
+            <div class="poultry-type-item">
+                <span>{{ poultry.poultry_type|title }}</span>
+                <span class="badge badge-success">{{ poultry.count }} operations</span>
+            </div>
+            {% empty %}
+            <p>No poultry type data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Device Statistics -->
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <h3>📱 Device Statistics</h3>
+            {% for device in device_stats %}
+            <div class="device-item">
+                <span>{{ device.device_type|title }}</span>
+                <span class="badge badge-warning">{{ device.count }} users</span>
+            </div>
+            {% empty %}
+            <p>No device data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Vaccination Submissions -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <h3>💉 Recent Vaccination Submissions</h3>
+            {% for submission in recent_submissions %}
+            <div class="recent-submission">
+                <div class="submission-header">
+                    {{ submission.batch_name }} - {{ submission.poultry_type|title }}
+                    <span class="badge badge-{% if submission.status == 'completed' %}success{% elif submission.status == 'processed' %}info{% else %}warning{% endif %}">
+                        {{ submission.status|title }}
+                    </span>
+                </div>
+                <div class="submission-details">
+                    <strong>Farmer:</strong> {{ submission.farmer_name }} | 
+                    <strong>Location:</strong> {{ submission.farm_location }}, {{ submission.country }} | 
+                    <strong>Batch Size:</strong> {{ submission.batch_size|floatformat:0 }} birds | 
+                    <strong>Arrival:</strong> {{ submission.arrival_date }} | 
+                    <strong>Device:</strong> {{ submission.device_type|title }} | 
+                    <strong>Submitted:</strong> {{ submission.created_at|timesince }} ago
+                </div>
+            </div>
+            {% empty %}
+            <p>No recent vaccination submissions found.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Hourly Activity Chart -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <h3>📈 Hourly Activity Today</h3>
+            <div style="height: 200px; background: #f8f9fa; padding: 20px; border-radius: 4px;">
+                {% for hour_data in hourly_activity %}
+                <div style="display: inline-block; margin: 5px; padding: 10px; background: #4CAF50; color: white; border-radius: 4px;">
+                    {{ hour_data.hour }}:00<br>
+                    <strong>{{ hour_data.count }}</strong>
+                </div>
+                {% empty %}
+                <p>No hourly activity data available for today.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Distribution -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="dashboard-card">
+            <h3>📊 Submission Status Distribution</h3>
+            {% for status in status_stats %}
+            <div class="status-item">
+                <span>{{ status.status|title }}</span>
+                <span class="badge badge-secondary">{{ status.count }} submissions</span>
+            </div>
+            {% empty %}
+            <p>No status data available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh every 30 seconds
+setTimeout(function() {
+    location.reload();
+}, 30000);
+
+// Add some interactivity
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for tool usage items
+    document.querySelectorAll('.tool-usage-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            const toolName = this.querySelector('strong').textContent.toLowerCase();
+            window.location.href = `/admin-dashboard/tool-usage/${toolName}/`;
+        });
+        item.style.cursor = 'pointer';
+    });
+});
+</script>
+{% endblock %}
+
+

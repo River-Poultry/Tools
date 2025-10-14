@@ -1,0 +1,46 @@
+# Django Settings
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# Database
+DATABASE_URL=sqlite:///db.sqlite3
+
+# Email Settings for Zoho Mail
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.zoho.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=hello@riverpoultry.com
+EMAIL_HOST_PASSWORD=your-zoho-app-password
+DEFAULT_FROM_EMAIL=hello@riverpoultry.com
+SERVER_EMAIL=hello@riverpoultry.com
+
+# Frontend URL
+FRONTEND_URL=http://localhost:3000
+
+# VAPID Settings for Push Notifications
+VAPID_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----
+your-vapid-private-key-here
+-----END PRIVATE KEY-----
+VAPID_PUBLIC_KEY=-----BEGIN PUBLIC KEY-----
+your-vapid-public-key-here
+-----END PUBLIC KEY-----
+VAPID_ADMIN_EMAIL=hello@riverpoultry.com
+
+# Redis (for Celery)
+REDIS_URL=redis://localhost:6379/0
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+
+# Twilio SMS (Optional - for future SMS notifications)
+TWILIO_ACCOUNT_SID=your-twilio-account-sid
+TWILIO_AUTH_TOKEN=your-twilio-auth-token
+TWILIO_PHONE_NUMBER=your-twilio-phone-number
+
+# WhatsApp Business API (Optional - for future WhatsApp notifications)
+WHATSAPP_ACCESS_TOKEN=your-whatsapp-access-token
+WHATSAPP_PHONE_NUMBER_ID=your-whatsapp-phone-number-id
+
+
+

@@ -1,0 +1,340 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}Real-Time Monitor - River Poultry Admin{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .stat-number {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        font-size: 1.1em;
+        opacity: 0.9;
+    }
+    .live-activity-item {
+        padding: 12px;
+        border-left: 4px solid #4CAF50;
+        margin-bottom: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        animation: slideIn 0.5s ease-in;
+    }
+    .live-activity-item.new {
+        border-left-color: #ff6b6b;
+        background: #fff5f5;
+    }
+    .tool-usage-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background: #e3f2fd;
+        margin-bottom: 5px;
+        border-radius: 4px;
+    }
+    .nav-tabs {
+        margin-bottom: 20px;
+    }
+    .nav-tab {
+        display: inline-block;
+        padding: 10px 20px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        text-decoration: none;
+        color: #333;
+        margin-right: 5px;
+        border-radius: 4px 4px 0 0;
+    }
+    .nav-tab.active {
+        background: white;
+        border-bottom: 1px solid white;
+    }
+    .nav-tab:hover {
+        background: #e9ecef;
+    }
+    .live-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background: #4CAF50;
+        border-radius: 50%;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+    }
+    .timestamp {
+        color: #666;
+        font-size: 0.8em;
+    }
+    .session-info {
+        background: #f0f0f0;
+        padding: 8px;
+        border-radius: 4px;
+        margin: 5px 0;
+        font-family: monospace;
+        font-size: 0.9em;
+    }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    @keyframes slideIn {
+        from { transform: translateX(-20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    .auto-refresh {
+        background: #4CAF50;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+    .auto-refresh:hover {
+        background: #45a049;
+    }
+    .auto-refresh.disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>⚡ Real-Time User Activity Monitor</h1>
+    <p>Live monitoring of user activity from the frontend</p>
+    <button id="autoRefreshBtn" class="auto-refresh">🔄 Auto-Refresh: ON</button>
+</div>
+
+<!-- Navigation Tabs -->
+<div class="nav-tabs">
+    <a href="{% url 'admin_dashboard:user_activity_dashboard' %}" class="nav-tab">📊 Overview</a>
+    <a href="{% url 'admin_dashboard:vaccination_activity' %}" class="nav-tab">💉 Vaccination Activity</a>
+    <a href="{% url 'admin_dashboard:geographic_analytics' %}" class="nav-tab">🌍 Geographic Analytics</a>
+    <a href="{% url 'admin_dashboard:real_time_monitor' %}" class="nav-tab active">⚡ Real-Time Monitor</a>
+</div>
+
+<!-- Live Statistics -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-number">{{ active_sessions }}</div>
+            <div class="stat-label">Active Sessions (30 min)</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-number">{{ live_activity|length }}</div>
+            <div class="stat-label">Recent Events</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-number">{{ current_tool_usage|length }}</div>
+            <div class="stat-label">Active Tools</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Live Activity Feed -->
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <h3>
+                <span class="live-indicator"></span>
+                Live Activity Feed (Last 100 Events)
+            </h3>
+            <div id="activityFeed" style="max-height: 600px; overflow-y: auto;">
+                {% for activity in live_activity %}
+                <div class="live-activity-item" data-timestamp="{{ activity.timestamp|date:'c' }}">
+                    <strong>{{ activity.tool_name|title }}</strong> - {{ activity.action|title }}<br>
+                    <small>
+                        Session: {{ activity.session_id|truncatechars:20 }} | 
+                        <span class="timestamp">{{ activity.timestamp|timesince }} ago</span>
+                        {% if activity.metadata.country %}
+                            | 📍 {{ activity.metadata.country }}
+                        {% endif %}
+                        {% if activity.metadata.device %}
+                            | 📱 {{ activity.metadata.device.type }}
+                        {% endif %}
+                    </small>
+                </div>
+                {% empty %}
+                <p>No live activity found.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Tool Usage -->
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <h3>🛠️ Current Tool Usage (Last Hour)</h3>
+            {% for tool in current_tool_usage %}
+            <div class="tool-usage-item">
+                <span><strong>{{ tool.tool_name|title }}</strong></span>
+                <span class="badge badge-primary">{{ tool.count }} events</span>
+            </div>
+            {% empty %}
+            <p>No current tool usage data.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Active Sessions -->
+        <div class="dashboard-card">
+            <h3>👥 Active Sessions</h3>
+            <div class="session-info">
+                <strong>{{ active_sessions }}</strong> unique sessions active in the last 30 minutes
+            </div>
+            <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                Sessions are tracked by unique session IDs from the frontend.
+            </p>
+        </div>
+
+        <!-- System Status -->
+        <div class="dashboard-card">
+            <h3>🔧 System Status</h3>
+            <div style="font-size: 0.9em;">
+                <div style="margin-bottom: 8px;">
+                    <strong>Backend:</strong> 
+                    <span style="color: #4CAF50;">● Online</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>Database:</strong> 
+                    <span style="color: #4CAF50;">● Connected</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>API Endpoints:</strong> 
+                    <span style="color: #4CAF50;">● Active</span>
+                </div>
+                <div style="margin-bottom: 8px;">
+                    <strong>Last Update:</strong> 
+                    <span class="timestamp">{{ "now"|date:"H:i:s" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let autoRefresh = true;
+let refreshInterval;
+
+function toggleAutoRefresh() {
+    autoRefresh = !autoRefresh;
+    const btn = document.getElementById('autoRefreshBtn');
+    
+    if (autoRefresh) {
+        btn.textContent = '🔄 Auto-Refresh: ON';
+        btn.classList.remove('disabled');
+        startAutoRefresh();
+    } else {
+        btn.textContent = '⏸️ Auto-Refresh: OFF';
+        btn.classList.add('disabled');
+        clearInterval(refreshInterval);
+    }
+}
+
+function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(function() {
+        if (autoRefresh) {
+            location.reload();
+        }
+    }, 10000); // Refresh every 10 seconds
+}
+
+function addNewActivity(activity) {
+    const feed = document.getElementById('activityFeed');
+    const newItem = document.createElement('div');
+    newItem.className = 'live-activity-item new';
+    newItem.innerHTML = `
+        <strong>${activity.tool_name}</strong> - ${activity.action}<br>
+        <small>
+            Session: ${activity.session_id.substring(0, 20)}... | 
+            <span class="timestamp">Just now</span>
+            ${activity.country ? `| 📍 ${activity.country}` : ''}
+            ${activity.device ? `| 📱 ${activity.device}` : ''}
+        </small>
+    `;
+    
+    feed.insertBefore(newItem, feed.firstChild);
+    
+    // Remove old items if we have too many
+    const items = feed.querySelectorAll('.live-activity-item');
+    if (items.length > 100) {
+        feed.removeChild(items[items.length - 1]);
+    }
+    
+    // Remove 'new' class after animation
+    setTimeout(() => {
+        newItem.classList.remove('new');
+    }, 1000);
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('autoRefreshBtn').addEventListener('click', toggleAutoRefresh);
+    startAutoRefresh();
+    
+    // Add some interactivity
+    document.querySelectorAll('.live-activity-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            const sessionId = this.querySelector('small').textContent.match(/Session: ([^|]+)/);
+            if (sessionId) {
+                console.log('Session ID:', sessionId[1].trim());
+                // Could add session details modal here
+            }
+        });
+        item.style.cursor = 'pointer';
+    });
+});
+
+// Simulate real-time updates (in production, this would be WebSocket or Server-Sent Events)
+function simulateRealTimeUpdates() {
+    // This is just for demonstration - in production you'd use WebSockets
+    const tools = ['vaccination', 'roomMeasurement', 'budgetCalculator'];
+    const actions = ['view', 'calculate', 'download', 'export'];
+    const countries = ['Nigeria', 'Ghana', 'Kenya', 'Morocco', 'Ethiopia'];
+    
+    setInterval(function() {
+        if (Math.random() > 0.7) { // 30% chance of new activity
+            const activity = {
+                tool_name: tools[Math.floor(Math.random() * tools.length)],
+                action: actions[Math.floor(Math.random() * actions.length)],
+                session_id: 'session_' + Math.random().toString(36).substr(2, 9),
+                country: countries[Math.floor(Math.random() * countries.length)],
+                device: Math.random() > 0.5 ? 'mobile' : 'desktop'
+            };
+            addNewActivity(activity);
+        }
+    }, 5000); // Check every 5 seconds
+}
+
+// Uncomment the line below to enable simulated real-time updates
+// simulateRealTimeUpdates();
+</script>
+{% endblock %}
+
+

@@ -1,0 +1,281 @@
+/* Django Enhanced - Subtle UI Improvements */
+
+/* Keep Django's default colors but add subtle enhancements */
+:root {
+    --django-blue: #417690;
+    --django-light-blue: #79aec8;
+    --django-dark-blue: #205067;
+    --django-gray: #f8f8f8;
+    --django-border: #ddd;
+    --django-text: #333;
+    --django-light-text: #666;
+}
+
+/* Subtle improvements to the header */
+#header {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    border-bottom: 1px solid var(--django-border) !important;
+}
+
+#header h1, #header h1 a {
+    font-weight: 600 !important;
+    text-shadow: none !important;
+}
+
+/* Improve button styling slightly */
+input[type="submit"], input[type="button"], .button, button,
+.default, .addlink, .changelink, .deletelink, .viewlink {
+    border-radius: 4px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+}
+
+input[type="submit"]:hover, input[type="button"]:hover, .button:hover, button:hover,
+.default:hover, .addlink:hover, .changelink:hover, .deletelink:hover, .viewlink:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+}
+
+/* Subtle table improvements */
+.results th {
+    font-weight: 600 !important;
+    border-bottom: 2px solid var(--django-blue) !important;
+}
+
+.results tr:hover {
+    background-color: #f0f8ff !important;
+}
+
+/* Improve form inputs */
+input, select, textarea {
+    border-radius: 4px !important;
+    border: 1px solid var(--django-border) !important;
+    transition: border-color 0.2s ease !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--django-blue) !important;
+    box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.2) !important;
+    outline: none !important;
+}
+
+/* Subtle module improvements */
+.module {
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    border: 1px solid var(--django-border) !important;
+}
+
+.module h2, .module h3, .module caption {
+    border-radius: 6px 6px 0 0 !important;
+    font-weight: 600 !important;
+}
+
+/* Improve navigation */
+#nav-global {
+    border-bottom: 1px solid var(--django-border) !important;
+}
+
+#nav-global a {
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+#nav-global a:hover {
+    background-color: var(--django-light-blue) !important;
+    color: white !important;
+}
+
+/* Subtle content improvements */
+#content, #content-main {
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    border: 1px solid var(--django-border) !important;
+}
+
+/* Improve breadcrumbs */
+.breadcrumbs {
+    font-size: 13px !important;
+    color: var(--django-light-text) !important;
+}
+
+.breadcrumbs a {
+    color: var(--django-blue) !important;
+    text-decoration: none !important;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline !important;
+}
+
+/* Subtle sidebar improvements */
+#nav-sidebar .module {
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+#nav-sidebar .module h2, #nav-sidebar .module h3, #nav-sidebar .module caption {
+    border-radius: 6px 6px 0 0 !important;
+}
+
+/* Improve pagination */
+.paginator {
+    border-radius: 4px !important;
+    overflow: hidden !important;
+}
+
+.paginator a, .paginator .this-page {
+    border-radius: 0 !important;
+    transition: background-color 0.2s ease !important;
+}
+
+/* Subtle improvements to filters */
+#changelist-filter {
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    margin-left: 30px !important;
+    position: relative !important;
+    left: 10px !important;
+}
+
+#changelist-filter h2 {
+    border-radius: 6px 6px 0 0 !important;
+}
+
+/* Improve action bar */
+.actions {
+    border-radius: 4px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+}
+
+/* Subtle improvements to messages */
+.messagelist {
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+.messagelist li {
+    border-radius: 4px !important;
+    margin-bottom: 8px !important;
+}
+
+/* Improve search */
+#searchbar {
+    border-radius: 4px !important;
+    border: 1px solid var(--django-border) !important;
+}
+
+#searchbar:focus {
+    border-color: var(--django-blue) !important;
+    box-shadow: 0 0 0 2px rgba(65, 118, 144, 0.2) !important;
+}
+
+/* Subtle improvements to help text */
+.help {
+    color: var(--django-light-text) !important;
+    font-style: italic !important;
+}
+
+/* Improve fieldset styling */
+fieldset {
+    border-radius: 6px !important;
+    border: 1px solid var(--django-border) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
+}
+
+fieldset legend {
+    font-weight: 600 !important;
+    color: var(--django-text) !important;
+}
+
+/* Subtle improvements to error messages */
+.errorlist {
+    border-radius: 4px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+}
+
+/* Improve date/time widgets */
+.datetime input {
+    border-radius: 4px !important;
+}
+
+/* Subtle improvements to select boxes */
+select {
+    border-radius: 4px !important;
+    background-image: none !important;
+}
+
+/* Improve file upload styling */
+input[type="file"] {
+    border-radius: 4px !important;
+    border: 1px solid var(--django-border) !important;
+}
+
+/* Subtle improvements to checkboxes and radio buttons */
+input[type="checkbox"], input[type="radio"] {
+    margin-right: 6px !important;
+}
+
+/* Improve textarea styling */
+textarea {
+    border-radius: 4px !important;
+    resize: vertical !important;
+}
+
+/* Subtle improvements to the dashboard */
+.dashboard .module {
+    border-radius: 6px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Improve the branding area */
+.branding {
+    font-weight: 500 !important;
+}
+
+/* Logo styling */
+.brand-logo-img {
+    filter: brightness(0) invert(1) !important; /* Makes logo white */
+    opacity: 0.9 !important;
+    transition: opacity 0.2s ease !important;
+    height: 40px !important;
+    width: auto !important;
+    margin-bottom: 4px !important;
+}
+
+.brand-logo-img:hover {
+    opacity: 1 !important;
+}
+
+/* Brand title alignment */
+.brand-title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* Ensure header alignment */
+#header {
+    display: flex !important;
+    align-items: flex-end !important;
+    padding-bottom: 8px !important;
+}
+
+/* Subtle improvements to the user tools */
+#user-tools {
+    font-size: 12px !important;
+}
+
+#user-tools a {
+    border-radius: 3px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+#user-tools a:hover {
+    background-color: var(--django-light-blue) !important;
+    color: white !important;
+}
