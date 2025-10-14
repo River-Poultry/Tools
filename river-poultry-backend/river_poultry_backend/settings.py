@@ -182,10 +182,10 @@ EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.zoho.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='hello@riverpoultry.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='xv0EbsYXcEUN')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='hello@riverpoultry.com')
-SERVER_EMAIL = config('SERVER_EMAIL', default='hello@riverpoultry.com')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@riverpoultry.com')
+SERVER_EMAIL = config('SERVER_EMAIL', default='noreply@riverpoultry.com')
 
 # Frontend URL
 FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:3000')
@@ -200,7 +200,7 @@ VAPID_PUBLIC_KEY = config('VAPID_PUBLIC_KEY', default='''-----BEGIN PUBLIC KEY--
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE4vRiSc+UUdR7ynBj0VYeIUqguO++
 RK248+yCJLwztcQqFIRktBjiHfOhsO0NSJbVZebE/4XHZ2aUOBxQagukOA==
 -----END PUBLIC KEY-----''')
-VAPID_ADMIN_EMAIL = config('VAPID_ADMIN_EMAIL', default='hello@riverpoultry.com')
+VAPID_ADMIN_EMAIL = config('VAPID_ADMIN_EMAIL', default='noreply@riverpoultry.com')
 
 # Media files
 MEDIA_URL = '/media/'
