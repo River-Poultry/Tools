@@ -4,6 +4,12 @@
   "outputDirectory": "build",
   "installCommand": "npm ci",
   "framework": "create-react-app",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
   "routes": [
     {
       "src": "/static/(.*)",
@@ -20,6 +26,14 @@
     {
       "src": "/robots.txt",
       "dest": "/robots.txt"
+    },
+    {
+      "src": "/sw.js",
+      "dest": "/sw.js"
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+      "dest": "/$1"
     },
     {
       "src": "/(.*)",
