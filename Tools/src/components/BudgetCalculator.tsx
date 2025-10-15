@@ -16,12 +16,13 @@ import {
   Divider,
   IconButton,
 } from "@mui/material";
-import { Add, Delete, Download, Email } from "@mui/icons-material";
+import { Add, Delete, Download } from "@mui/icons-material";
 import HeroSection from "./HeroSection";
 import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
-import { EMAIL_CONFIG, isZohoMailConfigured, generateEmailTemplate } from "../config/email";
+// import { EMAIL_CONFIG, isZohoMailConfigured, generateEmailTemplate } from "../config/email";
 import { COUNTRY_CODES, DEFAULT_CURRENCY, DEFAULT_COUNTRY_CODE } from "../constants";
+import EmailButton from "./EmailButton";
 
 type BirdType = "layers" | "broilers" | "sasso/kroilers" | "local";
 type FeedItem = { id: string; name: string; kgPerTon: number; pricePerKg: number };
@@ -679,124 +680,11 @@ const BudgetCalculator: React.FC = () => {
     doc.save("Poultry_Budget_Report.pdf");
   };
 
-  const handleEmailPDF = async () => {
-    if (!contactInfo.email) {
-      alert("Please enter an email address to send the report.");
-      return;
-    }
-
-    try {
-      const doc = generatePDF();
-      const pdfBlob = doc.output('blob');
-      
-      // Convert blob to base64 for Zoho Mail API
-      const base64PDF = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const base64 = reader.result?.toString().split(',')[1];
-          resolve(base64);
-        };
-        reader.readAsDataURL(pdfBlob);
-      });
-
-      // Check if Zoho Mail is properly configured
-      if (!isZohoMailConfigured()) {
-        throw new Error('Zoho Mail not configured');
-      }
-
-      // Zoho Mail API configuration
-      const emailData = {
-        from: {
-          email: EMAIL_CONFIG.FROM_EMAIL,
-          name: EMAIL_CONFIG.FROM_NAME
-        },
-        to: [
-          {
-            email: contactInfo.email,
-            name: contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : "Customer"
-          }
-        ],
-        subject: EMAIL_CONFIG.SUBJECT_TEMPLATE,
-        htmlContent: generateEmailTemplate({
-          birdType,
-          numBirds: getNumBirds(),
-          productionPeriod: getProductionPeriod(),
-          ageUnit,
-          totalCosts: formatter.format(totalCosts),
-          netProfit: formatter.format(netProfit),
-          contactPhone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : ''
-        }),
-        attachments: [
-          {
-            name: "Poultry_Budget_Report.pdf",
-            content: base64PDF,
-            contentType: "application/pdf"
-          }
-        ]
-      };
-
-      // Send email via Zoho Mail API
-      const response = await fetch(EMAIL_CONFIG.API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Zoho-oauthtoken ${EMAIL_CONFIG.ZOHO_ACCESS_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(emailData)
-      });
-
-      if (response.ok) {
-        alert(`Report successfully sent to ${contactInfo.email}!`);
-      } else {
-        throw new Error('Failed to send email');
-      }
-      
-    } catch (error) {
-      console.error('Error sending email:', error);
-      
-      // Fallback: Open default email client with pre-filled content
-      const doc = generatePDF();
-      const pdfBlob = doc.output('blob');
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      
-      const subject = encodeURIComponent(EMAIL_CONFIG.SUBJECT_TEMPLATE);
-      const body = encodeURIComponent(`
-Dear ${contactInfo.phone ? 'Farmer' : 'Customer'},
-
-Thank you for using our Poultry Budget Calculator! 
-
-Please find attached your detailed budget report.
-
-Report Summary:
-- Bird Type: ${birdType}
-- Number of Birds: ${getNumBirds().toLocaleString()}
-- Production Period: ${getProductionPeriod()} ${ageUnit}
-- Total Costs: ${formatter.format(totalCosts)}
-- Net Profit: ${formatter.format(netProfit)}
-
-This report includes detailed cost breakdowns, revenue projections, and profit analysis based on industry standards.
-
-If you have any questions about your budget or need assistance with poultry farming, please don't hesitate to contact us.
-
-Best regards,
-${EMAIL_CONFIG.COMPANY_NAME} Team
-
----
-Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
-      `);
-      
-      // Create a temporary link to download the PDF
-      const downloadLink = document.createElement('a');
-      downloadLink.href = pdfUrl;
-      downloadLink.download = 'Poultry_Budget_Report.pdf';
-      downloadLink.click();
-      
-      // Open email client
-      window.open(`mailto:${contactInfo.email}?subject=${subject}&body=${body}`);
-      
-      alert(`Please attach the downloaded PDF file to your email. The report has been downloaded to your device.`);
-    }
+  const generatePDFBlob = (): Blob => {
+    const doc = generatePDF();
+    return doc.output('blob');
   };
+
 
   return (
     <Box sx={{ bgcolor: "#f5f5f5", minHeight: "100vh", pb: 5 }}>
@@ -1424,17 +1312,32 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                       startIcon={<Download />}
                       disabled={!contactInfo.phone && !contactInfo.email}
                       onClick={handleDownloadPDF}
+                      sx={{ 
+                        bgcolor: '#286844',
+                        '&:hover': { bgcolor: '#1e4d2e' }
+                      }}
                     >
                       Download PDF
                     </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<Email />}
-                      disabled={!contactInfo.email}
-                      onClick={handleEmailPDF}
-                    >
-                      Send by Email
-                    </Button>
+                    {contactInfo.email && (
+                      <EmailButton
+                        reportType="budget"
+                        reportData={{
+                          birdType,
+                          numBirds: getNumBirds(),
+                          productionPeriod: getProductionPeriod(),
+                          ageUnit,
+                          totalCosts: formatter.format(totalCosts),
+                          netProfit: formatter.format(netProfit),
+                          contactPhone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : ''
+                        }}
+                        pdfBlob={generatePDFBlob()}
+                        fileName="Poultry_Budget_Report.pdf"
+                        farmerName={contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : undefined}
+                        farmerPhone={contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : undefined}
+                        variant="outlined"
+                      />
+                    )}
                   </Box>
 
                   <Box sx={{ display: "flex", gap: 1, mt: 2 }}>

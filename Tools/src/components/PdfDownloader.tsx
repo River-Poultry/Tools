@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Button, TextField, useMediaQuery, useTheme, Box, Typography, MenuItem } from "@mui/material";
+import { Button, TextField, useMediaQuery, useTheme, Box, Typography, MenuItem, Stack } from "@mui/material";
 import { Download } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
+import EmailButton from "./EmailButton";
 
 // Country code options for phone numbers
 const COUNTRY_CODES = [
@@ -193,6 +194,150 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
         doc.save(`Vaccination_${type}_${arrivalDate.replace(/\s+/g, '_')}.pdf`);
     };
 
+    const generatePdfBlob = (): Blob => {
+        const doc = new jsPDF();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        let yPosition = 35;
+        let pageNum = 1;
+
+        // Helper function to add header to each page
+        const addHeader = (pageNum: number) => {
+            // Logo
+            const img = new Image();
+            img.src = logoImg;
+            doc.addImage(img, "PNG", 14, 8, 20, 20, undefined, "FAST");
+            
+            // Title
+            doc.setFontSize(16);
+            doc.setTextColor(40, 100, 60);
+            doc.setFont('helvetica', 'bold');
+            doc.text("Poultry Vaccination Report", 40, 20);
+            
+            // Page number
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Page ${pageNum}`, pageWidth - 20, 20, { align: 'right' });
+        };
+
+        // Helper function to add footer
+        const addFooter = (pageNum: number, isLastPage: boolean) => {
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont('helvetica', 'normal');
+            
+            const footerY = pageHeight - 10;
+            doc.text("River Poultry & SmartVet - Professional Poultry Management", 14, footerY);
+            doc.text("www.riverpoultry.com | support@riverpoultry.com", pageWidth - 14, footerY, { align: 'right' });
+            
+            if (isLastPage) {
+                doc.text("Generated on: " + new Date().toLocaleDateString(), 14, footerY - 8);
+            }
+        };
+
+        // Helper function to check if we need a new page
+        const checkNewPage = (requiredSpace: number) => {
+            if (yPosition + requiredSpace > pageHeight - 30) {
+                doc.addPage();
+                pageNum++;
+                yPosition = 35;
+                addHeader(pageNum);
+            }
+        };
+
+        // Helper function to draw a table row
+        const drawTableRow = (label: string, value: string, isHeader: boolean = false) => {
+            checkNewPage(8);
+            
+            if (isHeader) {
+                doc.setFillColor(40, 100, 60);
+                doc.rect(14, yPosition - 3, pageWidth - 28, 8, 'F');
+                doc.setFontSize(12);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont('helvetica', 'bold');
+                doc.text(label, 20, yPosition + 2);
+            } else {
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont('helvetica', 'normal');
+                doc.text(label, 20, yPosition + 2);
+                doc.text(value, pageWidth - 20, yPosition + 2, { align: 'right' });
+            }
+            yPosition += 6;
+        };
+
+        // Helper function to draw section divider
+        const drawSectionDivider = () => {
+            checkNewPage(5);
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, yPosition, pageWidth - 14, yPosition);
+            yPosition += 8;
+        };
+
+        // Add header to first page
+        addHeader(1);
+
+        // Farm Information Section
+        drawTableRow("FARM INFORMATION", "", true);
+        drawTableRow("Poultry Type", type);
+        drawTableRow("Arrival Date", arrivalDate);
+        drawTableRow("Expected Sale Date", saleDate);
+        drawTableRow("Total Vaccinations", `${data.length} vaccines`);
+
+        drawSectionDivider();
+
+        // Vaccination Schedule Section
+        drawTableRow("VACCINATION SCHEDULE", "", true);
+        
+        data.forEach((vaccine, index) => {
+            checkNewPage(20);
+            
+            // Vaccine header
+            doc.setFillColor(240, 240, 240);
+            doc.rect(14, yPosition - 3, pageWidth - 28, 10, 'F');
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${index + 1}. ${vaccine.age} - ${vaccine.date || 'TBD'}`, 20, yPosition + 2);
+            yPosition += 8;
+            
+            // Vaccine details
+            drawTableRow("Vaccine", vaccine.vaccine);
+            drawTableRow("Route", vaccine.route);
+            drawTableRow("Notes", vaccine.notes);
+            yPosition += 5;
+        });
+
+        drawSectionDivider();
+
+        // Technical Summary Section
+        drawTableRow("TECHNICAL SUMMARY", "", true);
+        drawTableRow("Total Vaccinations", `${data.length} vaccines`);
+        drawTableRow("Vaccination Period", `${data[0]?.age || 'Day 1'} to ${data[data.length - 1]?.age || 'Final'}`);
+        drawTableRow("Primary Diseases Covered", getPrimaryDiseases(data));
+        drawTableRow("Administration Routes", getRoutes(data));
+        drawSectionDivider();
+
+        // Important Notes Section
+        drawTableRow("IMPORTANT NOTES", "", true);
+        drawTableRow("•", "Follow manufacturer's instructions for each vaccine");
+        drawTableRow("•", "Maintain proper cold chain storage (2-8°C)");
+        drawTableRow("•", "Use clean, sterile equipment for administration");
+        drawTableRow("•", "Monitor birds for adverse reactions post-vaccination");
+        drawTableRow("•", "Keep vaccination records for traceability");
+        drawTableRow("•", "Consult veterinarian for any health concerns");
+
+        // Add footer to all pages
+        for (let i = 1; i <= pageNum; i++) {
+            doc.setPage(i);
+            addFooter(i, i === pageNum);
+        }
+
+        // Return the PDF as a blob
+        return doc.output('blob');
+    };
+
     // Helper functions for technical summary
     const getPrimaryDiseases = (data: any[]) => {
         const diseases = new Set();
@@ -260,22 +405,47 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
                 />
             </Box>
             
-            <Button
-                variant="contained"
-                color="success"
-                startIcon={<Download />}
-                disabled={!contact.phone && !contact.email}
-                sx={{ width: isMobile ? "100%" : "auto" }}
-                onClick={() => {
-                    if (onDownloadTrigger && !onDownloadTrigger()) {
-                        return; // Registration prompt shown, don't proceed with download
-                    }
-                    generatePdf();
-                }}
-                data-pdf-download
-            >
-                Download PDF
-            </Button>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ width: "100%" }}>
+                <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<Download />}
+                    disabled={!contact.phone && !contact.email}
+                    sx={{ 
+                        flex: 1,
+                        bgcolor: '#286844',
+                        '&:hover': { bgcolor: '#1e4d2e' }
+                    }}
+                    onClick={() => {
+                        if (onDownloadTrigger && !onDownloadTrigger()) {
+                            return; // Registration prompt shown, don't proceed with download
+                        }
+                        generatePdf();
+                    }}
+                    data-pdf-download
+                >
+                    Download PDF
+                </Button>
+                
+                {contact.email && (
+                    <EmailButton
+                        reportType="vaccination"
+                        reportData={{
+                            type,
+                            arrivalDate,
+                            saleDate,
+                            vaccines: data,
+                            totalVaccinations: data.length
+                        }}
+                        pdfBlob={generatePdfBlob()}
+                        fileName={`Vaccination_${type}_${arrivalDate.replace(/\s+/g, '_')}.pdf`}
+                        farmerName={contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined}
+                        farmerPhone={contact.phone ? `${contact.countryCode}${contact.phone}` : undefined}
+                        variant="outlined"
+                        sx={{ flex: 1 }}
+                    />
+                )}
+            </Stack>
             
             {(!contact.phone && !contact.email) && (
                 <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#666' }}>

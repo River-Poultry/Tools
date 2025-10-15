@@ -25,6 +25,7 @@ import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
 import HeroSection from "./HeroSection";
 import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from "../constants";
+import EmailButton from "./EmailButton";
 
 const spaceRequirements: Record<string, number> = {
     broilers: 0.09,
@@ -80,6 +81,23 @@ const HouseMeasurement: React.FC = () => {
             resultRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [result]);
+
+    // Helper functions for email functionality
+    const getDimensions = () => {
+        if (!type || !birds) return 'N/A';
+        const requiredSpace = spaceRequirements[type] * Number(birds);
+        let width = Math.sqrt(requiredSpace / 2);
+        if (width > 12) width = 12;
+        const length = +(requiredSpace / width).toFixed(2);
+        return `${length.toFixed(2)}m × ${width.toFixed(2)}m`;
+    };
+
+    const getVentilationArea = () => {
+        if (!type || !birds) return 'N/A';
+        const requiredSpace = spaceRequirements[type] * Number(birds);
+        const targetOpenArea = requiredSpace * 0.1;
+        return `${targetOpenArea.toFixed(1)} m²`;
+    };
 
     // Generate PDF with multi-page support
     const generatePDF = () => {
@@ -356,6 +374,11 @@ const HouseMeasurement: React.FC = () => {
         }
 
         return doc;
+    };
+
+    const generatePDFBlob = (): Blob => {
+        const doc = generatePDF();
+        return doc.output('blob');
     };
 
     // Preview component
@@ -942,6 +965,23 @@ const HouseMeasurement: React.FC = () => {
                                         >
                                             Download PDF
                                         </Button>
+                                        {contact.email && (
+                                            <EmailButton
+                                                reportType="house-design"
+                                                reportData={{
+                                                    type,
+                                                    birds: Number(birds),
+                                                    requiredSpace: spaceRequirements[type] * Number(birds),
+                                                    dimensions: getDimensions(),
+                                                    ventilationArea: getVentilationArea()
+                                                }}
+                                                pdfBlob={generatePDFBlob()}
+                                                fileName="House_Design_Report.pdf"
+                                                farmerName={contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined}
+                                                farmerPhone={contact.phone ? `${contact.countryCode}${contact.phone}` : undefined}
+                                                variant="outlined"
+                                            />
+                                        )}
                                     </Stack>
                                 </Box>
                             </Card>
