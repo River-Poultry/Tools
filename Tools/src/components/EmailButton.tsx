@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { Email, Close, Send } from '@mui/icons-material';
 import { emailService, ReportEmailData } from '../services/emailService';
+import { emailNotificationService } from '../services/notificationService';
 
 interface EmailButtonProps {
   reportType: 'budget' | 'vaccination' | 'house-design' | 'nutrition';
@@ -89,6 +90,14 @@ const EmailButton: React.FC<EmailButtonProps> = ({
       setSnackbarOpen(true);
 
       if (result.success) {
+        // Send notification to user
+        await emailNotificationService.sendReportGeneratedNotification(
+          email,
+          reportType,
+          reportData,
+          farmerName
+        );
+        
         setEmailDialogOpen(false);
         setEmail('');
       }

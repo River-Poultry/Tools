@@ -1108,7 +1108,7 @@ const Vaccination: React.FC = () => {
                                             setRegistrationTrigger('support');
                                             setShowRegistrationPrompt(true);
                                         } else {
-                                            // TODO: Implement support functionality for logged-in users
+                                            // Support functionality for logged-in users
                                             setSnackbarMessage('Support feature coming soon!');
                                             setSnackbarOpen(true);
                                         }

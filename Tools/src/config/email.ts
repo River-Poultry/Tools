@@ -4,16 +4,18 @@ export const EMAIL_CONFIG = {
   API_ENDPOINT: 'https://mail.zoho.com/api/accounts/self/messages',
   
   // Email settings
-  FROM_EMAIL: 'noreply@smartvet.africa',
+  FROM_EMAIL: 'noreply@riverpoultry.com',
   FROM_NAME: 'River Poultry & SmartVet',
   
-  // Zoho OAuth token (replace with your actual token)
-  // To get this token, you need to:
-  // 1. Go to https://api-console.zoho.com/
-  // 2. Create a new application
-  // 3. Generate OAuth token for Zoho Mail API
-  // 4. Replace 'YOUR_ZOHO_ACCESS_TOKEN' with the actual token
-  ZOHO_ACCESS_TOKEN: 'YOUR_ZOHO_ACCESS_TOKEN',
+  // Zoho Mail SMTP settings
+  SMTP_HOST: 'smtp.zoho.com',
+  SMTP_PORT: 587,
+  SMTP_SECURE: false, // true for 465, false for other ports
+  SMTP_USER: 'noreply@riverpoultry.com',
+  SMTP_PASS: 'h4tuM10XRp0Y',
+  
+  // Zoho OAuth token (for API usage)
+  ZOHO_ACCESS_TOKEN: 'h4tuM10XRp0Y',
   
   // Fallback email settings
   FALLBACK_ENABLED: true,

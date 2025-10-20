@@ -24,7 +24,7 @@ import {
   Error,
   Info,
 } from '@mui/icons-material';
-import { notificationService, NotificationPayload } from '../services/notificationService';
+// import { notificationService, NotificationPayload } from '../services/notificationService';
 
 interface NotificationSettingsProps {
   userId?: number;
@@ -43,8 +43,10 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ userId }) =
   }, []);
 
   const checkNotificationStatus = async () => {
-    setIsSupported(notificationService.isSupported());
-    setPermission(notificationService.getPermission());
+    // setIsSupported(notificationService.isSupported());
+    // setPermission(notificationService.getPermission());
+    setIsSupported(false);
+    setPermission('default');
     
     // Check if user is subscribed (you might want to check with backend)
     try {
@@ -66,7 +68,8 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ userId }) =
     try {
       if (enabled) {
         // Enable notifications
-        const success = await notificationService.setupNotifications(userId);
+        // const success = await notificationService.setupNotifications(userId);
+        const success = false;
         if (success) {
           setIsSubscribed(true);
           setPermission('granted');
@@ -76,8 +79,8 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ userId }) =
         }
       } else {
         // Disable notifications
-        await notificationService.unsubscribeFromNotifications();
-        await notificationService.removeSubscription();
+        // await notificationService.unsubscribeFromNotifications();
+        // await notificationService.removeSubscription();
         setIsSubscribed(false);
         setSuccess('Notifications disabled successfully!');
       }
@@ -93,15 +96,15 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ userId }) =
     setError(null);
 
     try {
-      const testPayload: NotificationPayload = {
-        title: 'Test Notification',
-        body: 'This is a test notification from River Poultry Tools!',
-        icon: '/river-poultry-logo.png',
-        tag: 'test-notification',
-        data: { url: '/' }
-      };
+      // const testPayload: NotificationPayload = {
+      //   title: 'Test Notification',
+      //   body: 'This is a test notification from River Poultry Tools!',
+      //   icon: '/river-poultry-logo.png',
+      //   tag: 'test-notification',
+      //   data: { url: '/' }
+      // };
 
-      await notificationService.showLocalNotification(testPayload);
+      // await notificationService.showLocalNotification(testPayload);
       setSuccess('Test notification sent!');
     } catch (error: any) {
       setError(error.message || 'Failed to send test notification');

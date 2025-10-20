@@ -5,7 +5,7 @@ export interface ToolUsageEvent {
   userId?: string;
   sessionId: string;
   timestamp: Date;
-  action: 'view' | 'calculate' | 'download' | 'export' | 'calendar_add' | 'email_send';
+  action: 'view' | 'calculate' | 'download' | 'export' | 'calendar_add' | 'email_send' | 'test_push' | 'test_analytics';
   metadata?: {
     poultryType?: string;
     batchSize?: number;
@@ -76,7 +76,7 @@ class AnalyticsService {
 
   constructor() {
     // Backend API URL - use local backend for development
-    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
+    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
     this.sessionId = this.generateSessionId();
     this.initializeLocationAndDevice();
   }

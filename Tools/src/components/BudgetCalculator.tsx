@@ -22,7 +22,10 @@ import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
 // import { EMAIL_CONFIG, isZohoMailConfigured, generateEmailTemplate } from "../config/email";
 import { COUNTRY_CODES, DEFAULT_CURRENCY, DEFAULT_COUNTRY_CODE } from "../constants";
-import EmailButton from "./EmailButton";
+// import EmailButton from "./EmailButton";
+import { useEmailNotification } from "../hooks/useEmailNotification";
+import { emailService } from "../services/emailService";
+import { emailNotificationService } from "../services/notificationService";
 
 type BirdType = "layers" | "broilers" | "sasso/kroilers" | "local";
 type FeedItem = { id: string; name: string; kgPerTon: number; pricePerKg: number };
@@ -675,15 +678,71 @@ const BudgetCalculator: React.FC = () => {
     return doc;
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     const doc = generatePDF();
     doc.save("Poultry_Budget_Report.pdf");
+    
+    // If user has provided email, automatically send the report
+    if (contactInfo.email) {
+      try {
+        const pdfBlob = generatePDFBlob();
+        const result = await emailService.sendReportEmail({
+          reportType: 'budget',
+          farmerEmail: contactInfo.email,
+          farmerName: contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : undefined,
+          farmerPhone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : undefined,
+          reportData: {
+            birdType,
+            numBirds: getNumBirds(),
+            productionPeriod: getProductionPeriod(),
+            ageUnit,
+            totalCosts: formatter.format(totalCosts),
+            netProfit: formatter.format(netProfit),
+            contactPhone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : ''
+          },
+          pdfBlob,
+          fileName: "Poultry_Budget_Report.pdf"
+        });
+        
+        if (result) {
+          // Send notification to user
+          await emailNotificationService.sendReportGeneratedNotification(
+            contactInfo.email,
+            'budget',
+            {
+              birdType,
+              numBirds: getNumBirds(),
+              productionPeriod: getProductionPeriod(),
+              ageUnit,
+              totalCosts: formatter.format(totalCosts),
+              netProfit: formatter.format(netProfit)
+            },
+            contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : undefined
+          );
+          
+          alert(`Report downloaded and sent to ${contactInfo.email}!`);
+        } else {
+          alert('Report downloaded successfully! Email sending failed, but you can try again.');
+        }
+      } catch (error) {
+        console.error('Error sending email automatically:', error);
+        alert('Report downloaded successfully! Email sending failed, but you can try again.');
+      }
+    }
   };
 
   const generatePDFBlob = (): Blob => {
-    const doc = generatePDF();
+      const doc = generatePDF();
     return doc.output('blob');
   };
+
+  // Email notification hook
+  useEmailNotification({
+            email: contactInfo.email,
+    name: contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : undefined,
+    phone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : undefined,
+    enabled: true
+  });
 
 
   return (
@@ -1317,27 +1376,8 @@ const BudgetCalculator: React.FC = () => {
                         '&:hover': { bgcolor: '#1e4d2e' }
                       }}
                     >
-                      Download PDF
+                      {contactInfo.email ? 'Download & Email PDF' : 'Download PDF'}
                     </Button>
-                    {contactInfo.email && (
-                      <EmailButton
-                        reportType="budget"
-                        reportData={{
-                          birdType,
-                          numBirds: getNumBirds(),
-                          productionPeriod: getProductionPeriod(),
-                          ageUnit,
-                          totalCosts: formatter.format(totalCosts),
-                          netProfit: formatter.format(netProfit),
-                          contactPhone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : ''
-                        }}
-                        pdfBlob={generatePDFBlob()}
-                        fileName="Poultry_Budget_Report.pdf"
-                        farmerName={contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : undefined}
-                        farmerPhone={contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : undefined}
-                        variant="outlined"
-                      />
-                    )}
                   </Box>
 
                   <Box sx={{ display: "flex", gap: 1, mt: 2 }}>

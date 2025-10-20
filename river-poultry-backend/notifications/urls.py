@@ -14,4 +14,7 @@ urlpatterns = [
     
     # Statistics
     path('stats/', views.notification_stats, name='notification-stats'),
+    
+    # Email reports
+    path('send-report-email/', views.send_report_email, name='send-report-email'),
 ]

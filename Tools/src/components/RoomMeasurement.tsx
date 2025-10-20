@@ -25,7 +25,10 @@ import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
 import HeroSection from "./HeroSection";
 import { COUNTRY_CODES, DEFAULT_COUNTRY_CODE } from "../constants";
-import EmailButton from "./EmailButton";
+// import EmailButton from "./EmailButton";
+import { useEmailNotification } from "../hooks/useEmailNotification";
+import { emailService } from "../services/emailService";
+import { emailNotificationService } from "../services/notificationService";
 
 const spaceRequirements: Record<string, number> = {
     broilers: 0.09,
@@ -98,6 +101,14 @@ const HouseMeasurement: React.FC = () => {
         const targetOpenArea = requiredSpace * 0.1;
         return `${targetOpenArea.toFixed(1)} m²`;
     };
+
+    // Email notification hook
+    useEmailNotification({
+        email: contact.email,
+        name: contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined,
+        phone: contact.phone ? `${contact.countryCode}${contact.phone}` : undefined,
+        enabled: true
+    });
 
     // Generate PDF with multi-page support
     const generatePDF = () => {
@@ -954,34 +965,62 @@ const HouseMeasurement: React.FC = () => {
                                             variant="contained"
                                             disabled={!contact.phone && !contact.email}
                                             startIcon={<Download />}
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 const doc = generatePDF();
                                                 doc.save("House_Design_Report.pdf");
+                                                
+                                                // If user has provided email, automatically send the report
+                                                if (contact.email) {
+                                                    try {
+                                                        const pdfBlob = generatePDFBlob();
+                                                        const result = await emailService.sendReportEmail({
+                                                            reportType: 'house-design',
+                                                            farmerEmail: contact.email,
+                                                            farmerName: contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined,
+                                                            farmerPhone: contact.phone ? `${contact.countryCode}${contact.phone}` : undefined,
+                                                            reportData: {
+                                                                type,
+                                                                birds: Number(birds),
+                                                                requiredSpace: spaceRequirements[type] * Number(birds),
+                                                                dimensions: getDimensions(),
+                                                                ventilationArea: getVentilationArea()
+                                                            },
+                                                            pdfBlob,
+                                                            fileName: "House_Design_Report.pdf"
+                                                        });
+                                                        
+                                                        if (result) {
+                                                            // Send notification to user
+                                                            await emailNotificationService.sendReportGeneratedNotification(
+                                                                contact.email,
+                                                                'house-design',
+                                                                {
+                                                                    type,
+                                                                    birds: Number(birds),
+                                                                    requiredSpace: spaceRequirements[type] * Number(birds),
+                                                                    dimensions: getDimensions(),
+                                                                    ventilationArea: getVentilationArea()
+                                                                },
+                                                                contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined
+                                                            );
+                                                            
+                                                            alert(`Report downloaded and sent to ${contact.email}!`);
+                                                        } else {
+                                                            alert('Report downloaded successfully! Email sending failed, but you can try again.');
+                                                        }
+                                                    } catch (error) {
+                                                        console.error('Error sending email automatically:', error);
+                                                        alert('Report downloaded successfully! Email sending failed, but you can try again.');
+                                                    }
+                                                }
                                             }}
                                             sx={{ 
                                                 bgcolor: '#286844', 
                                                 '&:hover': { bgcolor: '#1e4d2e' }
                                             }}
                                         >
-                                            Download PDF
+                                            {contact.email ? 'Download & Email PDF' : 'Download PDF'}
                                         </Button>
-                                        {contact.email && (
-                                            <EmailButton
-                                                reportType="house-design"
-                                                reportData={{
-                                                    type,
-                                                    birds: Number(birds),
-                                                    requiredSpace: spaceRequirements[type] * Number(birds),
-                                                    dimensions: getDimensions(),
-                                                    ventilationArea: getVentilationArea()
-                                                }}
-                                                pdfBlob={generatePDFBlob()}
-                                                fileName="House_Design_Report.pdf"
-                                                farmerName={contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined}
-                                                farmerPhone={contact.phone ? `${contact.countryCode}${contact.phone}` : undefined}
-                                                variant="outlined"
-                                            />
-                                        )}
                                     </Stack>
                                 </Box>
                             </Card>

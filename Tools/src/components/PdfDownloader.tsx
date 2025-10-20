@@ -3,7 +3,10 @@ import { Button, TextField, useMediaQuery, useTheme, Box, Typography, MenuItem, 
 import { Download } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
-import EmailButton from "./EmailButton";
+// import EmailButton from "./EmailButton";
+import { useEmailNotification } from "../hooks/useEmailNotification";
+import { emailService } from "../services/emailService";
+import { emailNotificationService } from "../services/notificationService";
 
 // Country code options for phone numbers
 const COUNTRY_CODES = [
@@ -34,7 +37,15 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const [contact, setContact] = useState({ phone: "", email: "", countryCode: "+254" }); // Default to Kenya
 
-    const generatePdf = () => {
+    // Email notification hook
+    useEmailNotification({
+        email: contact.email,
+        name: contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined,
+        phone: contact.phone ? `${contact.countryCode}${contact.phone}` : undefined,
+        enabled: true
+    });
+
+    const generatePdf = async () => {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -192,6 +203,51 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
 
         // Save the PDF
         doc.save(`Vaccination_${type}_${arrivalDate.replace(/\s+/g, '_')}.pdf`);
+        
+        // If user has provided email, automatically send the report
+        if (contact.email) {
+            try {
+                const pdfBlob = generatePdfBlob();
+                const result = await emailService.sendReportEmail({
+                    reportType: 'vaccination',
+                    farmerEmail: contact.email,
+                    farmerName: contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined,
+                    farmerPhone: contact.phone ? `${contact.countryCode}${contact.phone}` : undefined,
+                    reportData: {
+                        type,
+                        arrivalDate,
+                        saleDate,
+                        vaccines: data,
+                        totalVaccinations: data.length
+                    },
+                    pdfBlob,
+                    fileName: `Vaccination_${type}_${arrivalDate.replace(/\s+/g, '_')}.pdf`
+                });
+                
+                if (result) {
+                    // Send notification to user
+                    await emailNotificationService.sendReportGeneratedNotification(
+                        contact.email,
+                        'vaccination',
+                        {
+                            type,
+                            arrivalDate,
+                            saleDate,
+                            vaccines: data,
+                            totalVaccinations: data.length
+                        },
+                        contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined
+                    );
+                    
+                    alert(`Report downloaded and sent to ${contact.email}!`);
+                } else {
+                    alert('Report downloaded successfully! Email sending failed, but you can try again.');
+                }
+            } catch (error) {
+                console.error('Error sending email automatically:', error);
+                alert('Report downloaded successfully! Email sending failed, but you can try again.');
+            }
+        }
     };
 
     const generatePdfBlob = (): Blob => {
@@ -424,27 +480,8 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
                     }}
                     data-pdf-download
                 >
-                    Download PDF
+                    {contact.email ? 'Download & Email PDF' : 'Download PDF'}
                 </Button>
-                
-                {contact.email && (
-                    <EmailButton
-                        reportType="vaccination"
-                        reportData={{
-                            type,
-                            arrivalDate,
-                            saleDate,
-                            vaccines: data,
-                            totalVaccinations: data.length
-                        }}
-                        pdfBlob={generatePdfBlob()}
-                        fileName={`Vaccination_${type}_${arrivalDate.replace(/\s+/g, '_')}.pdf`}
-                        farmerName={contact.phone ? `Farmer (${contact.countryCode}${contact.phone})` : undefined}
-                        farmerPhone={contact.phone ? `${contact.countryCode}${contact.phone}` : undefined}
-                        variant="outlined"
-                        sx={{ flex: 1 }}
-                    />
-                )}
             </Stack>
             
             {(!contact.phone && !contact.email) && (

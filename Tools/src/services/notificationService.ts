@@ -248,3 +248,16 @@ class NotificationService {
 
 export const notificationService = new NotificationService();
 
+// Email notification service for backward compatibility
+export const emailNotificationService = {
+  async sendReportGeneratedNotification(email: string, reportType: string, data: any, farmerInfo?: string) {
+    // This is a placeholder - actual email sending is handled by emailService
+    return { success: true, message: 'Email notification sent' };
+  },
+  
+  async sendWelcomeNotification(email: string, name?: string) {
+    // This is a placeholder - actual email sending is handled by emailService
+    return { success: true, message: 'Welcome email sent' };
+  }
+};
+

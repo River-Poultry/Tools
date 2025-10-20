@@ -290,13 +290,13 @@ class AuthService {
       });
 
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        return result;
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to send password reset email');
       }
     } catch (error) {
-      console.error('Password reset request error:', error);
       throw error;
     }
   }

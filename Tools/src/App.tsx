@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useParams } from 'react-router-dom';
 import BudgetCalculator from './components/BudgetCalculator';
 import RoomMeasurement from './components/RoomMeasurement';
 import Navigation from './components/Navigation';
 import Vaccination from "./components/Vaccination";
 import ToolsOverview from './components/ToolsOverview';
 import AdminDashboard from './components/AdminDashboard';
-import AnalyticsDebug from './components/AnalyticsDebug';
 import Login from './components/Login';
 import UserDashboard from './components/UserDashboard';
 import WelcomePopup from './components/WelcomePopup';
 import PasswordResetConfirm from './components/PasswordResetConfirm';
 import UserProfile from './components/UserProfile';
 import NotificationAdmin from './components/NotificationAdmin';
+import ErrorBoundary from './components/ErrorBoundary';
 import { authService, User } from './services/authService';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
 
 // Wrapper component to handle URL parameters
 const PasswordResetConfirmWrapper: React.FC = () => {
@@ -49,12 +48,6 @@ const AppContent: React.FC = () => {
       const hasSeenWelcomePopup = localStorage.getItem('hasSeenWelcomePopup');
       const currentPath = location.pathname;
       
-      console.log('Current path:', currentPath); // Debug log
-      console.log('Has seen popup:', hasSeenWelcomePopup); // Debug log
-      
-      // TEMPORARY: For testing, you can uncomment the next line to always show popup
-      localStorage.removeItem('hasSeenWelcomePopup');
-      
       // Only show popup if:
       // 1. User hasn't seen it before
       // 2. User is on the main page (not on login/signup pages)
@@ -65,7 +58,6 @@ const AppContent: React.FC = () => {
           !currentPath.includes('/reset-password')) {
         // Delay showing the popup to let the page load first
         setTimeout(() => {
-          console.log('Setting showWelcomePopup to true'); // Debug log
           setShowWelcomePopup(true);
         }, 2000);
       }
@@ -86,6 +78,7 @@ const AppContent: React.FC = () => {
     localStorage.setItem('hasSeenWelcomePopup', 'true');
     setShowWelcomePopup(false);
   };
+
 
 
   if (loading) {
@@ -114,7 +107,6 @@ const AppContent: React.FC = () => {
           <Route path="/measurement" element={<RoomMeasurement />} />
           <Route path="/budget-calculator" element={<BudgetCalculator />} />
           <Route path="/dev/analytics" element={<AdminDashboard />} />
-          <Route path="/debug" element={<AnalyticsDebug />} />
         </Routes>
         <WelcomePopup
           open={showWelcomePopup}
@@ -137,7 +129,6 @@ const AppContent: React.FC = () => {
         <Route path="/budget-calculator" element={<BudgetCalculator />} />
         <Route path="/dev/analytics" element={<AdminDashboard />} />
         <Route path="/notifications" element={<NotificationAdmin />} />
-        <Route path="/debug" element={<AnalyticsDebug />} />
       </Routes>
     </AppContainer>
   );
@@ -145,9 +136,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <AppContent />
+      </Router>
+    </ErrorBoundary>
   );
 };
 
