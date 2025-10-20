@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome Popup Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #2E7D32;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #1B5E20;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #e8f5e8;
+            border: 1px solid #c8e6c9;
+        }
+        .info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Welcome Popup Test</h1>
+        
+        <div class="status info">
+            <h3>Current Status:</h3>
+            <p><strong>hasSeenWelcomePopup:</strong> <span id="status">Loading...</span></p>
+            <p><strong>Current URL:</strong> <span id="currentUrl"></span></p>
+        </div>
+
+        <div class="status">
+            <h3>Test Actions:</h3>
+            <button onclick="resetPopup()">🔄 Reset Popup (Clear localStorage)</button>
+            <button onclick="setSeen()">✅ Mark as Seen</button>
+            <button onclick="goToMain()">🏠 Go to Main Page</button>
+            <button onclick="checkStatus()">🔍 Refresh Status</button>
+        </div>
+
+        <div class="status info">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click "Reset Popup" to clear the localStorage</li>
+                <li>Click "Go to Main Page" to navigate to the app</li>
+                <li>The popup should appear after 2 seconds</li>
+                <li>Check browser console for debug logs</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function checkStatus() {
+            const hasSeen = localStorage.getItem('hasSeenWelcomePopup');
+            document.getElementById('status').textContent = hasSeen || 'null (not set)';
+            document.getElementById('currentUrl').textContent = window.location.href;
+        }
+
+        function resetPopup() {
+            localStorage.removeItem('hasSeenWelcomePopup');
+            alert('✅ localStorage cleared! The popup should now show on the main page.');
+            checkStatus();
+        }
+
+        function setSeen() {
+            localStorage.setItem('hasSeenWelcomePopup', 'true');
+            alert('✅ Marked as seen! The popup will not show again.');
+            checkStatus();
+        }
+
+        function goToMain() {
+            window.location.href = 'http://localhost:3000/';
+        }
+
+        // Check status on page load
+        checkStatus();
+    </script>
+</body>
+</html>
