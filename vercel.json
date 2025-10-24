@@ -18,8 +18,13 @@
   "env": {
     "REACT_APP_API_URL": "@react_app_api_url"
   },
-  "buildCommand": "npm run build",
+  "buildCommand": "npm ci && npx react-scripts build",
   "outputDirectory": "build",
-  "installCommand": "npm install",
-  "framework": "create-react-app"
+  "installCommand": "npm ci",
+  "framework": "create-react-app",
+  "functions": {
+    "app/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }

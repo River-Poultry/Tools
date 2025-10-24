@@ -107,10 +107,12 @@ The following fixes have been applied to resolve common Vercel deployment issues
    - Fixed with proper SPA routing in `vercel.json`
    - All routes now redirect to `index.html`
 
-2. **Build Failures**:
-   - Added proper build command
+2. **Build Failures - "react-scripts: command not found"**:
+   - Fixed with `npx react-scripts build` in build command
+   - Added proper `npm ci` install command
+   - Created `.npmrc` for proper npm configuration
    - Specified Node.js version requirements
-   - Optimized dependencies
+   - Optimized dependencies with package-lock.json
 
 3. **Environment Variables**:
    - Proper configuration in `vercel.json`
@@ -119,6 +121,11 @@ The following fixes have been applied to resolve common Vercel deployment issues
 4. **Static File Serving**:
    - Proper build output directory configuration
    - Optimized file serving
+
+5. **Dependency Installation Issues**:
+   - Added `.npmrc` configuration file
+   - Used `npm ci` for reliable, reproducible builds
+   - Ensured package-lock.json is properly used
 
 ### Useful Commands:
 
