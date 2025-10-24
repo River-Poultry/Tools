@@ -1,0 +1,32 @@
+{
+  "name": "portfolio-manager",
+  "version": "1.0.0",
+  "description": "PRUDEV II Portfolio Manager - MSME and BGE Management System",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "cd frontend && npm start",
+    "dev": "cd frontend && npm start"
+  },
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/portfolio-manager.git"
+  },
+  "keywords": [
+    "portfolio",
+    "msme",
+    "business",
+    "management",
+    "react",
+    "django"
+  ],
+  "author": "PRUDEV II Team",
+  "license": "MIT"
+}
