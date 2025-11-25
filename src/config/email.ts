@@ -1,37 +1,20 @@
-// Email configuration for Zoho Mail API
+// Email configuration for Backend API
 export const EMAIL_CONFIG = {
-  // Zoho Mail API endpoint
-  API_ENDPOINT: 'https://mail.zoho.com/api/accounts/self/messages',
-  
+  // Backend API endpoint
+  BACKEND_API_URL: process.env.REACT_APP_BACKEND_URL || 'http://localhost:5001',
+
   // Email settings
-  FROM_EMAIL: 'noreply@smartvet.africa',
+  FROM_EMAIL: 'hello@riverpoultry.com',
   FROM_NAME: 'River Poultry & SmartVet',
-  
-  // Zoho OAuth token (replace with your actual token)
-  // To get this token, you need to:
-  // 1. Go to https://api-console.zoho.com/
-  // 2. Create a new application
-  // 3. Generate OAuth token for Zoho Mail API
-  // 4. Replace 'YOUR_ZOHO_ACCESS_TOKEN' with the actual token
-  ZOHO_ACCESS_TOKEN: 'YOUR_ZOHO_ACCESS_TOKEN',
-  
-  // Fallback email settings
-  FALLBACK_ENABLED: true,
-  
+
   // Email templates
   SUBJECT_TEMPLATE: 'Your Poultry Budget Report - River Poultry & SmartVet',
-  
+
   // Company branding
   COMPANY_NAME: 'River Poultry & SmartVet',
   COMPANY_WEBSITE: 'www.riverpoultry.com',
   COMPANY_COLOR: '#286844',
   COMPANY_BG_COLOR: '#f1f2b0'
-};
-
-// Helper function to check if Zoho Mail is properly configured
-export const isZohoMailConfigured = (): boolean => {
-  return EMAIL_CONFIG.ZOHO_ACCESS_TOKEN !== 'YOUR_ZOHO_ACCESS_TOKEN' && 
-         EMAIL_CONFIG.ZOHO_ACCESS_TOKEN.length > 0;
 };
 
 // Email template generator

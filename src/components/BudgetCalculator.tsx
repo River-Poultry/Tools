@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Stack, 
-  TextField, 
-  Typography, 
-  Button, 
+import {
+  Box,
+  Card,
+  CardContent,
+  Stack,
+  TextField,
+  Typography,
+  Button,
   MenuItem,
   Stepper,
   Step,
@@ -20,8 +20,9 @@ import { Add, Delete, Download, Email } from "@mui/icons-material";
 import HeroSection from "./HeroSection";
 import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
-import { EMAIL_CONFIG, isZohoMailConfigured, generateEmailTemplate } from "../config/email";
+import { EMAIL_CONFIG, generateEmailTemplate } from "../config/email";
 import { COUNTRY_CODES, DEFAULT_CURRENCY, DEFAULT_COUNTRY_CODE } from "../constants";
+import { userTrackingService } from "../services/userTrackingService";
 
 type BirdType = "layers" | "broilers" | "sasso/kroilers" | "local";
 type FeedItem = { id: string; name: string; kgPerTon: number; pricePerKg: number };
@@ -284,7 +285,7 @@ const BudgetCalculator: React.FC = () => {
         setBroodingCost(data.broodingCost?.toString() || "");
         setContactInfo(data.contactInfo || { phone: "", email: "", countryCode: "+254" });
       }
-    } catch {}
+    } catch { }
   }, []);
 
   // Save data
@@ -294,27 +295,27 @@ const BudgetCalculator: React.FC = () => {
         birdType, numBirds, productionPeriod, docCostPerChick, eggPrice, broilerPrice, currencyCode, feedType, completeFeedItems, feedItems, vaccinations, drugTreatments,
         labourCost, waterCost, biosecurityCost, broodingCost, contactInfo
       }));
-    } catch {}
+    } catch { }
   }, [birdType, numBirds, productionPeriod, docCostPerChick, eggPrice, broilerPrice, currencyCode, feedType, completeFeedItems, feedItems, vaccinations, drugTreatments,
-      labourCost, waterCost, biosecurityCost, broodingCost, contactInfo]);
+    labourCost, waterCost, biosecurityCost, broodingCost, contactInfo]);
 
-  const formatter = useMemo(() => 
-    new Intl.NumberFormat(undefined, { 
-      style: "currency", 
-      currency: currencyCode, 
-      maximumFractionDigits: 2 
+  const formatter = useMemo(() =>
+    new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currencyCode,
+      maximumFractionDigits: 2
     }), [currencyCode]);
 
   // Helper functions
-  const addFeedRow = () => setFeedItems(prev => [...prev, { 
-    id: String(Date.now()), 
-    name: "", 
-    kgPerTon: 0, 
-    pricePerKg: 0 
+  const addFeedRow = () => setFeedItems(prev => [...prev, {
+    id: String(Date.now()),
+    name: "",
+    kgPerTon: 0,
+    pricePerKg: 0
   }]);
 
   const updateFeed = (id: string, key: keyof FeedItem, value: string) => {
-    setFeedItems(prev => prev.map(f => 
+    setFeedItems(prev => prev.map(f =>
       f.id === id ? { ...f, [key]: key === "name" ? value : (parseFloat(value) || 0) } : f
     ));
   };
@@ -322,7 +323,7 @@ const BudgetCalculator: React.FC = () => {
   const removeFeed = (id: string) => setFeedItems(prev => prev.filter(f => f.id !== id));
 
   const updateCompleteFeed = (stage: CompleteFeedStage, key: keyof CompleteFeedItem, value: number) => {
-    setCompleteFeedItems(prev => prev.map(item => 
+    setCompleteFeedItems(prev => prev.map(item =>
       item.stage === stage ? { ...item, [key]: value } : item
     ));
   };
@@ -337,32 +338,32 @@ const BudgetCalculator: React.FC = () => {
     return suggested.find(item => item.stage === stage)?.description || "";
   };
 
-  const addVaccination = () => setVaccinations(prev => [...prev, { 
-    id: String(Date.now()), 
-    name: "", 
-    age: 0, 
-    cost: 0, 
-    notes: "" 
+  const addVaccination = () => setVaccinations(prev => [...prev, {
+    id: String(Date.now()),
+    name: "",
+    age: 0,
+    cost: 0,
+    notes: ""
   }]);
 
   const updateVaccination = (id: string, key: keyof VaccinationItem, value: string | number) => {
-    setVaccinations(prev => prev.map(v => 
+    setVaccinations(prev => prev.map(v =>
       v.id === id ? { ...v, [key]: value } : v
     ));
   };
 
   const removeVaccination = (id: string) => setVaccinations(prev => prev.filter(v => v.id !== id));
 
-  const addDrugTreatment = () => setDrugTreatments(prev => [...prev, { 
-    id: String(Date.now()), 
-    name: "", 
-    age: 0, 
-    cost: 0, 
-    notes: "" 
+  const addDrugTreatment = () => setDrugTreatments(prev => [...prev, {
+    id: String(Date.now()),
+    name: "",
+    age: 0,
+    cost: 0,
+    notes: ""
   }]);
 
   const updateDrugTreatment = (id: string, key: keyof DrugTreatmentItem, value: string | number) => {
-    setDrugTreatments(prev => prev.map(d => 
+    setDrugTreatments(prev => prev.map(d =>
       d.id === id ? { ...d, [key]: value } : d
     ));
   };
@@ -404,12 +405,12 @@ const BudgetCalculator: React.FC = () => {
       // Calculate weighted average cost based on kg per ton for each stage
       const totalKg = completeFeedItems.reduce((sum, item) => sum + item.kgPerTon, 0);
       if (totalKg === 0) return 0;
-      
+
       const weightedCost = completeFeedItems.reduce((sum, item) => {
         const proportion = item.kgPerTon / totalKg;
         return sum + proportion * item.pricePerKg;
       }, 0);
-      
+
       return weightedCost;
     }
     return feedItems.reduce((sum, f) => {
@@ -448,17 +449,17 @@ const BudgetCalculator: React.FC = () => {
 
   const finalRevenue = useMemo(() => {
     if (birdType === "layers") return 0;
-    
+
     // Realistic sales distribution for meat birds:
     // 80% sold at full price, 4% mortality (no revenue), 16% sold at 50% price
     const totalBirds = getNumBirds();
     const fullPriceBirds = totalBirds * 0.80; // 80% at full price
     const discountedBirds = totalBirds * 0.16; // 16% at 50% price
     // 4% mortality = no revenue
-    
+
     const fullPriceRevenue = fullPriceBirds * getBroilerPrice();
     const discountedRevenue = discountedBirds * getBroilerPrice() * 0.5;
-    
+
     return fullPriceRevenue + discountedRevenue;
   }, [getNumBirds, birdType, getBroilerPrice]);
 
@@ -479,13 +480,13 @@ const BudgetCalculator: React.FC = () => {
   const isStepValid = (step: number): boolean => {
     switch (step) {
       case 0: return birdType && getNumBirds() > 0 && getProductionPeriod() > 0 && getDocCostPerChick() > 0 && ((birdType === "layers" && getEggPrice() > 0) || (birdType !== "layers" && getBroilerPrice() > 0));
-      case 1: 
+      case 1:
         if (feedType === "complete") {
           // Require starter and grower to have values, prestarter and finisher can be 0
           const starter = completeFeedItems.find(item => item.stage === "starter");
           const grower = completeFeedItems.find(item => item.stage === "grower");
-          return !!(starter && starter.kgPerTon > 0 && starter.pricePerKg > 0) && 
-                 !!(grower && grower.kgPerTon > 0 && grower.pricePerKg > 0);
+          return !!(starter && starter.kgPerTon > 0 && starter.pricePerKg > 0) &&
+            !!(grower && grower.kgPerTon > 0 && grower.pricePerKg > 0);
         }
         return feedItems.some(f => f.name && f.kgPerTon > 0 && f.pricePerKg > 0);
       case 2: return true; // Vaccinations are optional
@@ -583,10 +584,10 @@ const BudgetCalculator: React.FC = () => {
         doc.setTextColor(0, 0, 0);
         doc.setFont('helvetica', 'normal');
       }
-      
+
       doc.text(label, leftMargin + 5, yPosition + (isHeader ? 7 : 5));
       doc.text(value, rightMargin - 5, yPosition + (isHeader ? 7 : 5), { align: 'right' });
-      
+
       yPosition += isHeader ? headerHeight : rowHeight;
     };
 
@@ -611,7 +612,7 @@ const BudgetCalculator: React.FC = () => {
     drawTableRow("Total Feed Cost", formatter.format(monthlyFeedCost * months));
     drawTableRow("Total Vaccination Cost", formatter.format(totalVaccinationCost));
     drawTableRow("Total Drug Cost", formatter.format(totalDrugCost));
-    
+
     // Other Costs Subsection
     drawTableRow("Other Costs", "", false);
     drawTableRow("  • Labour Cost", formatter.format(getLabourCost() * months));
@@ -619,7 +620,7 @@ const BudgetCalculator: React.FC = () => {
     drawTableRow("  • Biosecurity Cost", formatter.format(getBiosecurityCost() * months));
     drawTableRow("  • Brooding Cost", formatter.format(getBroodingCost()));
     drawTableRow("  • Day-old Chick Cost", formatter.format(getDocCostPerChick() * getNumBirds()));
-    
+
     drawTableRow("TOTAL COSTS", formatter.format(totalCosts), false, true);
     drawSectionDivider();
 
@@ -639,42 +640,60 @@ const BudgetCalculator: React.FC = () => {
 
     // Net Profit Section
     drawTableRow("NET PROFIT", formatter.format(netProfit), false, true);
-    
+
     // Add profit margin percentage
     const profitMargin = totalCosts > 0 ? (netProfit / totalCosts) * 100 : 0;
     drawTableRow("Profit Margin", `${profitMargin.toFixed(1)}%`);
 
     // Footer section
     const footerY = pageHeight - 40;
-    
+
     // Contact info
     doc.setFontSize(9);
     doc.setTextColor(100); // Grey color
     doc.setFont('helvetica', 'normal');
-    
+
     const fullPhoneNumber = contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : '';
     const contactText = contactInfo.phone && contactInfo.email
       ? `Contact: ${fullPhoneNumber} | ${contactInfo.email}`
       : contactInfo.phone
-          ? `Contact: ${fullPhoneNumber}`
-          : contactInfo.email
-              ? `Contact: ${contactInfo.email}`
-              : 'Contact: Not provided';
-    
+        ? `Contact: ${fullPhoneNumber}`
+        : contactInfo.email
+          ? `Contact: ${contactInfo.email}`
+          : 'Contact: Not provided';
+
     doc.text(contactText, leftMargin, footerY);
-    
+
     // Generated date and time
     const now = new Date();
     const dateTime = `Generated: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
     doc.text(dateTime, rightMargin, footerY, { align: "right" });
-    
+
     // Company branding
     doc.text("Powered by River Poultry & SmartVet", pageWidth / 2, footerY + 15, { align: "center" });
 
     return doc;
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
+    // Track user lead
+    await userTrackingService.trackUserLead({
+      toolName: 'budgetCalculator',
+      action: 'pdf_download',
+      contactInfo: {
+        email: contactInfo.email,
+        phone: contactInfo.phone,
+        countryCode: contactInfo.countryCode,
+      },
+      toolData: {
+        birdType,
+        numBirds: getNumBirds(),
+        productionPeriod: getProductionPeriod(),
+        totalCosts,
+        netProfit,
+      },
+    });
+
     const doc = generatePDF();
     doc.save("Poultry_Budget_Report.pdf");
   };
@@ -685,37 +704,42 @@ const BudgetCalculator: React.FC = () => {
       return;
     }
 
+    // Track user lead for email request
+    await userTrackingService.trackUserLead({
+      toolName: 'budgetCalculator',
+      action: 'email_request',
+      contactInfo: {
+        email: contactInfo.email,
+        phone: contactInfo.phone,
+        countryCode: contactInfo.countryCode,
+      },
+      toolData: {
+        birdType,
+        numBirds: getNumBirds(),
+        productionPeriod: getProductionPeriod(),
+        totalCosts,
+        netProfit,
+      },
+    });
+
     try {
       const doc = generatePDF();
       const pdfBlob = doc.output('blob');
-      
-      // Convert blob to base64 for Zoho Mail API
-      const base64PDF = await new Promise((resolve) => {
+
+      // Convert blob to base64 for backend API
+      const base64PDF = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => {
           const base64 = reader.result?.toString().split(',')[1];
-          resolve(base64);
+          resolve(base64 || '');
         };
         reader.readAsDataURL(pdfBlob);
       });
 
-      // Check if Zoho Mail is properly configured
-      if (!isZohoMailConfigured()) {
-        throw new Error('Zoho Mail not configured');
-      }
-
-      // Zoho Mail API configuration
+      // Prepare email data for backend
       const emailData = {
-        from: {
-          email: EMAIL_CONFIG.FROM_EMAIL,
-          name: EMAIL_CONFIG.FROM_NAME
-        },
-        to: [
-          {
-            email: contactInfo.email,
-            name: contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : "Customer"
-          }
-        ],
+        to: contactInfo.email,
+        recipientName: contactInfo.phone ? `Farmer (${contactInfo.countryCode}${contactInfo.phone})` : "Customer",
         subject: EMAIL_CONFIG.SUBJECT_TEMPLATE,
         htmlContent: generateEmailTemplate({
           birdType,
@@ -726,40 +750,36 @@ const BudgetCalculator: React.FC = () => {
           netProfit: formatter.format(netProfit),
           contactPhone: contactInfo.phone ? `${contactInfo.countryCode}${contactInfo.phone}` : ''
         }),
-        attachments: [
-          {
-            name: "Poultry_Budget_Report.pdf",
-            content: base64PDF,
-            contentType: "application/pdf"
-          }
-        ]
+        pdfBase64: base64PDF,
+        pdfFilename: "Poultry_Budget_Report.pdf"
       };
 
-      // Send email via Zoho Mail API
-      const response = await fetch(EMAIL_CONFIG.API_ENDPOINT, {
+      // Send email via backend API
+      const response = await fetch(`${EMAIL_CONFIG.BACKEND_API_URL}/api/send-email`, {
         method: 'POST',
         headers: {
-          'Authorization': `Zoho-oauthtoken ${EMAIL_CONFIG.ZOHO_ACCESS_TOKEN}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(emailData)
       });
 
-      if (response.ok) {
+      const result = await response.json();
+
+      if (response.ok && result.success) {
         alert(`Report successfully sent to ${contactInfo.email}!`);
-        console.log('Email sent successfully via Zoho Mail');
+        console.log('Email sent successfully via backend:', result.messageId);
       } else {
-        throw new Error('Failed to send email');
+        throw new Error(result.message || 'Failed to send email');
       }
-      
+
     } catch (error) {
       console.error('Error sending email:', error);
-      
+
       // Fallback: Open default email client with pre-filled content
       const doc = generatePDF();
       const pdfBlob = doc.output('blob');
       const pdfUrl = URL.createObjectURL(pdfBlob);
-      
+
       const subject = encodeURIComponent(EMAIL_CONFIG.SUBJECT_TEMPLATE);
       const body = encodeURIComponent(`
 Dear ${contactInfo.phone ? 'Farmer' : 'Customer'},
@@ -785,17 +805,17 @@ ${EMAIL_CONFIG.COMPANY_NAME} Team
 ---
 Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
       `);
-      
+
       // Create a temporary link to download the PDF
       const downloadLink = document.createElement('a');
       downloadLink.href = pdfUrl;
       downloadLink.download = 'Poultry_Budget_Report.pdf';
       downloadLink.click();
-      
+
       // Open email client
       window.open(`mailto:${contactInfo.email}?subject=${subject}&body=${body}`);
-      
-      alert(`Please attach the downloaded PDF file to your email. The report has been downloaded to your device.`);
+
+      alert(`Could not send email automatically. The report has been downloaded - please attach it to your email manually.`);
     }
   };
 
@@ -810,7 +830,7 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
       <Card sx={{ maxWidth: 1000, mx: "auto", mt: -4, p: 3, borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Stepper activeStep={activeStep} orientation="vertical">
-            
+
             {/* Step 1: Basic Information */}
             <Step>
               <StepLabel>Basic Information</StepLabel>
@@ -938,9 +958,9 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                       <Typography variant="body2" color="text.secondary">
                         Complete feed stages with quantities and prices. Prestarter and Finisher can be 0, but Starter and Grower are required.
                       </Typography>
-                      
-                      <Button 
-                        variant="outlined" 
+
+                      <Button
+                        variant="outlined"
                         onClick={() => {
                           const suggested = SUGGESTED_COMPLETE_FEED_QUANTITIES[birdType];
                           setCompleteFeedItems(suggested.map(item => ({
@@ -953,28 +973,28 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                       >
                         Apply Suggested Quantities for {birdType.charAt(0).toUpperCase() + birdType.slice(1)}
                       </Button>
-                      
+
                       {completeFeedItems.map((item) => (
                         <Box key={item.stage} sx={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 1, alignItems: "center" }}>
-                          <TextField 
+                          <TextField
                             label={`${item.stage.charAt(0).toUpperCase() + item.stage.slice(1)} Stage`}
                             value={getSuggestedCompleteFeedDescription(item.stage)}
                             InputProps={{ readOnly: true }}
                             helperText={`Suggested: ${getSuggestedCompleteFeedQuantity(item.stage)} kg/ton`}
                           />
-                          <TextField 
-                            label="Kg per Ton" 
-                            type="number" 
+                          <TextField
+                            label="Kg per Ton"
+                            type="number"
                             inputProps={{ step: "0.1", min: 0, max: 1000 }}
-                            value={item.kgPerTon} 
-                            onChange={e => updateCompleteFeed(item.stage, "kgPerTon", parseFloat(e.target.value || "0"))} 
+                            value={item.kgPerTon}
+                            onChange={e => updateCompleteFeed(item.stage, "kgPerTon", parseFloat(e.target.value || "0"))}
                           />
-                          <TextField 
-                            label="Price per kg" 
-                            type="number" 
+                          <TextField
+                            label="Price per kg"
+                            type="number"
                             inputProps={{ step: "0.01", min: 0 }}
-                            value={item.pricePerKg} 
-                            onChange={e => updateCompleteFeed(item.stage, "pricePerKg", parseFloat(e.target.value || "0"))} 
+                            value={item.pricePerKg}
+                            onChange={e => updateCompleteFeed(item.stage, "pricePerKg", parseFloat(e.target.value || "0"))}
                           />
                         </Box>
                       ))}
@@ -984,9 +1004,9 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                       <Typography variant="body2" color="text.secondary">
                         Predefined ingredients for {birdType}. Adjust quantities and prices as needed.
                       </Typography>
-                      
-                      <Button 
-                        variant="outlined" 
+
+                      <Button
+                        variant="outlined"
                         onClick={() => {
                           const predefinedIngredients = PREDEFINED_FEED_INGREDIENTS[birdType];
                           setFeedItems(predefinedIngredients.map((ingredient, index) => ({
@@ -1000,34 +1020,34 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                       >
                         Apply Suggested Quantities for {birdType.charAt(0).toUpperCase() + birdType.slice(1)}
                       </Button>
-                      
+
                       {feedItems.map((f) => (
                         <Box key={f.id} sx={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr auto", gap: 1, alignItems: "center" }}>
-                          <TextField 
-                            label="Ingredient" 
-                            value={f.name} 
-                            onChange={e => updateFeed(f.id, "name", e.target.value)} 
+                          <TextField
+                            label="Ingredient"
+                            value={f.name}
+                            onChange={e => updateFeed(f.id, "name", e.target.value)}
                           />
-                          <TextField 
-                            label="Kg per Ton" 
-                            type="number" 
+                          <TextField
+                            label="Kg per Ton"
+                            type="number"
                             inputProps={{ step: "0.1", min: 0, max: 1000 }}
-                            value={f.kgPerTon} 
-                            onChange={e => updateFeed(f.id, "kgPerTon", e.target.value)} 
+                            value={f.kgPerTon}
+                            onChange={e => updateFeed(f.id, "kgPerTon", e.target.value)}
                           />
-                          <TextField 
-                            label="Price per kg" 
-                            type="number" 
+                          <TextField
+                            label="Price per kg"
+                            type="number"
                             inputProps={{ step: "0.01", min: 0 }}
-                            value={f.pricePerKg} 
-                            onChange={e => updateFeed(f.id, "pricePerKg", e.target.value)} 
+                            value={f.pricePerKg}
+                            onChange={e => updateFeed(f.id, "pricePerKg", e.target.value)}
                           />
                           <IconButton onClick={() => removeFeed(f.id)} color="error">
                             <Delete />
                           </IconButton>
                         </Box>
                       ))}
-                      
+
                       <Button variant="outlined" startIcon={<Add />} onClick={addFeedRow}>
                         Add Custom Ingredient
                       </Button>
@@ -1078,37 +1098,37 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                       Add {birdType.charAt(0).toUpperCase() + birdType.slice(1)} Recommended Vaccines
                     </Button>
                   </Box>
-                  
+
                   <Typography variant="body2" color="text.secondary">
-                    Recommended vaccines for {birdType} based on Merck Veterinary Manual standards. 
+                    Recommended vaccines for {birdType} based on Merck Veterinary Manual standards.
                     {isBroiler ? " Ages shown in days." : " Ages automatically converted to weeks."}
                   </Typography>
-                  
+
                   {vaccinations.map((v) => (
                     <Box key={v.id} sx={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: 1, alignItems: "center" }}>
-                      <TextField 
-                        label="Vaccine Name" 
-                        value={v.name} 
-                        onChange={e => updateVaccination(v.id, "name", e.target.value)} 
+                      <TextField
+                        label="Vaccine Name"
+                        value={v.name}
+                        onChange={e => updateVaccination(v.id, "name", e.target.value)}
                       />
-                      <TextField 
-                        label={`Age (${ageUnit})`} 
-                        type="number" 
+                      <TextField
+                        label={`Age (${ageUnit})`}
+                        type="number"
                         inputProps={{ min: 0 }}
-                        value={v.age} 
-                        onChange={e => updateVaccination(v.id, "age", parseInt(e.target.value || "0", 10))} 
+                        value={v.age}
+                        onChange={e => updateVaccination(v.id, "age", parseInt(e.target.value || "0", 10))}
                       />
-                      <TextField 
-                        label="Total Cost" 
-                        type="number" 
+                      <TextField
+                        label="Total Cost"
+                        type="number"
                         inputProps={{ step: "0.01", min: 0 }}
-                        value={v.cost} 
-                        onChange={e => updateVaccination(v.id, "cost", parseFloat(e.target.value || "0"))} 
+                        value={v.cost}
+                        onChange={e => updateVaccination(v.id, "cost", parseFloat(e.target.value || "0"))}
                       />
-                      <TextField 
-                        label="Notes" 
-                        value={v.notes} 
-                        onChange={e => updateVaccination(v.id, "notes", e.target.value)} 
+                      <TextField
+                        label="Notes"
+                        value={v.notes}
+                        onChange={e => updateVaccination(v.id, "notes", e.target.value)}
                       />
                       <IconButton onClick={() => removeVaccination(v.id)} color="error">
                         <Delete />
@@ -1149,39 +1169,39 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
                   <Typography variant="body2" color="text.secondary">
                     Add any planned drug treatments with their timing and cost.
                   </Typography>
-                  
+
                   {drugTreatments.map((d) => (
                     <Box key={d.id} sx={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: 1, alignItems: "center" }}>
-                      <TextField 
-                        label="Treatment Name" 
-                        value={d.name} 
-                        onChange={e => updateDrugTreatment(d.id, "name", e.target.value)} 
+                      <TextField
+                        label="Treatment Name"
+                        value={d.name}
+                        onChange={e => updateDrugTreatment(d.id, "name", e.target.value)}
                       />
-                      <TextField 
-                        label={`Age (${ageUnit})`} 
-                        type="number" 
+                      <TextField
+                        label={`Age (${ageUnit})`}
+                        type="number"
                         inputProps={{ min: 0 }}
-                        value={d.age} 
-                        onChange={e => updateDrugTreatment(d.id, "age", parseInt(e.target.value || "0", 10))} 
+                        value={d.age}
+                        onChange={e => updateDrugTreatment(d.id, "age", parseInt(e.target.value || "0", 10))}
                       />
-                      <TextField 
-                        label="Total Cost" 
-                        type="number" 
+                      <TextField
+                        label="Total Cost"
+                        type="number"
                         inputProps={{ step: "0.01", min: 0 }}
-                        value={d.cost} 
-                        onChange={e => updateDrugTreatment(d.id, "cost", parseFloat(e.target.value || "0"))} 
+                        value={d.cost}
+                        onChange={e => updateDrugTreatment(d.id, "cost", parseFloat(e.target.value || "0"))}
                       />
-                      <TextField 
-                        label="Notes" 
-                        value={d.notes} 
-                        onChange={e => updateDrugTreatment(d.id, "notes", e.target.value)} 
+                      <TextField
+                        label="Notes"
+                        value={d.notes}
+                        onChange={e => updateDrugTreatment(d.id, "notes", e.target.value)}
                       />
                       <IconButton onClick={() => removeDrugTreatment(d.id)} color="error">
                         <Delete />
                       </IconButton>
                     </Box>
                   ))}
-                  
+
                   <Button variant="outlined" startIcon={<Add />} onClick={addDrugTreatment}>
                     Add Drug Treatment
                   </Button>
@@ -1283,13 +1303,13 @@ Powered by ${EMAIL_CONFIG.COMPANY_NAME} | ${EMAIL_CONFIG.COMPANY_WEBSITE}
 
                   <Paper sx={{ p: 3, bgcolor: "primary.50" }}>
                     <Typography variant="h6" gutterBottom>Budget Summary</Typography>
-                    
+
                     <Stack spacing={1}>
                       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                         <Typography>Production Period:</Typography>
                         <Typography>{getProductionPeriod()} {ageUnit} ({months} months)</Typography>
                       </Box>
-                      
+
                       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                         <Typography>Number of Birds:</Typography>
                         <Typography>{getNumBirds().toLocaleString()}</Typography>
