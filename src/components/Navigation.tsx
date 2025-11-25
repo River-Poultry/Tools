@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Ruler, TrendingUpDown, Calculator, ExternalLink } from "lucide-react";
+import { Menu, X, Ruler, Calculator } from "lucide-react";
 import styled from "styled-components";
 import riverPoultryLogo from "../assets/river-poultry-logo.png";
 
@@ -161,15 +161,9 @@ const Navigation: React.FC = () => {
         
         {/* Navigation Items */}
         <NavList open={open}>
-          <NavItem active={location.pathname === "/"} scrolled={scrolled}>
-            <Link to="/" onClick={() => setOpen(false)}>
-              <TrendingUpDown size={16} />
-              Tools Overview
-            </Link>
-          </NavItem>
           <NavItem active={location.pathname === "/vaccination"} scrolled={scrolled}>
             <Link to="/vaccination" onClick={() => setOpen(false)}>
-              <TrendingUpDown size={16} />
+              <Ruler size={16} />
               Vaccination Schedule
             </Link>
           </NavItem>
@@ -184,32 +178,6 @@ const Navigation: React.FC = () => {
               <Calculator size={16} />
               Budget Calculator
             </Link>
-          </NavItem>
-          <NavItem active={false} scrolled={scrolled}>
-            <a 
-              href="https://manager.riverpoultry.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                gap: "8px", 
-                color: scrolled ? "#000000" : "white", 
-                textDecoration: "none", 
-                padding: "15px 20px", 
-                fontWeight: 500, 
-                fontSize: "1rem",
-                borderBottom: "3px solid transparent", 
-                transition: "all 0.3s ease", 
-                textShadow: scrolled ? "none" : "1px 1px 2px rgba(0,0,0,0.3)"
-              }}
-              onMouseEnter={(e) => (e.target as HTMLElement).style.background = scrolled ? "rgba(0, 0, 0, 0.1)" : "rgba(255,255,255,0.15)"}
-              onMouseLeave={(e) => (e.target as HTMLElement).style.background = "transparent"}
-            >
-              <ExternalLink size={16} />
-              Poultry Manager
-            </a>
           </NavItem>
         </NavList>
 

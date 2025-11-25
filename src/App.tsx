@@ -5,6 +5,8 @@ import RoomMeasurement from './components/RoomMeasurement';
 import Navigation from './components/Navigation';
 import Vaccination from "./components/Vaccination";
 import ToolsOverview from './components/ToolsOverview';
+import LeadsViewer from './components/LeadsViewer';
+import ProtectedRoute from './components/ProtectedRoute';
 import styled from 'styled-components';
 
 const AppContainer = styled.div`
@@ -22,6 +24,11 @@ const App: React.FC = () => {
           <Route path="/vaccination" element={<Vaccination />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
           <Route path="/budget-calculator" element={<BudgetCalculator />} />
+          <Route path="/admin/leads" element={
+            <ProtectedRoute password="RiverPoultry2025!">
+              <LeadsViewer />
+            </ProtectedRoute>
+          } />
         </Routes>
       </AppContainer>
     </Router>

@@ -3,20 +3,21 @@ import { Button, TextField, useMediaQuery, useTheme, Box, Typography, MenuItem }
 import { Download } from "@mui/icons-material";
 import jsPDF from "jspdf";
 import logoImg from "../assets/logo.png";
+import { userTrackingService } from "../services/userTrackingService";
 
 // Country code options for phone numbers
 const COUNTRY_CODES = [
-  { code: "+254", name: "Kenya (+254)" },
-  { code: "+256", name: "Uganda (+256)" },
-  { code: "+255", name: "Tanzania (+255)" },
-  { code: "+250", name: "Rwanda (+250)" },
-  { code: "+251", name: "Ethiopia (+251)" },
-  { code: "+234", name: "Nigeria (+234)" },
-  { code: "+233", name: "Ghana (+233)" },
-  { code: "+27", name: "South Africa (+27)" },
-  { code: "+1", name: "USA/Canada (+1)" },
-  { code: "+44", name: "UK (+44)" },
-  { code: "+49", name: "Germany (+49)" },
+    { code: "+254", name: "Kenya (+254)" },
+    { code: "+256", name: "Uganda (+256)" },
+    { code: "+255", name: "Tanzania (+255)" },
+    { code: "+250", name: "Rwanda (+250)" },
+    { code: "+251", name: "Ethiopia (+251)" },
+    { code: "+234", name: "Nigeria (+234)" },
+    { code: "+233", name: "Ghana (+233)" },
+    { code: "+27", name: "South Africa (+27)" },
+    { code: "+1", name: "USA/Canada (+1)" },
+    { code: "+44", name: "UK (+44)" },
+    { code: "+49", name: "Germany (+49)" },
 
 ];
 
@@ -32,7 +33,23 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const [contact, setContact] = useState({ phone: "", email: "", countryCode: "+254" }); // Default to Kenya
 
-    const generatePdf = () => {
+    const generatePdf = async () => {
+        // Track user lead
+        await userTrackingService.trackUserLead({
+            toolName: 'vaccination',
+            action: 'pdf_download',
+            contactInfo: {
+                email: contact.email,
+                phone: contact.phone,
+                countryCode: contact.countryCode,
+            },
+            toolData: {
+                poultryType: type,
+                arrivalDate: arrivalDate,
+                vaccineCount: data.length,
+            },
+        });
+
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -45,13 +62,13 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
             const img = new Image();
             img.src = logoImg;
             doc.addImage(img, "PNG", 14, 8, 20, 20, undefined, "FAST");
-            
+
             // Title
             doc.setFontSize(16);
             doc.setTextColor(40, 100, 60);
             doc.setFont('helvetica', 'bold');
             doc.text("Poultry Vaccination Report", 40, 20);
-            
+
             // Page number
             doc.setFontSize(10);
             doc.setTextColor(100, 100, 100);
@@ -62,23 +79,23 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
         // Helper function to add footer
         const addFooter = (pageNum: number, isLastPage: boolean) => {
             const footerY = pageHeight - 20;
-            
+
             if (isLastPage) {
                 // Contact info and generated date on last page
                 doc.setFontSize(9);
                 doc.setTextColor(100, 100, 100);
                 doc.setFont('helvetica', 'normal');
-                
+
                 if (contact.phone || contact.email) {
                     const contactInfo = [];
                     if (contact.phone) contactInfo.push(`Phone: ${contact.countryCode}${contact.phone}`);
                     if (contact.email) contactInfo.push(`Email: ${contact.email}`);
                     doc.text(contactInfo.join(' | '), 14, footerY);
                 }
-                
+
                 const generatedDate = new Date().toLocaleString();
                 doc.text(`Generated: ${generatedDate}`, pageWidth - 14, footerY, { align: 'right' });
-                
+
                 // Company branding
                 doc.setFontSize(8);
                 doc.text("Powered by River Poultry & SmartVet", pageWidth / 2, footerY + 8, { align: 'center' });
@@ -103,7 +120,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
         // Helper function to draw table row
         const drawTableRow = (label: string, value: string, isHeader = false) => {
             checkNewPage(15);
-            
+
             if (isHeader) {
                 doc.setFillColor(241, 242, 176);
                 doc.rect(14, yPosition - 5, pageWidth - 28, 12, 'F');
@@ -143,10 +160,10 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
 
         // Vaccination Schedule Section
         drawTableRow("VACCINATION SCHEDULE", "", true);
-        
+
         data.forEach((vaccine, index) => {
             checkNewPage(20);
-            
+
             // Vaccine header
             doc.setFillColor(240, 240, 240);
             doc.rect(14, yPosition - 3, pageWidth - 28, 10, 'F');
@@ -155,7 +172,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
             doc.setFont('helvetica', 'bold');
             doc.text(`${index + 1}. ${vaccine.age} - ${vaccine.date || 'TBD'}`, 20, yPosition + 2);
             yPosition += 8;
-            
+
             // Vaccine details
             drawTableRow("Vaccine", vaccine.vaccine);
             drawTableRow("Route", vaccine.route);
@@ -224,7 +241,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
             <Typography variant="h6" sx={{ mb: 2, color: '#286844', fontWeight: 'bold' }}>
                 Download Report
             </Typography>
-            
+
             <Box sx={{ display: 'flex', gap: 2, mb: 2, flexDirection: isMobile ? 'column' : 'row' }}>
                 <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
                     <TextField
@@ -258,7 +275,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
                     sx={{ flex: 1 }}
                 />
             </Box>
-            
+
             <Button
                 variant="contained"
                 color="success"
@@ -270,7 +287,7 @@ const PdfDownloader: React.FC<PdfDownloaderProps> = ({ data, type, arrivalDate, 
             >
                 Download PDF
             </Button>
-            
+
             {(!contact.phone && !contact.email) && (
                 <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#666' }}>
                     Please provide phone or email to download the report
