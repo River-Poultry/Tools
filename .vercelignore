@@ -63,10 +63,6 @@ coverage/
 backend/
 backend*/
 
-# Development files
-*.md
-!README.md
-
 # Test files
 src/**/*.test.*
 src/**/*.spec.*
@@ -76,3 +72,4 @@ tests/
 # Temporary files
 tmp/
 temp/
+
