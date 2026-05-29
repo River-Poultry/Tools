@@ -1,20 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, useParams } from 'react-router-dom';
-import BudgetCalculator from './components/BudgetCalculator';
-import RoomMeasurement from './components/RoomMeasurement';
 import Navigation from './components/Navigation';
-import Vaccination from "./components/Vaccination";
-import ToolsOverview from './components/ToolsOverview';
-import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
-import UserDashboard from './components/UserDashboard';
 import WelcomePopup from './components/WelcomePopup';
-import PasswordResetConfirm from './components/PasswordResetConfirm';
-import UserProfile from './components/UserProfile';
-import NotificationAdmin from './components/NotificationAdmin';
 import ErrorBoundary from './components/ErrorBoundary';
 import { authService, User } from './services/authService';
 import styled from 'styled-components';
+
+// Lazy load heavy components to reduce bundle size
+const BudgetCalculator = React.lazy(() => import('./components/BudgetCalculator'));
+const RoomMeasurement = React.lazy(() => import('./components/RoomMeasurement'));
+const Vaccination = React.lazy(() => import('./components/Vaccination'));
+const ToolsOverview = React.lazy(() => import('./components/ToolsOverview'));
+const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
+const UserDashboard = React.lazy(() => import('./components/UserDashboard'));
+const PasswordResetConfirm = React.lazy(() => import('./components/PasswordResetConfirm'));
+const UserProfile = React.lazy(() => import('./components/UserProfile'));
+const NotificationAdmin = React.lazy(() => import('./components/NotificationAdmin'));
+const DebugPage = React.lazy(() => import('./components/DebugPage'));
 
 // Wrapper component to handle URL parameters
 const PasswordResetConfirmWrapper: React.FC = () => {
@@ -30,6 +33,15 @@ const PasswordResetConfirmWrapper: React.FC = () => {
 const AppContainer = styled.div`
   min-height: 100vh;
   background: #ffffffff;
+`;
+
+const LoadingFallback = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 18px;
+  color: #666;
 `;
 
 const AppContent: React.FC = () => {
@@ -99,15 +111,18 @@ const AppContent: React.FC = () => {
     return (
       <AppContainer>
         <Navigation user={user} onLogout={handleLogout} />
-        <Routes>
-          <Route path="/" element={<ToolsOverview />} />
-          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} onContinueAsGuest={() => window.history.back()} />} />
-          <Route path="/reset-password/:uid/:token" element={<PasswordResetConfirmWrapper />} />
-          <Route path="/vaccination" element={<Vaccination />} />
-          <Route path="/measurement" element={<RoomMeasurement />} />
-          <Route path="/budget-calculator" element={<BudgetCalculator />} />
-          <Route path="/dev/analytics" element={<AdminDashboard />} />
-        </Routes>
+        <Suspense fallback={<LoadingFallback>Loading...</LoadingFallback>}>
+          <Routes>
+            <Route path="/" element={<ToolsOverview />} />
+            <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} onContinueAsGuest={() => window.history.back()} />} />
+            <Route path="/reset-password/:uid/:token" element={<PasswordResetConfirmWrapper />} />
+            <Route path="/vaccination" element={<Vaccination />} />
+            <Route path="/measurement" element={<RoomMeasurement />} />
+            <Route path="/budget-calculator" element={<BudgetCalculator />} />
+            <Route path="/dev/analytics" element={<AdminDashboard />} />
+            <Route path="/debug" element={<DebugPage />} />
+          </Routes>
+        </Suspense>
         <WelcomePopup
           open={showWelcomePopup}
           onClose={handleWelcomePopupClose}
@@ -120,16 +135,19 @@ const AppContent: React.FC = () => {
   return (
     <AppContainer>
       <Navigation user={user} onLogout={handleLogout} />
-      <Routes>
-        <Route path="/" element={<ToolsOverview />} />
-        <Route path="/dashboard" element={<UserDashboard user={user} onLogout={handleLogout} />} />
-        <Route path="/profile" element={<UserProfile user={user} onUserUpdate={setUser} />} />
-        <Route path="/vaccination" element={<Vaccination />} />
-        <Route path="/measurement" element={<RoomMeasurement />} />
-        <Route path="/budget-calculator" element={<BudgetCalculator />} />
-        <Route path="/dev/analytics" element={<AdminDashboard />} />
-        <Route path="/notifications" element={<NotificationAdmin />} />
-      </Routes>
+      <Suspense fallback={<LoadingFallback>Loading...</LoadingFallback>}>
+        <Routes>
+          <Route path="/" element={<ToolsOverview />} />
+          <Route path="/dashboard" element={<UserDashboard user={user} onLogout={handleLogout} />} />
+          <Route path="/profile" element={<UserProfile user={user} onUserUpdate={setUser} />} />
+          <Route path="/vaccination" element={<Vaccination />} />
+          <Route path="/measurement" element={<RoomMeasurement />} />
+          <Route path="/budget-calculator" element={<BudgetCalculator />} />
+          <Route path="/dev/analytics" element={<AdminDashboard />} />
+          <Route path="/notifications" element={<NotificationAdmin />} />
+          <Route path="/debug" element={<DebugPage />} />
+        </Routes>
+      </Suspense>
     </AppContainer>
   );
 };

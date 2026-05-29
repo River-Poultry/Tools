@@ -49,7 +49,7 @@ class AuthService {
   private token: string | null = null;
 
   constructor() {
-    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
+    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8001/api';
     this.token = localStorage.getItem('auth_token');
   }
 

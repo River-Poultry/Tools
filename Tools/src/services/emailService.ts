@@ -137,7 +137,7 @@ class EmailService {
       const emailContent = this.generateReportEmailTemplate(data);
 
       // Send email via backend API with Zoho Mail configuration
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000/api'}/notifications/send-report-email/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8001/api'}/notifications/send-report-email/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
