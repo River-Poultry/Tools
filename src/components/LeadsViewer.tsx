@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Box,
     Card,
@@ -26,6 +26,11 @@ const LeadsViewer: React.FC = () => {
         setStats(userTrackingService.getLeadStats());
         setLeads(userTrackingService.getStoredLeads());
     };
+
+    const sortedLeads = useMemo(
+        () => [...leads].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()),
+        [leads]
+    );
 
     useEffect(() => {
         refreshData();
@@ -172,9 +177,7 @@ const LeadsViewer: React.FC = () => {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    leads
-                                        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-                                        .map((lead) => (
+                                    sortedLeads.map((lead) => (
                                             <TableRow key={lead.id} hover>
                                                 <TableCell>{formatDate(lead.timestamp)}</TableCell>
                                                 <TableCell>

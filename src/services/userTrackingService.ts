@@ -48,7 +48,7 @@ class UserTrackingService {
     }
 
     private generateSessionId(): string {
-        return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        return `session_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
     }
 
     /**
@@ -57,7 +57,7 @@ class UserTrackingService {
     async trackUserLead(lead: Omit<UserLead, 'id' | 'timestamp' | 'sessionId' | 'userAgent' | 'referrer'>): Promise<void> {
         const fullLead: UserLead = {
             ...lead,
-            id: `lead_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `lead_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
             timestamp: new Date(),
             sessionId: this.sessionId,
             userAgent: navigator.userAgent,

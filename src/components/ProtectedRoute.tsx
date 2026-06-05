@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     children,
-    password = 'admin2025' // Change this to your secure password
+    password = process.env.REACT_APP_ADMIN_PASSWORD || '',
 }) => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [inputPassword, setInputPassword] = useState('');

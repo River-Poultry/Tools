@@ -97,7 +97,7 @@ export function downloadIcsFile(filename: string, icsContent: string): void {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 export function downloadIcsForEvents(filename: string, events: CalendarEvent[]): void {

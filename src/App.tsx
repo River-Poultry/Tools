@@ -25,7 +25,7 @@ const App: React.FC = () => {
           <Route path="/measurement" element={<RoomMeasurement />} />
           <Route path="/budget-calculator" element={<BudgetCalculator />} />
           <Route path="/admin/leads" element={
-            <ProtectedRoute password="RiverPoultry2025!">
+            <ProtectedRoute password={process.env.REACT_APP_ADMIN_PASSWORD}>
               <LeadsViewer />
             </ProtectedRoute>
           } />
