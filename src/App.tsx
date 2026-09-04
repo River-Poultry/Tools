@@ -1,17 +1,19 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import BudgetCalculator from './components/BudgetCalculator';
-import RoomMeasurement from './components/RoomMeasurement';
-import Navigation from './components/Navigation';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import BudgetCalculator from "./components/BudgetCalculator";
+import RoomMeasurement from "./components/RoomMeasurement";
+import Navigation from "./components/Navigation";
 import Vaccination from "./components/Vaccination";
-import ToolsOverview from './components/ToolsOverview';
-import LeadsViewer from './components/LeadsViewer';
-import ProtectedRoute from './components/ProtectedRoute';
-import styled from 'styled-components';
+import ToolsOverview from "./components/ToolsOverview";
+import LeadsViewer from "./components/LeadsViewer";
+import ProtectedRoute from "./components/ProtectedRoute";
+import FlockBreakeven from "./components/FlockBreakeven";
+import LoanCalculator from "./components/LoanCalculator";
+import styled from "styled-components";
 
 const AppContainer = styled.div`
   min-height: 100vh;
-  background: #ffffffff;
+  background: #ffffff;
 `;
 
 const App: React.FC = () => {
@@ -24,6 +26,8 @@ const App: React.FC = () => {
           <Route path="/vaccination" element={<Vaccination />} />
           <Route path="/measurement" element={<RoomMeasurement />} />
           <Route path="/budget-calculator" element={<BudgetCalculator />} />
+          <Route path="/flock-breakeven" element={<FlockBreakeven />} />
+          <Route path="/loan-calculator" element={<LoanCalculator />} />
           <Route path="/admin/leads" element={
             <ProtectedRoute password={process.env.REACT_APP_ADMIN_PASSWORD}>
               <LeadsViewer />

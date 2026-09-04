@@ -57,11 +57,29 @@ const ToolsOverview: React.FC = () => {
     {
       id: "budget",
       title: "Enterprise Budget Calculator",
-      description: "Comprehensive financial planning and analysis tools. Increase profitability by 25% with our data-driven insights and expert financial modeling.",
+      description: "Comprehensive multi-stage feed, health, equipment, and lifecycle sales budget with dynamic ratio formulation and lay curve models.",
       icon: <Calculate sx={{ fontSize: 32 }} />,
       path: "/budget-calculator",
       color: "#4CAF50",
-      features: ["Cost analysis", "Profit projections", "Budget planning", "Financial reports"],
+      features: ["Multi-stage feed ratios", "Lay curve projection", "Equipment payback", "Excel & PDF export"],
+    },
+    {
+      id: "flock-breakeven",
+      title: "Flock Cost & Breakeven",
+      description: "Fast broiler and meat bird batch profitability calculator. Instantly calculate production costs, margins, and market breakeven live-weight pricing.",
+      icon: <TrendingUp sx={{ fontSize: 32 }} />,
+      path: "/flock-breakeven",
+      color: "#1E8A47",
+      features: ["Batch cost analysis", "Survivors & mortality", "Profit & margin per bird", "Breakeven price / kg"],
+    },
+    {
+      id: "loan-roi",
+      title: "Loan & Investment ROI",
+      description: "Commercial reducing-balance loan simulator for poultry expansion. Evaluate monthly instalments, cash flow coverage, and payback timelines.",
+      icon: <BarChart sx={{ fontSize: 32 }} />,
+      path: "/loan-calculator",
+      color: "#2E7D32",
+      features: ["Reducing-balance PMT", "Debt service coverage", "Payback period", "Total interest analysis"],
     },
   ];
 

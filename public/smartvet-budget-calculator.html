@@ -1,0 +1,1913 @@
+<USER_REQUEST>
+Take a deep look at this and compare. <title>SmartVet Budget Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:            #F1F6F2;
+    --surface:       #FFFFFF;
+    --surface-2:     #E7F0EA;
+    --border:        #D2E0D6;
+    --ink:           #16241C;
+    --ink-soft:      #52685A;
+    --ink-faint:     #8AA093;
+    --accent:        #1E8A47;
+    --accent-ink:    #0E4623;
+    --brand-deep:    #145C2E;
+    --good:          #4C9A3F;
+    --good-bg:       #E2F0DF;
+    --bad:           #C13A2E;
+    --bad-bg:        #F6DEDA;
+    --warn:          #C98A2B;
+    --warn-bg:       #F6EAD2;
+    --shadow:        0 1px 2px rgba(20,40,28,0.06), 0 6px 20px -8px rgba(20,40,28,0.18);
+    --focus:         #146B37;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:          #0E1712;
+      --surface:     #16211B;
+      --surface-2:   #1D2B23;
+      --border:      #2C3B32;
+      --ink:         #E7F0EA;
+      --ink-soft:    #A9BDB0;
+      --ink-faint:   #6E8378;
+      --accent:      #4CC479;
+      --accent-ink:  #06210F;
+      --brand-deep:  #8FD6A8;
+      --good:        #5FBF6C;
+      --good-bg:     #1E3324;
+      --bad:         #E38176;
+      --bad-bg:      #3A211D;
+      --warn:        #E0AA55;
+      --warn-bg:     #3B2E17;
+      --shadow:      0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+      --focus:       #4CC479;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:            #0E1712;
+    --surface:       #16211B;
+    --surface-2:     #1D2B23;
+    --border:        #2C3B32;
+    --ink:           #E7F0EA;
+    --ink-soft:      #A9BDB0;
+    --ink-faint:     #6E8378;
+    --accent:        #4CC479;
+    --accent-ink:    #06210F;
+    --brand-deep:    #8FD6A8;
+    --good:          #5FBF6C;
+    --good-bg:       #1E3324;
+    --bad:           #E38176;
+    --bad-bg:        #3A211D;
+    --warn:          #E0AA55;
+    --warn-bg:       #3B2E17;
+    --shadow:        0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+    --focus:         #4CC479;
+  }
+
+  *{box-sizing:border-box;}
+  [hidden]{display:none!important;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"IBM Plex Sans",-apple-system,Segoe UI,sans-serif;
+    line-height:1.5;
+  }
+  .num{ font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,monospace; font-variant-numeric:tabular-nums; }
+
+  .wrap{ max-width:1080px; margin:0 auto; padding:28px 20px 64px; }
+
+  header.top{
+    display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
+    flex-wrap:wrap;
+    border-bottom:2px solid var(--border);
+    padding-bottom:16px; margin-bottom:20px;
+  }
+  .brand-mark{ display:flex; align-items:center; gap:12px; }
+  .brand-mark .glyph{
+    width:46px; height:46px; border-radius:50%;
+    background:var(--surface-2); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    flex:none; overflow:hidden;
+  }
+  .brand-mark .glyph img{ width:100%; height:100%; object-fit:cover; }
+  h1{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:700; font-size:26px;
+    letter-spacing:-0.01em; margin:0; text-wrap:balance; color:var(--ink);
+  }
+  .tagline{ color:var(--ink-soft); font-size:13.5px; margin-top:2px; }
+  .org-tag{
+    font-size:11.5px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink-faint); font-weight:600;
+  }
+
+  nav.tabs{
+    display:flex; gap:2px; margin-bottom:22px; flex-wrap:wrap;
+    border-bottom:1px solid var(--border);
+  }
+  nav.tabs button{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:600; font-size:14.5px;
+    color:var(--ink-soft); background:transparent; border:none;
+    padding:10px 13px 12px; cursor:pointer; position:relative; top:1px;
+    border-bottom:2.5px solid transparent; white-space:nowrap;
+  }
+  nav.tabs button.active{ color:var(--ink); border-bottom-color:var(--accent); }
+  nav.tabs button:hover:not(.active){ color:var(--ink); }
+  nav.tabs button:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .grid{
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:20px; align-items:start;
+  }
+  .grid > *{ min-width:0; }
+  @media (max-width:800px){ .grid{ grid-template-columns:1fr; } }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:20px 22px; box-shadow:var(--shadow); min-width:0;
+  }
+  .card + .card{ margin-top:16px; }
+  .card h2{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:600; font-size:15px;
+    margin:0 0 14px; color:var(--brand-deep);
+    text-transform:uppercase; letter-spacing:0.05em;
+  }
+
+  /* ---- Step-by-step wizard chrome ---- */
+  .wiz-bar{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .wiz-progress{ flex:1; height:6px; border-radius:999px; background:var(--surface-2); overflow:hidden; border:1px solid var(--border); }
+  .wiz-progress-fill{ height:100%; width:0%; background:var(--accent); border-radius:999px; transition:width .25s ease; }
+  .wiz-steps-count{ font-size:11.5px; font-weight:700; color:var(--ink-soft); white-space:nowrap; letter-spacing:0.02em; }
+  .wiz-toggle-all{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-size:11.5px; font-weight:600;
+    color:var(--accent); background:transparent; border:1px solid var(--border); border-radius:999px;
+    padding:6px 13px; cursor:pointer; white-space:nowrap; flex:none;
+  }
+  .wiz-toggle-all:hover{ border-color:var(--accent); }
+  .wiz-toggle-all:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .wiz-question{ margin-bottom:16px; }
+  .wiz-question h3{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:700; font-size:19px;
+    color:var(--ink); margin:0 0 5px; line-height:1.3;
+  }
+  .wiz-question p{ font-size:13px; color:var(--ink-soft); margin:0; line-height:1.45; max-width:60ch; }
+
+  .wiz-nav{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:18px; }
+  .wiz-nav-btn{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:600; font-size:13.5px;
+    padding:10px 22px; border-radius:10px; cursor:pointer; border:1.5px solid var(--border);
+    background:var(--surface); color:var(--ink);
+  }
+  .wiz-nav-btn.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .wiz-nav-btn:disabled{ opacity:.35; cursor:default; }
+  .wiz-nav-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .wiz-dots{ display:flex; align-items:center; gap:6px; }
+  .wiz-dot{
+    width:9px; height:9px; border-radius:50%; background:var(--border); border:none; cursor:pointer; padding:0;
+    transition:background .15s,width .15s;
+  }
+  .wiz-dot.active{ background:var(--accent); width:22px; border-radius:5px; }
+  .wiz-dot:hover:not(.active){ background:var(--ink-faint); }
+  .wiz-dot:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .export-btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:600; font-size:13.5px;
+    padding:11px 16px; margin-top:16px; border-radius:10px; cursor:pointer;
+    border:1.5px solid var(--accent); background:var(--surface); color:var(--accent);
+  }
+  .export-btn:hover:not(:disabled){ background:var(--good-bg); }
+  .export-btn:disabled{ opacity:.6; cursor:default; }
+  .export-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+  .export-status{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:8px; min-height:14px; }
+  .export-status.err{ color:var(--bad); }
+  .export-status.ok{ color:var(--good); }
+
+  .field-row{ display:flex; align-items:center; gap:8px 14px; padding:9px 0; border-bottom:1px dashed var(--border); flex-wrap:wrap; }
+  .field-row:last-child{ border-bottom:none; }
+  .field-row label{ flex:1 1 auto; font-size:13.5px; color:var(--ink); }
+  .field-row .hint{ display:block; font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
+  .field-input{ display:flex; align-items:center; gap:6px; flex:none; }
+  .field-input input{
+    width:108px; text-align:right; font-family:"IBM Plex Mono",monospace;
+    font-size:14px; padding:6px 8px; border:1px solid var(--border); border-radius:6px;
+    background:var(--surface-2); color:var(--ink);
+  }
+  .field-input input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .field-input .unit{ font-size:11.5px; color:var(--ink-faint); width:38px; }
+  input[type=range]{ accent-color:var(--accent); }
+
+  .results-sticky{ position:sticky; top:16px; }
+
+  .status-pill{
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:12.5px; font-weight:600; letter-spacing:0.02em;
+    padding:5px 12px; border-radius:999px; margin-bottom:14px;
+  }
+  .status-pill.good{ background:var(--good-bg); color:var(--good); }
+  .status-pill.bad{ background:var(--bad-bg); color:var(--bad); }
+  .status-pill.warn{ background:var(--warn-bg); color:var(--warn); }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; background:currentColor; }
+
+  .tiles{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .tile{
+    background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+    padding:12px 14px; min-width:0;
+  }
+  .tile .label{ font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); }
+  .tile .value{ font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:19px; margin-top:3px; font-variant-numeric:tabular-nums; }
+  .tile .value.big{ font-size:22px; }
+  .tile.wide{ grid-column:1 / -1; }
+
+  .breakdown-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:2px 10px; font-size:12.5px; padding:5px 0; color:var(--ink-soft); }
+  .breakdown-row .num{ color:var(--ink); white-space:nowrap; margin-left:auto; }
+  .swatch{ display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; }
+
+  .data-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .data-table th{
+    text-align:right; font-size:10px; text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--ink-faint); font-weight:600; padding:0 8px 6px; border-bottom:1px solid var(--border);
+  }
+  .data-table th:first-child{ text-align:left; }
+  .data-table td{ padding:6px 8px; border-bottom:1px dashed var(--border); text-align:right; }
+  .data-table td:first-child{ text-align:left; color:var(--ink); }
+  .data-table tr:last-child td{ border-bottom:none; }
+  .data-table tr.total-row td{ font-weight:600; border-top:1.5px solid var(--border); border-bottom:none; padding-top:8px; }
+  .data-table tr.total-row td:first-child{ color:var(--brand-deep); }
+  .tbl-input{
+    width:82px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12.5px;
+    padding:4px 6px; border:1px solid var(--border); border-radius:5px;
+    background:var(--surface-2); color:var(--ink);
+  }
+  .tbl-input:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .tbl-input.narrow{ width:58px; }
+  .tbl-input::-webkit-outer-spin-button, .tbl-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .tbl-input[type=number]{ -moz-appearance:textfield; }
+  .tbl-select{
+    width:84px; text-align:right; font-family:"IBM Plex Mono",monospace; font-size:12px;
+    padding:4px 4px; border:1px solid var(--border); border-radius:5px;
+    background:var(--surface-2); color:var(--ink);
+  }
+  .tbl-select:focus-visible{ outline:2px solid var(--focus); outline-offset:1px; }
+  .tbl-dash{ color:var(--ink-faint); }
+
+  .lb-section + .lb-section{ margin-top:22px; padding-top:18px; border-top:1px solid var(--border); }
+  .lb-section-head{
+    display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px 16px;
+    margin-bottom:10px;
+  }
+  .lb-section-head h3{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:600; font-size:14.5px; margin:0; color:var(--ink);
+  }
+  .lb-section-head .hint{ font-size:11.5px; color:var(--ink-faint); font-weight:400; }
+  .lb-inline-fields{ display:flex; gap:14px; flex-wrap:wrap; }
+  .lb-inline-fields label{
+    display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--ink-soft);
+  }
+  .lb-stage-total{ font-size:12px; color:var(--ink-soft); margin-top:6px; text-align:right; }
+  .lb-stage-total .num{ color:var(--brand-deep); font-weight:600; }
+
+  .breed-select{ display:flex; gap:8px; flex-wrap:wrap; }
+  .breed-btn{
+    font-family:"Manrope",-apple-system,Segoe UI,sans-serif; font-weight:600; font-size:13px;
+    padding:9px 18px; border-radius:999px; border:1.5px solid var(--border); background:var(--surface-2);
+    color:var(--ink-soft); cursor:pointer; transition:background .12s,color .12s,border-color .12s;
+  }
+  .breed-btn:hover:not(.active){ border-color:var(--accent); color:var(--ink); }
+  .breed-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .breed-btn:focus-visible{ outline:2px solid var(--focus); outline-offset:2px; }
+
+  .scale-track{
+    position:relative; height:26px; border-radius:6px; overflow:hidden;
+    background:linear-gradient(to right, var(--good-bg) 0%, var(--good-bg) 40%, var(--warn-bg) 40%, var(--warn-bg) 60%, var(--bad-bg) 60%, var(--bad-bg) 100%);
+    border:1px solid var(--border); margin:4px 0 6px;
+  }
+  .scale-track .marker{
+    position:absolute; top:-3px; bottom:-3px; width:3px; background:var(--ink);
+    transform:translateX(-50%);
+  }
+  .scale-labels{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-faint); }
+
+  footer.note{
+    margin-top:26px; font-size:12px; color:var(--ink-faint); line-height:1.6;
+    border-top:1px solid var(--border); padding-top:14px;
+  }
+
+  svg text{ font-family:"IBM Plex Mono",monospace; fill:var(--ink-soft); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand-mark">
+      <div class="glyph"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 24 24' fill='none' stroke='%231E8A47' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/></svg>" alt="SmartVet Africa"></div>
+      <div>
+        <h1>SmartVet Budget Calculator</h1>
+        <div class="tagline">Flock budgeting &amp; planning tools for the veterinary team</div>
+      </div>
+    </div>
+    <div class="org-tag">SmartVet Africa &middot; Internal Tool</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="active" role="tab" aria-selected="true" data-tab="budget">Budget Calculator</button>
+    <button role="tab" aria-selected="false" data-tab="flock">Flock Cost &amp; Breakeven</button>
+    <button role="tab" aria-selected="false" data-tab="loan">Loan &amp; Investment ROI</button>
+    <button role="tab" aria-selected="false" data-tab="room">Stocking Density</button>
+  </nav>
+
+  <!-- FLOCK PANEL -->
+  <section class="panel" id="panel-flock">
+    <div class="grid">
+      <div class="wiz" data-wiz="flock">
+        <div class="wiz-bar">
+          <div class="wiz-progress"><div class="wiz-progress-fill"></div></div>
+          <div class="wiz-steps-count"></div>
+          <button type="button" class="wiz-toggle-all">Show all fields</button>
+        </div>
+        <div class="wiz-question"><h3 class="wiz-q-text"></h3><p class="wiz-q-hint"></p></div>
+
+        <div class="wiz-step card"
+             data-question="What will it cost to raise this batch to market weight?"
+             data-hint="Think about the day-old chick price, total feed used per bird to reach market weight, feed price per kg, and per-bird vaccine, bedding and labour costs.">
+          <h2>Batch &amp; rearing costs</h2>
+          <div class="field-row">
+            <label>Chicks placed<span class="hint">day-old broiler chicks at start</span></label>
+            <div class="field-input"><input type="number" id="f-chicks" value="500" min="1" step="1"><span class="unit">birds</span></div>
+          </div>
+          <div class="field-row">
+            <label>Cost per chick<span class="hint">day-old chick price</span></label>
+            <div class="field-input"><input type="number" id="f-chickcost" value="4500" min="0" step="50"><span class="unit">UGX</span></div>
+          </div>
+          <div class="field-row">
+            <label>Feed to market weight<span class="hint">total feed per bird over the cycle</span></label>
+            <div class="field-input"><input type="number" id="f-feedkg" value="4.2" min="0" step="0.1"><span class="unit">kg</span></div>
+          </div>
+          <div class="field-row">
+            <label>Feed price<span class="hint">per kg, mixed starter/grower/finisher</span></label>
+            <div class="field-input"><input type="number" id="f-feedprice" value="2800" min="0" step="50"><span class="unit">UGX</span></div>
+          </div>
+          <div class="field-row">
+            <label>Vaccines &amp; medication<span class="hint">per bird placed</span></label>
+            <div class="field-input"><input type="number" id="f-vaccine" value="800" min="0" step="50"><span class="unit">UGX</span></div>
+          </div>
+          <div class="field-row">
+            <label>Labour, bedding &amp; overhead<span class="hint">per bird placed</span></label>
+            <div class="field-input"><input type="number" id="f-other" value="1200" min="0" step="50"><span class="unit">UGX</span></div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="How many birds do you expect to lose, and what will the survivors sell for?"
+             data-hint="Base mortality on what you've seen in past batches of this breed and housing. Use the live weight and price you expect at the point of sale.">
+          <h2>Mortality &amp; sale</h2>
+          <div class="field-row">
+            <label>Expected mortality</label>
+            <div class="field-input"><input type="number" id="f-mortality" value="5" min="0" max="100" step="0.5"><span class="unit">%</span></div>
+          </div>
+          <div class="field-row">
+            <label>Average weight at sale</label>
+            <div class="field-input"><input type="number" id="f-weight" value="1.8" min="0" step="0.1"><span class="unit">kg</span></div>
+          </div>
+          <div class="field-row">
+            <label>Selling price<span class="hint">per kg, live weight</span></label>
+            <div class="field-input"><input type="number" id="f-price" value="12500" min="0" step="100"><span class="unit">UGX</span></div>
+          </div>
+        </div>
+
+        <div class="wiz-nav">
+          <button type="button" class="wiz-nav-btn wiz-back">&larr; Back</button>
+          <div class="wiz-dots"></div>
+          <button type="button" class="wiz-nav-btn primary wiz-next">Next &rarr;</button>
+        </div>
+      </div>
+
+      <div class="results-sticky">
+        <div class="card">
+          <h2>Result</h2>
+          <div id="f-status"></div>
+          <div class="tiles">
+            <div class="tile"><div class="label">Birds sold</div><div class="value num" id="f-out-survivors">&mdash;</div></div>
+            <div class="tile"><div class="label">Cost / bird sold</div><div class="value num" id="f-out-costperbird">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Total profit, this batch</div><div class="value num big" id="f-out-profit">&mdash;</div></div>
+            <div class="tile"><div class="label">Profit / bird sold</div><div class="value num" id="f-out-profitperbird">&mdash;</div></div>
+            <div class="tile"><div class="label">Margin</div><div class="value num" id="f-out-margin">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Breakeven price / kg</div><div class="value num" id="f-out-breakeven">&mdash;</div></div>
+          </div>
+          <svg id="f-chart" viewBox="0 0 300 108" width="100%" height="108" role="img" aria-label="Cost breakdown by category"></svg>
+          <div id="f-legend"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOAN PANEL -->
+  <section class="panel" id="panel-loan">
+    <div class="grid">
+      <div class="wiz" data-wiz="loan">
+        <div class="wiz-bar">
+          <div class="wiz-progress"><div class="wiz-progress-fill"></div></div>
+          <div class="wiz-steps-count"></div>
+          <button type="button" class="wiz-toggle-all">Show all fields</button>
+        </div>
+        <div class="wiz-question"><h3 class="wiz-q-text"></h3><p class="wiz-q-hint"></p></div>
+
+        <div class="wiz-step card"
+             data-question="What loan are you considering for this investment?"
+             data-hint="Enter the amount you'd borrow, the lender's annual interest rate on a reducing balance, and the repayment term in months.">
+          <h2>Loan terms</h2>
+          <div class="field-row">
+            <label>Loan amount</label>
+            <div class="field-input"><input type="number" id="l-amount" value="15000000" min="0" step="100000"><span class="unit">UGX</span></div>
+          </div>
+          <div class="field-row">
+            <label>Interest rate<span class="hint">annual, reducing balance</span></label>
+            <div class="field-input"><input type="number" id="l-rate" value="22" min="0" step="0.5"><span class="unit">%/yr</span></div>
+          </div>
+          <div class="field-row">
+            <label>Loan term</label>
+            <div class="field-input"><input type="number" id="l-term" value="24" min="1" step="1"><span class="unit">months</span></div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="How will this investment change your monthly cash flow?"
+             data-hint="Estimate the extra revenue the investment will generate each month, and any extra operating cost that comes with running it.">
+          <h2>Expected impact on cash flow</h2>
+          <div class="field-row">
+            <label>Extra revenue<span class="hint">per month, from the funded investment</span></label>
+            <div class="field-input"><input type="number" id="l-revenue" value="2200000" min="0" step="50000"><span class="unit">UGX</span></div>
+          </div>
+          <div class="field-row">
+            <label>Extra operating cost<span class="hint">per month, running the investment</span></label>
+            <div class="field-input"><input type="number" id="l-opcost" value="900000" min="0" step="50000"><span class="unit">UGX</span></div>
+          </div>
+        </div>
+
+        <div class="wiz-nav">
+          <button type="button" class="wiz-nav-btn wiz-back">&larr; Back</button>
+          <div class="wiz-dots"></div>
+          <button type="button" class="wiz-nav-btn primary wiz-next">Next &rarr;</button>
+        </div>
+      </div>
+
+      <div class="results-sticky">
+        <div class="card">
+          <h2>Result</h2>
+          <div id="l-status"></div>
+          <div class="tiles">
+            <div class="tile wide"><div class="label">Monthly instalment</div><div class="value num big" id="l-out-payment">&mdash;</div></div>
+            <div class="tile"><div class="label">Total interest</div><div class="value num" id="l-out-interest">&mdash;</div></div>
+            <div class="tile"><div class="label">Net cash flow / month</div><div class="value num" id="l-out-netcf">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Payback period</div><div class="value num" id="l-out-payback">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Net return over term</div><div class="value num" id="l-out-roi">&mdash;</div></div>
+          </div>
+          <svg id="l-chart" viewBox="0 0 300 92" width="100%" height="92" role="img" aria-label="Repayment breakdown and payback timeline"></svg>
+          <div id="l-legend"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOM / STOCKING DENSITY PANEL -->
+  <section class="panel" id="panel-room">
+    <div class="grid">
+      <div class="wiz" data-wiz="room">
+        <div class="wiz-bar">
+          <div class="wiz-progress"><div class="wiz-progress-fill"></div></div>
+          <div class="wiz-steps-count"></div>
+          <button type="button" class="wiz-toggle-all">Show all fields</button>
+        </div>
+        <div class="wiz-question"><h3 class="wiz-q-text"></h3><p class="wiz-q-hint"></p></div>
+
+        <div class="wiz-step card"
+             data-question="What space do you have, and what stocking density are you targeting?"
+             data-hint="Use the internal usable floor dimensions of the house, and a stocking density appropriate to your ventilation, climate and housing type.">
+          <h2>House dimensions</h2>
+          <div class="field-row">
+            <label>House length</label>
+            <div class="field-input"><input type="number" id="r-length" value="30" min="0" step="0.5"><span class="unit">m</span></div>
+          </div>
+          <div class="field-row">
+            <label>House width</label>
+            <div class="field-input"><input type="number" id="r-width" value="9" min="0" step="0.5"><span class="unit">m</span></div>
+          </div>
+          <div class="field-row">
+            <label>Target stocking density<span class="hint">open-sided deep-litter housing, to 8 weeks</span></label>
+            <div class="field-input"><input type="number" id="r-density" value="10" min="1" max="20" step="0.5"><span class="unit">/m&sup2;</span></div>
+          </div>
+        </div>
+        <div class="wiz-step card"
+             data-question="How will you space out feeders and drinkers?"
+             data-hint="Use manufacturer or extension guidance for birds per feeder and per drinker at this stage of growth.">
+          <h2>Equipment ratios</h2>
+          <div class="field-row">
+            <label>Birds per tube feeder</label>
+            <div class="field-input"><input type="number" id="r-feeder" value="25" min="1" step="1"><span class="unit">birds</span></div>
+          </div>
+          <div class="field-row">
+            <label>Birds per bell drinker</label>
+            <div class="field-input"><input type="number" id="r-drinker" value="100" min="1" step="1"><span class="unit">birds</span></div>
+          </div>
+        </div>
+
+        <div class="wiz-nav">
+          <button type="button" class="wiz-nav-btn wiz-back">&larr; Back</button>
+          <div class="wiz-dots"></div>
+          <button type="button" class="wiz-nav-btn primary wiz-next">Next &rarr;</button>
+        </div>
+      </div>
+
+      <div class="results-sticky">
+        <div class="card">
+          <h2>Result</h2>
+          <div id="r-status"></div>
+          <div class="tiles">
+            <div class="tile"><div class="label">Floor area</div><div class="value num" id="r-out-area">&mdash;</div></div>
+            <div class="tile"><div class="label">Max birds</div><div class="value num big" id="r-out-birds">&mdash;</div></div>
+            <div class="tile"><div class="label">Feeders needed</div><div class="value num" id="r-out-feeders">&mdash;</div></div>
+            <div class="tile"><div class="label">Drinkers needed</div><div class="value num" id="r-out-drinkers">&mdash;</div></div>
+          </div>
+          <div class="scale-track"><div class="marker" id="r-marker" style="left:0%"></div></div>
+          <div class="scale-labels"><span>0</span><span>Conservative &middot; Standard &middot; Intensive</span><span>20/m&sup2;</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUDGET CALCULATOR PANEL -->
+  <section class="panel active" id="panel-budget">
+    <div class="grid">
+      <div class="wiz" data-wiz="budget">
+        <div class="wiz-bar">
+          <div class="wiz-progress"><div class="wiz-progress-fill"></div></div>
+          <div class="wiz-steps-count"></div>
+          <button type="button" class="wiz-toggle-all">Show all fields</button>
+        </div>
+        <div class="wiz-question"><h3 class="wiz-q-text"></h3><p class="wiz-q-hint"></p></div>
+
+        <div class="wiz-step card"
+             data-question="What kind of birds are you budgeting for?"
+             data-hint="This sets sensible defaults for feed, health, equipment and how you'll sell the flock &mdash; every figure stays editable after you choose.">
+          <div class="lb-section" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="lb-section-head">
+              <h3>Breed type</h3>
+              <span class="hint">sets default feed formulation, health, equipment and sales model &mdash; all figures stay editable after you choose</span>
+            </div>
+            <div class="breed-select" role="tablist" aria-label="Breed type">
+              <button type="button" class="breed-btn" data-breed="broiler">Broiler</button>
+              <button type="button" class="breed-btn active" data-breed="layer">Layer</button>
+              <button type="button" class="breed-btn" data-breed="dualpurpose">Dual-purpose</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="How many birds are you placing, and what will it cost to get started?"
+             data-hint="Include the day-old chick price, any one-off transport cost, the mortality you expect over the cycle, and starter crumble for the first few days.">
+          <div class="lb-section" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="lb-section-head">
+              <h3>Flock setup</h3>
+            </div>
+            <div class="field-row">
+              <label>Day-old chicks placed</label>
+              <div class="field-input"><input type="number" id="lb-birds" value="3500" min="1" step="50"><span class="unit">birds</span></div>
+            </div>
+            <div class="field-row">
+              <label>Cost per chick</label>
+              <div class="field-input"><input type="number" id="lb-chickcost" value="5000" min="0" step="50"><span class="unit">UGX</span></div>
+            </div>
+            <div class="field-row">
+              <label>Transport of chicks<span class="hint">one-off, whole batch</span></label>
+              <div class="field-input"><input type="number" id="lb-transport" value="0" min="0" step="10000"><span class="unit">UGX</span></div>
+            </div>
+            <div class="field-row">
+              <label>Expected mortality<span class="hint">applied to egg, cull &amp; meat sales</span></label>
+              <div class="field-input"><input type="number" id="lb-mortality" value="5" min="0" max="100" step="0.5"><span class="unit">%</span></div>
+            </div>
+            <div class="field-row">
+              <label>Chick starter crumble<span class="hint">pre-mix, first days only</span></label>
+              <div class="field-input"><input type="number" id="lb-crumble-kg" value="0.1" min="0" step="0.01"><span class="unit">kg/bird</span></div>
+            </div>
+            <div class="field-row">
+              <label>Crumble cost</label>
+              <div class="field-input"><input type="number" id="lb-crumble-cost" value="3120" min="0" step="10"><span class="unit">/kg</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="What will you feed this flock through the cycle?"
+             data-hint="Each stage's ingredients are entered as a ratio (parts), not an exact weight &mdash; the sheet scales that ratio to however much feed the flock actually needs.">
+          <div class="lb-section" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="lb-section-head">
+              <h3>Feed formulation</h3>
+              <span class="hint">edit the ratios to change every ingredient quantity below</span>
+            </div>
+            <div id="lb-feed-stages"></div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="What vaccines, treatments and biosecurity measures will this flock need?"
+             data-hint="Rates scale automatically with flock size &mdash; adjust any that don't match your protocol, and add a water cost estimate for the whole cycle.">
+          <div class="lb-section" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="lb-section-head">
+              <h3>Health &amp; biosecurity</h3>
+              <span class="hint">rate scales automatically with flock size</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Item</th><th>Rate /1000 birds</th><th>Unit cost</th><th>Pack size</th><th>Qty</th><th>Amount</th></tr></thead>
+                <tbody id="lb-health-body"></tbody>
+              </table>
+            </div>
+            <div class="field-row" style="margin-top:6px;">
+              <label>Water<span class="hint">whole cycle, one-off estimate</span></label>
+              <div class="field-input"><input type="number" id="lb-water" value="300000" min="0" step="10000"><span class="unit">UGX</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="What equipment and staffing will this operation need?"
+             data-hint="Some equipment scales with flock size, some is a one-off setup cost. Staff costs are applied for every month of the cycle.">
+          <div class="lb-section" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="lb-section-head">
+              <h3>Equipment &mdash; scales with flock</h3>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Item</th><th>Birds / unit</th><th>Unit cost</th><th>Qty</th><th>Amount</th></tr></thead>
+                <tbody id="lb-equip-ratio-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="lb-section">
+            <div class="lb-section-head"><h3>Equipment &mdash; one-off setup</h3></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Item</th><th>Qty</th><th>Unit cost</th><th>Amount</th></tr></thead>
+                <tbody id="lb-equip-flat-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="lb-section">
+            <div class="lb-section-head"><h3>Staff</h3><span class="hint">cost applies each month of the cycle</span></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead><tr><th>Role</th><th>Qty</th><th>Cost / month</th><th>Amount / month</th></tr></thead>
+                <tbody id="lb-staff-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-step card"
+             data-question="How will you sell the output of this batch?"
+             data-hint="Use the egg sales table for layer and dual-purpose batches, and/or the meat sale block for broilers &mdash; leave whichever doesn't apply at zero.">
+          <div class="lb-section" style="margin-top:0;padding-top:0;border-top:none;">
+            <div class="lb-section-head">
+              <h3 id="lb-sales-title">Sales projection</h3>
+              <span class="hint" id="lb-sales-hint">lay rate = average eggs per hen per day</span>
+            </div>
+
+            <div id="lb-eggsales">
+              <div class="lb-inline-fields" style="margin-bottom:12px;">
+                <label>Laying starts, month <input type="number" class="tbl-input narrow" id="lb-start-month" value="4" min="1" step="1"></label>
+                <label>Egg price /tray (farm-gate) <input type="number" class="tbl-input" id="lb-egg-price" value="11500" min="0" step="100"></label>
+                <label><span id="lb-offlayer-label">Off-layer sale price /bird</span> <input type="number" class="tbl-input" id="lb-offlayer-price" value="14000" min="0" step="100"></label>
+                <label>Off-layers sold, % of survivors <input type="number" class="tbl-input narrow" id="lb-offlayer-pct" value="80" min="0" max="100" step="1"></label>
+              </div>
+              <div style="overflow-x:auto;">
+                <table class="data-table">
+                  <thead><tr><th>Month</th><th>Lay rate</th><th>Trays</th><th>Revenue</th></tr></thead>
+                  <tbody id="lb-sales-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="lb-meatsale" hidden>
+              <div class="lb-inline-fields">
+                <label>Market weight per bird <input type="number" class="tbl-input" id="lb-marketweight" value="2.0" min="0" step="0.1"> kg</label>
+                <label>Sale price per kg (live weight) <input type="number" class="tbl-input" id="lb-meatprice" value="11000" min="0" step="100"></label>
+                <label>Birds sold, % of survivors <input type="number" class="tbl-input narrow" id="lb-meatpct" value="98" min="0" max="100" step="1"></label>
+              </div>
+            </div>
+
+            <div class="field-row" style="margin-top:12px;">
+              <label>Manure sales, whole cycle</label>
+              <div class="field-input"><input type="number" id="lb-manure" value="5000000" min="0" step="100000"><span class="unit">UGX</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-nav">
+          <button type="button" class="wiz-nav-btn wiz-back">&larr; Back</button>
+          <div class="wiz-dots"></div>
+          <button type="button" class="wiz-nav-btn primary wiz-next">Next &rarr;</button>
+        </div>
+      </div>
+
+      <div class="results-sticky">
+        <div class="card">
+          <h2>Result</h2>
+          <div id="lb-status"></div>
+          <div class="tiles">
+            <div class="tile"><div class="label">Total feed cost</div><div class="value num" id="lb-out-feed">&mdash;</div></div>
+            <div class="tile"><div class="label">Health &amp; biosecurity</div><div class="value num" id="lb-out-health">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Production cost<span class="hint" style="display:block;">chicks + feed + health + water</span></div><div class="value num big" id="lb-out-production">&mdash;</div></div>
+            <div class="tile"><div class="label">Staff, whole cycle</div><div class="value num" id="lb-out-staff">&mdash;</div></div>
+            <div class="tile"><div class="label">Equipment (one-off)</div><div class="value num" id="lb-out-equipment">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Total revenue</div><div class="value num big" id="lb-out-revenue">&mdash;</div></div>
+            <div class="tile wide"><div class="label">Net profit</div><div class="value num big" id="lb-out-profit">&mdash;</div></div>
+            <div class="tile"><div class="label">Payback on equipment</div><div class="value num" id="lb-out-payback">&mdash;</div></div>
+            <div class="tile"><div class="label" id="lb-out-breakeven-label">Breakeven egg price</div><div class="value num" id="lb-out-breakeven">&mdash;</div></div>
+          </div>
+          <svg id="lb-chart" viewBox="0 0 300 108" width="100%" height="108" role="img" aria-label="Cost breakdown across the cycle"></svg>
+          <div id="lb-legend"></div>
+          <button type="button" class="export-btn" id="lb-export-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export to Excel
+          </button>
+          <div id="lb-export-status" class="export-status"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">
+    For internal use by SmartVet Africa veterinary staff. Figures are planning estimates in Ugandan shillings &mdash; actual feed conversion, market prices, house ventilation and lender terms vary by season and supplier. Recalculates instantly as you edit any field.
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script>
+(function(){
+  "use strict";
+  var fmt = function(n){
+    if(!isFinite(n)) return "&mdash;";
+    return "UGX " + Math.round(n).toLocaleString("en-UG");
+  };
+  var fmtPlain = function(n){
+    if(!isFinite(n)) return "—";
+    return "UGX " + Math.round(n).toLocaleString("en-UG");
+  };
+  var pct = function(n){
+    if(!isFinite(n)) return "—";
+    return (n>=0?"":"−") + Math.abs(n).toFixed(1) + "%";
+  };
+
+  // ---- Tabs ----
+  var tabBtns = document.querySelectorAll("nav.tabs button");
+  tabBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      tabBtns.forEach(function(b){ b.classList.remove("active"); b.setAttribute("aria-selected","false"); });
+      btn.classList.add("active"); btn.setAttribute("aria-selected","true");
+      document.querySelectorAll(".panel").forEach(function(p){ p.classList.remove("active"); });
+      document.getElementById("panel-" + btn.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---- Flock calculator ----
+  var fIds = ["f-chicks","f-chickcost","f-feedkg","f-feedprice","f-vaccine","f-other","f-mortality","f-weight","f-price"];
+  var fEls = {}; fIds.forEach(function(id){ fEls[id] = document.getElementById(id); });
+
+  function computeFlock(){
+    var chicks = parseFloat(fEls["f-chicks"].value) || 0;
+    var chickCost = parseFloat(fEls["f-chickcost"].value) || 0;
+    var feedKg = parseFloat(fEls["f-feedkg"].value) || 0;
+    var feedPrice = parseFloat(fEls["f-feedprice"].value) || 0;
+    var vaccine = parseFloat(fEls["f-vaccine"].value) || 0;
+    var other = parseFloat(fEls["f-other"].value) || 0;
+    var mortality = Math.min(100, Math.max(0, parseFloat(fEls["f-mortality"].value) || 0));
+    var weight = parseFloat(fEls["f-weight"].value) || 0;
+    var price = parseFloat(fEls["f-price"].value) || 0;
+
+    var survivors = chicks * (1 - mortality/100);
+    var totalChick = chicks * chickCost;
+    var totalFeed = chicks * feedKg * feedPrice;
+    var totalVaccine = chicks * vaccine;
+    var totalOther = chicks * other;
+    var totalCost = totalChick + totalFeed + totalVaccine + totalOther;
+    var revenue = survivors * weight * price;
+    var profit = revenue - totalCost;
+    var costPerBird = survivors > 0 ? totalCost / survivors : NaN;
+    var profitPerBird = survivors > 0 ? profit / survivors : NaN;
+    var margin = revenue > 0 ? (profit/revenue*100) : NaN;
+    var breakeven = (survivors>0 && weight>0) ? totalCost / (survivors*weight) : NaN;
+
+    document.getElementById("f-out-survivors").textContent = isFinite(survivors) ? Math.round(survivors).toLocaleString("en-UG") + " of " + Math.round(chicks).toLocaleString("en-UG") : "—";
+    document.getElementById("f-out-costperbird").innerHTML = fmt(costPerBird);
+    document.getElementById("f-out-profit").innerHTML = fmt(profit);
+    document.getElementById("f-out-profitperbird").innerHTML = fmt(profitPerBird);
+    document.getElementById("f-out-margin").textContent = pct(margin);
+    document.getElementById("f-out-breakeven").innerHTML = fmt(breakeven) + " /kg";
+
+    var statusEl = document.getElementById("f-status");
+    if(!isFinite(profit)){
+      statusEl.innerHTML = "";
+    } else if(profit <= 0){
+      statusEl.innerHTML = '<span class="status-pill bad"><span class="dot"></span>Loss-making at these prices</span>';
+    } else if(margin < 10){
+      statusEl.innerHTML = '<span class="status-pill warn"><span class="dot"></span>Profitable, thin margin</span>';
+    } else {
+      statusEl.innerHTML = '<span class="status-pill good"><span class="dot"></span>Profitable batch</span>';
+    }
+
+    drawFlockChart(totalChick, totalFeed, totalVaccine, totalOther);
+  }
+
+  function drawFlockChart(chick, feed, vaccine, other){
+    var svg = document.getElementById("f-chart");
+    var items = [
+      {label:"Chicks",   value:chick,   color:"var(--brand-deep)"},
+      {label:"Feed",     value:feed,    color:"var(--accent)"},
+      {label:"Vaccines", value:vaccine, color:"var(--good)"},
+      {label:"Other",    value:other,   color:"var(--ink-faint)"}
+    ];
+    var total = items.reduce(function(s,i){return s+i.value;},0) || 1;
+    var x = 8, y = 14, w = 284, h = 22;
+    var bars = "";
+    var cursor = x;
+    items.forEach(function(it){
+      var seg = (it.value/total) * w;
+      bars += '<rect x="'+cursor+'" y="'+y+'" width="'+Math.max(seg,0)+'" height="'+h+'" fill="'+it.color+'"></rect>';
+      cursor += seg;
+    });
+    var legend = "";
+    var lx = 8, ly = 58;
+    var legendHtml = "";
+    items.forEach(function(it, i){
+      var sharePct = (it.value/total*100).toFixed(0);
+      legendHtml += '<div class="breakdown-row"><span><span class="swatch" style="background:'+it.color+'"></span>'+it.label+'</span><span class="num">'+fmtPlain(it.value)+' &middot; '+sharePct+'%</span></div>';
+    });
+    svg.innerHTML =
+      '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4" fill="var(--surface-2)"></rect>' +
+      bars +
+      '<text x="'+x+'" y="'+(y+h+16)+'" font-size="10">Total cost</text>' +
+      '<text x="'+(x+w)+'" y="'+(y+h+16)+'" font-size="10" text-anchor="end" font-weight="600">'+fmtPlain(total)+'</text>';
+    document.getElementById("f-legend").innerHTML = legendHtml;
+  }
+
+  fIds.forEach(function(id){ fEls[id].addEventListener("input", computeFlock); });
+
+  // ---- Loan calculator ----
+  var lIds = ["l-amount","l-rate","l-term","l-revenue","l-opcost"];
+  var lEls = {}; lIds.forEach(function(id){ lEls[id] = document.getElementById(id); });
+
+  function computeLoan(){
+    var P = parseFloat(lEls["l-amount"].value) || 0;
+    var annualRate = parseFloat(lEls["l-rate"].value) || 0;
+    var n = parseFloat(lEls["l-term"].value) || 0;
+    var revenue = parseFloat(lEls["l-revenue"].value) || 0;
+    var opcost = parseFloat(lEls["l-opcost"].value) || 0;
+
+    var r = (annualRate/100)/12;
+    var payment;
+    if(n <= 0){ payment = NaN; }
+    else if(r === 0){ payment = P / n; }
+    else { payment = P * r / (1 - Math.pow(1+r, -n)); }
+
+    var totalRepay = payment * n;
+    var totalInterest = totalRepay - P;
+    var netBeforeLoan = revenue - opcost;
+    var netAfterLoan = netBeforeLoan - payment;
+    var payback = netBeforeLoan > 0 ? (P / netBeforeLoan) : NaN;
+    var netReturnOverTerm = (netBeforeLoan * n) - totalInterest - 0; // net operating gain minus interest cost (principal is repaid, not lost)
+    var roiPct = P>0 ? (netReturnOverTerm/P*100) : NaN;
+
+    document.getElementById("l-out-payment").innerHTML = fmt(payment);
+    document.getElementById("l-out-interest").innerHTML = fmt(totalInterest);
+    document.getElementById("l-out-netcf").innerHTML = fmt(netAfterLoan);
+    document.getElementById("l-out-payback").textContent = isFinite(payback) ? (payback<=n ? payback.toFixed(1)+" months" : payback.toFixed(1)+" months (beyond term)") : "never, at this cash flow";
+    document.getElementById("l-out-roi").innerHTML = fmt(netReturnOverTerm) + " (" + pct(roiPct) + ")";
+
+    var statusEl = document.getElementById("l-status");
+    if(!isFinite(netAfterLoan)){
+      statusEl.innerHTML = "";
+    } else if(netAfterLoan < 0){
+      statusEl.innerHTML = '<span class="status-pill bad"><span class="dot"></span>Cash flow negative after instalment</span>';
+    } else if(isFinite(payback) && payback > n){
+      statusEl.innerHTML = '<span class="status-pill warn"><span class="dot"></span>Positive, but payback outlasts the term</span>';
+    } else {
+      statusEl.innerHTML = '<span class="status-pill good"><span class="dot"></span>Affordable, pays back within term</span>';
+    }
+
+    drawLoanChart(P, totalInterest, payback, n);
+  }
+
+  function drawLoanChart(principal, interest, payback, term){
+    var svg = document.getElementById("l-chart");
+    var total = principal + interest || 1;
+    var x=8, y=14, w=284, h=20;
+    var pSeg = (principal/total)*w;
+    var iSeg = (interest/total)*w;
+    var bars =
+      '<rect x="'+x+'" y="'+y+'" width="'+pSeg+'" height="'+h+'" fill="var(--brand-deep)"></rect>' +
+      '<rect x="'+(x+pSeg)+'" y="'+y+'" width="'+Math.max(iSeg,0)+'" height="'+h+'" fill="var(--accent)"></rect>';
+
+    // payback marker on a second track scaled to term
+    var y2 = y+h+22, h2=10;
+    var markerX = x;
+    var pbLabel = "";
+    if(isFinite(payback) && term>0){
+      var clamped = Math.min(payback, term*1.15);
+      markerX = x + (clamped/(term*1.15))*w;
+      pbLabel = '<line x1="'+markerX+'" y1="'+(y2-4)+'" x2="'+markerX+'" y2="'+(y2+h2+4)+'" stroke="var(--bad)" stroke-width="2"></line>' +
+                '<text x="'+markerX+'" y="'+(y2-8)+'" font-size="9" text-anchor="middle" fill="var(--bad)">payback</text>';
+    }
+    var track = '<rect x="'+x+'" y="'+y2+'" width="'+w+'" height="'+h2+'" rx="3" fill="var(--surface-2)"></rect>' +
+                '<rect x="'+x+'" y="'+y2+'" width="'+w+'" height="'+h2+'" rx="3" fill="none" stroke="var(--border)"></rect>' +
+                '<text x="'+(x+w)+'" y="'+(y2+h2+14)+'" font-size="9" text-anchor="end">'+term+'-month term</text>';
+
+    svg.innerHTML = bars + track + pbLabel;
+    document.getElementById("l-legend").innerHTML =
+      '<div class="breakdown-row"><span><span class="swatch" style="background:var(--brand-deep)"></span>Principal</span><span class="num">'+fmtPlain(principal)+'</span></div>' +
+      '<div class="breakdown-row"><span><span class="swatch" style="background:var(--accent)"></span>Interest</span><span class="num">'+fmtPlain(interest)+'</span></div>';
+  }
+
+  lIds.forEach(function(id){ lEls[id].addEventListener("input", computeLoan); });
+
+  // ---- Stocking density calculator ----
+  var rIds = ["r-length","r-width","r-density","r-feeder","r-drinker"];
+  var rEls = {}; rIds.forEach(function(id){ rEls[id] = document.getElementById(id); });
+
+  function computeRoom(){
+    var length = parseFloat(rEls["r-length"].value) || 0;
+    var width = parseFloat(rEls["r-width"].value) || 0;
+    var density = parseFloat(rEls["r-density"].value) || 0;
+    var perFeeder = parseFloat(rEls["r-feeder"].value) || 0;
+    var perDrinker = parseFloat(rEls["r-drinker"].value) || 0;
+
+    var area = length * width;
+    var maxBirds = area * density;
+    var feeders = perFeeder > 0 ? Math.ceil(maxBirds / perFeeder) : 0;
+    var drinkers = perDrinker > 0 ? Math.ceil(maxBirds / perDrinker) : 0;
+
+    document.getElementById("r-out-area").innerHTML = area.toFixed(1) + " m&sup2;";
+    document.getElementById("r-out-birds").textContent = isFinite(maxBirds) ? Math.round(maxBirds).toLocaleString("en-UG") + " birds" : "—";
+    document.getElementById("r-out-feeders").textContent = feeders.toLocaleString("en-UG");
+    document.getElementById("r-out-drinkers").textContent = drinkers.toLocaleString("en-UG");
+
+    var statusEl = document.getElementById("r-status");
+    if(density <= 8){
+      statusEl.innerHTML = '<span class="status-pill good"><span class="dot"></span>Conservative density</span>';
+    } else if(density <= 12){
+      statusEl.innerHTML = '<span class="status-pill warn"><span class="dot"></span>Standard broiler density</span>';
+    } else {
+      statusEl.innerHTML = '<span class="status-pill bad"><span class="dot"></span>Intensive &mdash; verify ventilation</span>';
+    }
+    document.getElementById("r-marker").style.left = Math.min(100, Math.max(0, density/20*100)) + "%";
+  }
+  rIds.forEach(function(id){ rEls[id].addEventListener("input", computeRoom); });
+
+  // ---- Budget Calculator (breed-aware) ----
+  var LB = {
+    breed: "layer",
+    presets: {
+      broiler: {
+        salesMode: "meat",
+        feedStages: [
+          { key:"starter", name:"Starter mash", range:"Week 1–2", weeks:2, mode:"flat", kgPerBird:0.4,
+            recipe:[
+              {name:"Broken Maize", parts:150, cost:700},
+              {name:"Maize Bran", parts:300, cost:600},
+              {name:"Soybean Meal", parts:250, cost:1600},
+              {name:"Sunflower Cake", parts:150, cost:2000},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Broiler Starter Concentrate", parts:130, cost:5200}
+            ]},
+          { key:"grower", name:"Grower mash", range:"Week 3–4", weeks:2, mode:"flat", kgPerBird:1.3,
+            recipe:[
+              {name:"Broken Maize", parts:220, cost:750},
+              {name:"Maize Bran", parts:320, cost:600},
+              {name:"Soybean Meal", parts:200, cost:1600},
+              {name:"Sunflower Cake", parts:120, cost:2000},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Broiler Grower Concentrate", parts:120, cost:5000}
+            ]},
+          { key:"finisher", name:"Finisher mash", range:"Week 5–6", weeks:2, mode:"flat", kgPerBird:2.3,
+            recipe:[
+              {name:"Broken Maize", parts:280, cost:800},
+              {name:"Maize Bran", parts:330, cost:600},
+              {name:"Soybean Meal", parts:150, cost:1600},
+              {name:"Sunflower Cake", parts:110, cost:2000},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Broiler Finisher Concentrate", parts:110, cost:4900}
+            ]}
+        ],
+        health: [
+          {name:"NCD vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Gumboro/IBD vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Anticoccidial (whole cycle)", rate:1.0, cost:180000},
+          {name:"Vitamins &amp; electrolytes", rate:2.0, cost:45000},
+          {name:"Broad-spectrum antibiotic", rate:1.0, cost:250000},
+          {name:"Charcoal for brooding", rate:4.29, cost:45000},
+          {name:"White lime (biosecurity)", rate:2.86, cost:35000}
+        ],
+        equipRatio: [
+          {name:"Automatic drinkers", per:100, cost:55000},
+          {name:"Jumbo feeders (10kg)", per:50, cost:55000},
+          {name:"Brooding stoves", per:350, cost:50000},
+          {name:"Trays for brooding", per:300, cost:5000}
+        ],
+        equipFlat: [
+          {name:"Water tank (500 litres)", qty:1, cost:300000},
+          {name:"Plumbing fixtures", qty:3, cost:150000},
+          {name:"Stand", qty:1, cost:150000},
+          {name:"Labour for plumbing", qty:1, cost:150000},
+          {name:"Flat shoes (staff)", qty:5, cost:10000}
+        ],
+        staff: [
+          {name:"Farm manager / supervisor", qty:1, cost:300000},
+          {name:"Production staff", qty:2, cost:250000},
+          {name:"Feed mixing labour", qty:2, cost:150000},
+          {name:"Welfare / meals (per person/month)", qty:4, cost:180000}
+        ],
+        layRateCurve: null,
+        defaults: {
+          birds:3500, chickcost:3500, transport:0, mortality:5,
+          crumbleKg:0.1, crumbleCost:3120, water:150000, manure:1500000,
+          marketweight:2.0, meatprice:7200, meatpct:98
+        }
+      },
+      layer: {
+        salesMode: "eggs",
+        feedStages: [
+          { key:"starter", name:"Starter mash", range:"Week 2–8", weeks:6, mode:"flat", kgPerBird:1.5,
+            recipe:[
+              {name:"Broken Maize", parts:180, cost:600},
+              {name:"Maize Bran", parts:520, cost:600},
+              {name:"Sunflower Cake", parts:100, cost:2000},
+              {name:"Soybean Meal", parts:120, cost:1500},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Layer Concentrate", parts:60, cost:4700}
+            ]},
+          { key:"grower", name:"Grower mash", range:"Week 8–17", weeks:9, mode:"flat", kgPerBird:3,
+            recipe:[
+              {name:"Broken Maize", parts:200, cost:900},
+              {name:"Maize Bran", parts:530, cost:600},
+              {name:"Sunflower Cake", parts:100, cost:2000},
+              {name:"Soybean Meal", parts:100, cost:1500},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Layer Concentrate", parts:50, cost:4700}
+            ]},
+          { key:"prelay", name:"Prelay mash", range:"Week 18–20", weeks:3, mode:"flat", kgPerBird:1,
+            recipe:[
+              {name:"Broken Maize", parts:180, cost:900},
+              {name:"Maize Bran", parts:490, cost:600},
+              {name:"Sunflower Cake", parts:90, cost:2000},
+              {name:"Soybean Meal", parts:100, cost:3500},
+              {name:"Stock Feed Lime", parts:90, cost:1000},
+              {name:"5% Layer Concentrate", parts:50, cost:4700}
+            ]},
+          { key:"layer", name:"Layer mash", range:"Week 21–90", weeks:70, mode:"daily", gramsPerBirdDay:114,
+            recipe:[
+              {name:"Broken Maize", parts:185, cost:750},
+              {name:"Maize Bran", parts:500, cost:500},
+              {name:"Sunflower Cake", parts:75, cost:1000},
+              {name:"Soybean Meal", parts:95, cost:2800},
+              {name:"Stock Feed Lime", parts:95, cost:1000},
+              {name:"5% Layer Concentrate", parts:50, cost:4700}
+            ]}
+        ],
+        health: [
+          {name:"IBD/NCD vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Gumboro vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"NCD vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Fowl pox vaccine", rate:1.0, cost:80000, vial:true, vialSize:1000},
+          {name:"Infectious coryza treatment", rate:1.43, cost:65000},
+          {name:"NCD booster, rest of growing stage", rate:10.29, cost:20000, vial:true, vialSize:1000},
+          {name:"Other vaccines, rest of growing stage", rate:2.0, cost:25000, vial:true, vialSize:1000},
+          {name:"Assorted drugs", rate:0.29, cost:1500000},
+          {name:"Charcoal for brooding", rate:4.29, cost:45000},
+          {name:"White lime (biosecurity)", rate:2.86, cost:35000}
+        ],
+        equipRatio: [
+          {name:"Automatic drinkers", per:100, cost:55000},
+          {name:"Jumbo feeders (10kg)", per:50, cost:55000},
+          {name:"Brooding stoves", per:350, cost:50000},
+          {name:"Laying boxes", per:150, cost:250000},
+          {name:"Trays for brooding", per:300, cost:5000}
+        ],
+        equipFlat: [
+          {name:"Water tank (500 litres)", qty:1, cost:300000},
+          {name:"Plumbing fixtures", qty:3, cost:150000},
+          {name:"Stand", qty:1, cost:150000},
+          {name:"Labour for plumbing", qty:1, cost:150000},
+          {name:"Flat shoes (staff)", qty:5, cost:10000}
+        ],
+        staff: [
+          {name:"Farm manager / supervisor", qty:1, cost:300000},
+          {name:"Production staff", qty:2, cost:250000},
+          {name:"Feed mixing labour", qty:2, cost:150000},
+          {name:"Welfare / meals (per person/month)", qty:4, cost:180000}
+        ],
+        layRateCurve: [0.40,0.65,0.75,0.85,0.95,0.95,0.95,0.95,0.95,0.95,0.95,0.85,0.85,0.80,0.75],
+        defaults: {
+          birds:3500, chickcost:5000, transport:0, mortality:5,
+          crumbleKg:0.1, crumbleCost:3120, water:300000, manure:5000000,
+          startmonth:4, eggprice:11500, offlayerprice:14000, offlayerpct:80
+        }
+      },
+      dualpurpose: {
+        salesMode: "eggs",
+        feedStages: [
+          { key:"starter", name:"Starter mash", range:"Week 2–8", weeks:6, mode:"flat", kgPerBird:1.7,
+            recipe:[
+              {name:"Broken Maize", parts:180, cost:600},
+              {name:"Maize Bran", parts:500, cost:600},
+              {name:"Sunflower Cake", parts:110, cost:2000},
+              {name:"Soybean Meal", parts:130, cost:1500},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Dual-Purpose Concentrate", parts:60, cost:4500}
+            ]},
+          { key:"grower", name:"Grower mash", range:"Week 8–18", weeks:10, mode:"flat", kgPerBird:3.4,
+            recipe:[
+              {name:"Broken Maize", parts:200, cost:900},
+              {name:"Maize Bran", parts:510, cost:600},
+              {name:"Sunflower Cake", parts:110, cost:2000},
+              {name:"Soybean Meal", parts:110, cost:1500},
+              {name:"Stock Feed Lime", parts:20, cost:1000},
+              {name:"5% Dual-Purpose Concentrate", parts:50, cost:4500}
+            ]},
+          { key:"prelay", name:"Prelay mash", range:"Week 19–21", weeks:3, mode:"flat", kgPerBird:1.2,
+            recipe:[
+              {name:"Broken Maize", parts:180, cost:900},
+              {name:"Maize Bran", parts:480, cost:600},
+              {name:"Sunflower Cake", parts:100, cost:2000},
+              {name:"Soybean Meal", parts:110, cost:3500},
+              {name:"Stock Feed Lime", parts:80, cost:1000},
+              {name:"5% Dual-Purpose Concentrate", parts:50, cost:4500}
+            ]},
+          { key:"layer", name:"Layer mash", range:"Week 22–72", weeks:50, mode:"daily", gramsPerBirdDay:120,
+            recipe:[
+              {name:"Broken Maize", parts:190, cost:750},
+              {name:"Maize Bran", parts:490, cost:500},
+              {name:"Sunflower Cake", parts:80, cost:1000},
+              {name:"Soybean Meal", parts:100, cost:2800},
+              {name:"Stock Feed Lime", parts:90, cost:1000},
+              {name:"5% Dual-Purpose Concentrate", parts:50, cost:4500}
+            ]}
+        ],
+        health: [
+          {name:"IBD/NCD vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Gumboro vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"NCD vaccine", rate:1.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Fowl pox vaccine", rate:1.0, cost:80000, vial:true, vialSize:1000},
+          {name:"Infectious coryza treatment", rate:1.43, cost:65000},
+          {name:"NCD booster, rest of growing stage", rate:8.0, cost:20000, vial:true, vialSize:1000},
+          {name:"Other vaccines, rest of growing stage", rate:2.0, cost:25000, vial:true, vialSize:1000},
+          {name:"Assorted drugs", rate:0.29, cost:1200000},
+          {name:"Charcoal for brooding", rate:4.29, cost:45000},
+          {name:"White lime (biosecurity)", rate:2.86, cost:35000}
+        ],
+        equipRatio: [
+          {name:"Automatic drinkers", per:100, cost:55000},
+          {name:"Jumbo feeders (10kg)", per:50, cost:55000},
+          {name:"Brooding stoves", per:350, cost:50000},
+          {name:"Laying boxes", per:150, cost:250000},
+          {name:"Trays for brooding", per:300, cost:5000}
+        ],
+        equipFlat: [
+          {name:"Water tank (500 litres)", qty:1, cost:300000},
+          {name:"Plumbing fixtures", qty:3, cost:150000},
+          {name:"Stand", qty:1, cost:150000},
+          {name:"Labour for plumbing", qty:1, cost:150000},
+          {name:"Flat shoes (staff)", qty:5, cost:10000}
+        ],
+        staff: [
+          {name:"Farm manager / supervisor", qty:1, cost:300000},
+          {name:"Production staff", qty:2, cost:250000},
+          {name:"Feed mixing labour", qty:2, cost:150000},
+          {name:"Welfare / meals (per person/month)", qty:4, cost:180000}
+        ],
+        layRateCurve: [0.30, 0.50, 0.65, 0.70, 0.75, 0.75, 0.75, 0.70, 0.65, 0.60, 0.55, 0.50],
+        defaults: {
+          birds:3500, chickcost:4000, transport:0, mortality:6,
+          crumbleKg:0.1, crumbleCost:3120, water:250000, manure:4000000,
+          startmonth:5, eggprice:11500, offlayerprice:18000, offlayerpct:85
+        }
+      }
+    }
+  };
+
+  // ---- Dynamic Table Renderers ----
+  function renderFeedStages(stages) {
+    var container = document.getElementById("lb-feed-stages");
+    if (!container) return;
+    container.innerHTML = "";
+
+    stages.forEach(function(stage, sIdx) {
+      var div = document.createElement("div");
+      div.className = "lb-section";
+      div.dataset.stageKey = stage.key;
+
+      var intakeInfo = stage.mode === "daily"
+        ? stage.gramsPerBirdDay + " g/bird/day"
+        : stage.kgPerBird + " kg/bird";
+
+      var headHtml = 
+        '<div class="lb-section-head">' +
+          '<h3>' + stage.name + ' &mdash; ' + stage.range + '</h3>' +
+          '<div class="lb-inline-fields">' +
+            '<label>Duration <input type="number" class="tbl-input narrow stage-weeks" value="' + stage.weeks + '" min="1" step="1"> weeks</label>' +
+            '<label>' + (stage.mode === "daily" ? 'Intake/day <input type="number" class="tbl-input stage-rate" value="' + stage.gramsPerBirdDay + '" min="0" step="1"> g/bird' : 'Stage intake <input type="number" class="tbl-input stage-rate" value="' + stage.kgPerBird + '" min="0" step="0.1"> kg/bird') + '</label>' +
+          '</div>' +
+        '</div>';
+
+      var tableHtml = 
+        '<div style="overflow-x:auto;">' +
+          '<table class="data-table">' +
+            '<thead><tr><th>Ingredient</th><th>Parts /1000kg</th><th>Cost/kg</th><th>Buy (kg)</th><th>Amount</th></tr></thead>' +
+            '<tbody>';
+
+      stage.recipe.forEach(function(ingr, iIdx) {
+        tableHtml += 
+          '<tr data-ingr-idx="' + iIdx + '">' +
+            '<td>' + ingr.name + '</td>' +
+            '<td><input type="number" class="tbl-input ingr-parts" value="' + ingr.parts + '" min="0" step="5"></td>' +
+            '<td><input type="number" class="tbl-input ingr-cost" value="' + ingr.cost + '" min="0" step="50"></td>' +
+            '<td class="num ingr-buy">&mdash;</td>' +
+            '<td class="num ingr-amt">&mdash;</td>' +
+          '</tr>';
+      });
+
+      tableHtml += 
+            '<tr class="total-row">' +
+              '<td>Subtotal &middot; ' + stage.name + '</td>' +
+              '<td class="num stage-parts-tot">&mdash;</td>' +
+              '<td class="tbl-dash">&mdash;</td>' +
+              '<td class="num stage-buy-tot">&mdash;</td>' +
+              '<td class="num stage-amt-tot">&mdash;</td>' +
+            '</tr>' +
+          '</tbody>' +
+        '</table>' +
+      '</div>';
+
+      div.innerHTML = headHtml + tableHtml;
+      container.appendChild(div);
+    });
+  }
+
+  function renderHealthTable(items) {
+    var tbody = document.getElementById("lb-health-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    items.forEach(function(item, idx) {
+      var tr = document.createElement("tr");
+      tr.dataset.healthIdx = idx;
+      var packText = item.vial ? (item.vialSize || 1000) + "-dose vial" : "Bulk / unit";
+      tr.innerHTML = 
+        '<td>' + item.name + '</td>' +
+        '<td><input type="number" class="tbl-input item-rate" value="' + item.rate + '" min="0" step="0.1"></td>' +
+        '<td><input type="number" class="tbl-input item-cost" value="' + item.cost + '" min="0" step="500"></td>' +
+        '<td class="tbl-dash" style="font-size:11px;">' + packText + '</td>' +
+        '<td class="num item-qty">&mdash;</td>' +
+        '<td class="num item-amt">&mdash;</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderEquipTables(ratioItems, flatItems) {
+    var rBody = document.getElementById("lb-equip-ratio-body");
+    var fBody = document.getElementById("lb-equip-flat-body");
+    if (rBody) {
+      rBody.innerHTML = "";
+      ratioItems.forEach(function(item, idx) {
+        var tr = document.createElement("tr");
+        tr.dataset.ratioIdx = idx;
+        tr.innerHTML = 
+          '<td>' + item.name + '</td>' +
+          '<td><input type="number" class="tbl-input narrow item-per" value="' + item.per + '" min="1" step="5"></td>' +
+          '<td><input type="number" class="tbl-input item-cost" value="' + item.cost + '" min="0" step="1000"></td>' +
+          '<td class="num item-qty">&mdash;</td>' +
+          '<td class="num item-amt">&mdash;</td>';
+        rBody.appendChild(tr);
+      });
+    }
+
+    if (fBody) {
+      fBody.innerHTML = "";
+      flatItems.forEach(function(item, idx) {
+        var tr = document.createElement("tr");
+        tr.dataset.flatIdx = idx;
+        tr.innerHTML = 
+          '<td>' + item.name + '</td>' +
+          '<td><input type="number" class="tbl-input narrow item-qty-input" value="' + item.qty + '" min="0" step="1"></td>' +
+          '<td><input type="number" class="tbl-input item-cost" value="' + item.cost + '" min="0" step="1000"></td>' +
+          '<td class="num item-amt">&mdash;</td>';
+        fBody.appendChild(tr);
+      });
+    }
+  }
+
+  function renderStaffTable(staffItems) {
+    var tbody = document.getElementById("lb-staff-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    staffItems.forEach(function(item, idx) {
+      var tr = document.createElement("tr");
+      tr.dataset.staffIdx = idx;
+      tr.innerHTML = 
+        '<td>' + item.name + '</td>' +
+        '<td><input type="number" class="tbl-input narrow item-qty" value="' + item.qty + '" min="0" step="1"></td>' +
+        '<td><input type="number" class="tbl-input item-cost" value="' + item.cost + '" min="0" step="10000"></td>' +
+        '<td class="num item-amt">&mdash;</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderSalesTable(curve) {
+    var tbody = document.getElementById("lb-sales-body");
+    if (!tbody || !curve) return;
+    tbody.innerHTML = "";
+    var startMonth = parseInt(document.getElementById("lb-start-month").value, 10) || 4;
+
+    curve.forEach(function(rate, idx) {
+      var tr = document.createElement("tr");
+      tr.dataset.monthIdx = idx;
+      tr.innerHTML = 
+        '<td>Month ' + (startMonth + idx) + '</td>' +
+        '<td><input type="number" class="tbl-input narrow lay-rate" value="' + (rate * 100).toFixed(0) + '" min="0" max="100" step="1">%</td>' +
+        '<td class="num month-trays">&mdash;</td>' +
+        '<td class="num month-revenue">&mdash;</td>';
+      tbody.appendChild(tr);
+    });
+
+    var totalRow = document.createElement("tr");
+    totalRow.className = "total-row";
+    totalRow.innerHTML = 
+      '<td>Total egg sales</td>' +
+      '<td class="tbl-dash">&mdash;</td>' +
+      '<td class="num" id="lb-tot-trays">&mdash;</td>' +
+      '<td class="num" id="lb-tot-egg-rev">&mdash;</td>';
+    tbody.appendChild(totalRow);
+  }
+
+  // ---- Main Budget Calculation Engine ----
+  function computeBudget() {
+    var preset = LB.presets[LB.breed] || LB.presets.layer;
+    var birds = parseFloat(document.getElementById("lb-birds").value) || 0;
+    var chickCost = parseFloat(document.getElementById("lb-chickcost").value) || 0;
+    var transport = parseFloat(document.getElementById("lb-transport").value) || 0;
+    var mortality = Math.min(100, Math.max(0, parseFloat(document.getElementById("lb-mortality").value) || 0));
+    var crumbleKg = parseFloat(document.getElementById("lb-crumble-kg").value) || 0;
+    var crumbleCost = parseFloat(document.getElementById("lb-crumble-cost").value) || 0;
+    var waterCost = parseFloat(document.getElementById("lb-water").value) || 0;
+    var manureRev = parseFloat(document.getElementById("lb-manure").value) || 0;
+
+    var chicksAmount = (birds * chickCost) + transport;
+    var crumbleAmount = birds * crumbleKg * crumbleCost;
+    var totalFeedCost = crumbleAmount;
+
+    // 1. Feed Stages
+    var growingWeeks = 0;
+    var feedStageDivs = document.querySelectorAll("#lb-feed-stages .lb-section");
+    feedStageDivs.forEach(function(div, sIdx) {
+      var stageKey = div.dataset.stageKey;
+      var stageDef = preset.feedStages[sIdx];
+      var weeks = parseFloat(div.querySelector(".stage-weeks").value) || 0;
+      var rate = parseFloat(div.querySelector(".stage-rate").value) || 0;
+
+      if (stageDef && stageDef.key !== "layer" && stageDef.key !== "finisher") {
+        growingWeeks += weeks;
+      }
+
+      var stageTotalKg = 0;
+      if (stageDef && stageDef.mode === "daily") {
+        stageTotalKg = birds * (rate * weeks * 7 / 1000);
+      } else {
+        stageTotalKg = birds * rate;
+      }
+
+      var rows = div.querySelectorAll("tbody tr[data-ingr-idx]");
+      var totalParts = 0;
+      rows.forEach(function(row) {
+        var parts = parseFloat(row.querySelector(".ingr-parts").value) || 0;
+        totalParts += parts;
+      });
+
+      var stageTotalAmt = 0;
+      rows.forEach(function(row) {
+        var parts = parseFloat(row.querySelector(".ingr-parts").value) || 0;
+        var cost = parseFloat(row.querySelector(".ingr-cost").value) || 0;
+        var buyKg = totalParts > 0 ? (parts / totalParts) * stageTotalKg : 0;
+        var amt = buyKg * cost;
+        stageTotalAmt += amt;
+        row.querySelector(".ingr-buy").textContent = isFinite(buyKg) ? Math.round(buyKg).toLocaleString("en-UG") : "—";
+        row.querySelector(".ingr-amt").innerHTML = fmtPlain(amt);
+      });
+
+      totalFeedCost += stageTotalAmt;
+      var pTotEl = div.querySelector(".stage-parts-tot");
+      var bTotEl = div.querySelector(".stage-buy-tot");
+      var aTotEl = div.querySelector(".stage-amt-tot");
+      if (pTotEl) pTotEl.textContent = totalParts.toLocaleString("en-UG");
+      if (bTotEl) bTotEl.textContent = isFinite(stageTotalKg) ? Math.round(stageTotalKg).toLocaleString("en-UG") + " kg" : "—";
+      if (aTotEl) aTotEl.innerHTML = fmtPlain(stageTotalAmt);
+    });
+
+    // 2. Health & Biosecurity
+    var healthTotal = 0;
+    var healthRows = document.querySelectorAll("#lb-health-body tr[data-health-idx]");
+    healthRows.forEach(function(row, idx) {
+      var itemDef = preset.health[idx] || {};
+      var rate = parseFloat(row.querySelector(".item-rate").value) || 0;
+      var cost = parseFloat(row.querySelector(".item-cost").value) || 0;
+      var qty = itemDef.vial
+        ? Math.ceil(birds / (itemDef.vialSize || 1000))
+        : (rate * birds / 1000);
+      var amt = qty * cost;
+      healthTotal += amt;
+      row.querySelector(".item-qty").textContent = isFinite(qty) ? (itemDef.vial ? qty : qty.toFixed(2)) : "—";
+      row.querySelector(".item-amt").innerHTML = fmtPlain(amt);
+    });
+    var totalHealthAndWater = healthTotal + waterCost;
+
+    // 3. Equipment
+    var totalEquipment = 0;
+    var equipRatioRows = document.querySelectorAll("#lb-equip-ratio-body tr[data-ratio-idx]");
+    equipRatioRows.forEach(function(row) {
+      var per = parseFloat(row.querySelector(".item-per").value) || 1;
+      var cost = parseFloat(row.querySelector(".item-cost").value) || 0;
+      var qty = per > 0 ? Math.ceil(birds / per) : 0;
+      var amt = qty * cost;
+      totalEquipment += amt;
+      row.querySelector(".item-qty").textContent = qty.toLocaleString("en-UG");
+      row.querySelector(".item-amt").innerHTML = fmtPlain(amt);
+    });
+
+    var equipFlatRows = document.querySelectorAll("#lb-equip-flat-body tr[data-flat-idx]");
+    equipFlatRows.forEach(function(row) {
+      var qty = parseFloat(row.querySelector(".item-qty-input").value) || 0;
+      var cost = parseFloat(row.querySelector(".item-cost").value) || 0;
+      var amt = qty * cost;
+      totalEquipment += amt;
+      row.querySelector(".item-amt").innerHTML = fmtPlain(amt);
+    });
+
+    // 4. Staff
+    var monthlyStaff = 0;
+    var staffRows = document.querySelectorAll("#lb-staff-body tr[data-staff-idx]");
+    staffRows.forEach(function(row) {
+      var qty = parseFloat(row.querySelector(".item-qty").value) || 0;
+      var cost = parseFloat(row.querySelector(".item-cost").value) || 0;
+      var amt = qty * cost;
+      monthlyStaff += amt;
+      row.querySelector(".item-amt").innerHTML = fmtPlain(amt);
+    });
+
+    var growingMonths = growingWeeks > 0 ? (growingWeeks / 4.345) : 4.14;
+    var salesMonths = (preset.salesMode === "eggs" && preset.layRateCurve) ? preset.layRateCurve.length : 2;
+    var totalCycleMonths = growingMonths + salesMonths;
+    var totalStaffCost = monthlyStaff * totalCycleMonths;
+
+    // 5. Revenue
+    var survivors = birds * (1 - mortality / 100);
+    var totalRevenue = 0;
+    var totalTrays = 0;
+    var eggRevenue = 0;
+    var meatRevenue = 0;
+
+    if (preset.salesMode === "eggs") {
+      var eggPrice = parseFloat(document.getElementById("lb-egg-price").value) || 0;
+      var offlayerPrice = parseFloat(document.getElementById("lb-offlayer-price").value) || 0;
+      var offlayerPct = parseFloat(document.getElementById("lb-offlayer-pct").value) || 0;
+
+      var salesRows = document.querySelectorAll("#lb-sales-body tr[data-month-idx]");
+      salesRows.forEach(function(row) {
+        var layPct = (parseFloat(row.querySelector(".lay-rate").value) || 0) / 100;
+        // 30 eggs per tray -> trays per month = (survivors * layPct * 30) / 30 = survivors * layPct
+        var trays = Math.round(survivors * layPct);
+        var rev = trays * eggPrice;
+        totalTrays += trays;
+        eggRevenue += rev;
+        row.querySelector(".month-trays").textContent = trays.toLocaleString("en-UG");
+        row.querySelector(".month-revenue").innerHTML = fmtPlain(rev);
+      });
+
+      var totTraysEl = document.getElementById("lb-tot-trays");
+      var totEggRevEl = document.getElementById("lb-tot-egg-rev");
+      if (totTraysEl) totTraysEl.textContent = totalTrays.toLocaleString("en-UG");
+      if (totEggRevEl) totEggRevEl.innerHTML = fmtPlain(eggRevenue);
+
+      var offlayerCulls = survivors * (offlayerPct / 100);
+      var offlayerRev = offlayerCulls * offlayerPrice;
+      totalRevenue = eggRevenue + offlayerRev + manureRev;
+    } else {
+      var marketWeight = parseFloat(document.getElementById("lb-marketweight").value) || 0;
+      var meatPrice = parseFloat(document.getElementById("lb-meatprice").value) || 0;
+      var meatPct = (parseFloat(document.getElementById("lb-meatpct").value) || 0) / 100;
+      var birdsSold = survivors * meatPct;
+      meatRevenue = birdsSold * marketWeight * meatPrice;
+      totalRevenue = meatRevenue + manureRev;
+    }
+
+    // 6. Totals & Financial Results
+    var productionCost = chicksAmount + totalFeedCost + totalHealthAndWater;
+    var totalOperatingCost = productionCost + totalStaffCost;
+    var netProfit = totalRevenue - totalOperatingCost;
+    var netCashFlowPerMonth = totalCycleMonths > 0 ? (netProfit / totalCycleMonths) : 0;
+    var paybackPeriod = (totalEquipment > 0 && netCashFlowPerMonth > 0)
+      ? (totalEquipment / netCashFlowPerMonth)
+      : NaN;
+
+    var breakevenValue = NaN;
+    if (preset.salesMode === "eggs") {
+      breakevenValue = totalTrays > 0 ? (totalOperatingCost / totalTrays) : NaN;
+    } else {
+      var totalKgSold = (survivors * ((parseFloat(document.getElementById("lb-meatpct").value) || 0)/100)) * (parseFloat(document.getElementById("lb-marketweight").value) || 0);
+      breakevenValue = totalKgSold > 0 ? (totalOperatingCost / totalKgSold) : NaN;
+    }
+
+    // Output to UI
+    document.getElementById("lb-out-feed").innerHTML = fmt(totalFeedCost);
+    document.getElementById("lb-out-health").innerHTML = fmt(totalHealthAndWater);
+    document.getElementById("lb-out-production").innerHTML = fmt(productionCost);
+    document.getElementById("lb-out-staff").innerHTML = fmt(totalStaffCost);
+    document.getElementById("lb-out-equipment").innerHTML = fmt(totalEquipment);
+    document.getElementById("lb-out-revenue").innerHTML = fmt(totalRevenue);
+    document.getElementById("lb-out-profit").innerHTML = fmt(netProfit);
+
+    document.getElementById("lb-out-payback").textContent = isFinite(paybackPeriod)
+      ? paybackPeriod.toFixed(1) + " months"
+      : (netProfit <= 0 ? "never (unprofitable)" : "—");
+
+    var beLabel = document.getElementById("lb-out-breakeven-label");
+    if (beLabel) {
+      beLabel.textContent = preset.salesMode === "eggs" ? "Breakeven egg price / tray" : "Breakeven price / kg";
+    }
+    document.getElementById("lb-out-breakeven").innerHTML = fmt(breakevenValue);
+
+    var statusEl = document.getElementById("lb-status");
+    if (netProfit <= 0) {
+      statusEl.innerHTML = '<span class="status-pill bad"><span class="dot"></span>Loss-making batch</span>';
+    } else if (totalRevenue > 0 && (netProfit / totalRevenue) < 0.15) {
+      statusEl.innerHTML = '<span class="status-pill warn"><span class="dot"></span>Profitable, modest margin</span>';
+    } else {
+      statusEl.innerHTML = '<span class="status-pill good"><span class="dot"></span>High-performing commercial flock</span>';
+    }
+
+    drawBudgetChart(chicksAmount, totalFeedCost, totalHealthAndWater, totalStaffCost, totalEquipment);
+  }
+
+  function drawBudgetChart(chicks, feed, health, staff, equipment) {
+    var svg = document.getElementById("lb-chart");
+    if (!svg) return;
+    var items = [
+      {label:"Chicks",     value:chicks,     color:"var(--brand-deep)"},
+      {label:"Feed",       value:feed,       color:"var(--accent)"},
+      {label:"Health",     value:health,     color:"var(--good)"},
+      {label:"Staff",      value:staff,      color:"var(--warn)"},
+      {label:"Equipment",  value:equipment,  color:"var(--ink-faint)"}
+    ];
+    var total = items.reduce(function(s,i){return s+i.value;},0) || 1;
+    var x = 8, y = 14, w = 284, h = 22;
+    var bars = "";
+    var cursor = x;
+    items.forEach(function(it){
+      var seg = (it.value/total) * w;
+      bars += '<rect x="'+cursor+'" y="'+y+'" width="'+Math.max(seg,0)+'" height="'+h+'" fill="'+it.color+'"></rect>';
+      cursor += seg;
+    });
+
+    var legendHtml = "";
+    items.forEach(function(it){
+      var share = (it.value/total*100).toFixed(1);
+      legendHtml += '<div class="breakdown-row"><span><span class="swatch" style="background:'+it.color+'"></span>'+it.label+'</span><span class="num">'+fmtPlain(it.value)+' &middot; '+share+'%</span></div>';
+    });
+
+    svg.innerHTML =
+      '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="4" fill="var(--surface-2)"></rect>' +
+      bars +
+      '<text x="'+x+'" y="'+(y+h+16)+'" font-size="10">Total investment</text>' +
+      '<text x="'+(x+w)+'" y="'+(y+h+16)+'" font-size="10" text-anchor="end" font-weight="600">'+fmtPlain(total)+'</text>';
+    document.getElementById("lb-legend").innerHTML = legendHtml;
+  }
+
+  // ---- Breed Switcher ----
+  function setBreed(breedName) {
+    LB.breed = breedName;
+    var preset = LB.presets[breedName] || LB.presets.layer;
+
+    document.querySelectorAll(".breed-btn").forEach(function(btn) {
+      if (btn.dataset.breed === breedName) {
+        btn.classList.add("active");
+        btn.setAttribute("aria-selected", "true");
+      } else {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-selected", "false");
+      }
+    });
+
+    // Populate defaults
+    var d = preset.defaults || {};
+    if (d.birds !== undefined) document.getElementById("lb-birds").value = d.birds;
+    if (d.chickcost !== undefined) document.getElementById("lb-chickcost").value = d.chickcost;
+    if (d.transport !== undefined) document.getElementById("lb-transport").value = d.transport;
+    if (d.mortality !== undefined) document.getElementById("lb-mortality").value = d.mortality;
+    if (d.crumbleKg !== undefined) document.getElementById("lb-crumble-kg").value = d.crumbleKg;
+    if (d.crumbleCost !== undefined) document.getElementById("lb-crumble-cost").value = d.crumbleCost;
+    if (d.water !== undefined) document.getElementById("lb-water").value = d.water;
+    if (d.manure !== undefined) document.getElementById("lb-manure").value = d.manure;
+
+    var eggSalesSection = document.getElementById("lb-eggsales");
+    var meatSaleSection = document.getElementById("lb-meatsale");
+
+    if (preset.salesMode === "meat") {
+      if (eggSalesSection) eggSalesSection.hidden = true;
+      if (meatSaleSection) meatSaleSection.hidden = false;
+      document.getElementById("lb-sales-title").textContent = "Broiler Meat Sales Projection";
+      document.getElementById("lb-sales-hint").textContent = "live weight sale at end of growing cycle";
+      if (d.marketweight !== undefined) document.getElementById("lb-marketweight").value = d.marketweight;
+      if (d.meatprice !== undefined) document.getElementById("lb-meatprice").value = d.meatprice;
+      if (d.meatpct !== undefined) document.getElementById("lb-meatpct").value = d.meatpct;
+    } else {
+      if (eggSalesSection) eggSalesSection.hidden = false;
+      if (meatSaleSection) meatSaleSection.hidden = true;
+      document.getElementById("lb-sales-title").textContent = "Sales Projection";
+      document.getElementById("lb-sales-hint").textContent = "lay rate = average eggs per hen per day";
+      if (d.startmonth !== undefined) document.getElementById("lb-start-month").value = d.startmonth;
+      if (d.eggprice !== undefined) document.getElementById("lb-egg-price").value = d.eggprice;
+      if (d.offlayerprice !== undefined) document.getElementById("lb-offlayer-price").value = d.offlayerprice;
+      if (d.offlayerpct !== undefined) document.getElementById("lb-offlayer-pct").value = d.offlayerpct;
+    }
+
+    renderFeedStages(preset.feedStages);
+    renderHealthTable(preset.health);
+    renderEquipTables(preset.equipRatio, preset.equipFlat);
+    renderStaffTable(preset.staff);
+    renderSalesTable(preset.layRateCurve);
+    bindBudgetEvents();
+    computeBudget();
+  }
+
+  function bindBudgetEvents() {
+    var inputs = document.querySelectorAll("#panel-budget input");
+    inputs.forEach(function(inp) {
+      inp.removeEventListener("input", computeBudget);
+      inp.addEventListener("input", computeBudget);
+    });
+  }
+
+  // ---- Wizard Chrome Navigation ----
+  function initWizards() {
+    document.querySelectorAll(".wiz").forEach(function(wiz) {
+      var steps = Array.from(wiz.querySelectorAll(".wiz-step"));
+      var currentStep = 0;
+      var showAll = false;
+
+      var fill = wiz.querySelector(".wiz-progress-fill");
+      var countEl = wiz.querySelector(".wiz-steps-count");
+      var toggleBtn = wiz.querySelector(".wiz-toggle-all");
+      var qText = wiz.querySelector(".wiz-q-text");
+      var qHint = wiz.querySelector(".wiz-q-hint");
+      var backBtn = wiz.querySelector(".wiz-back");
+      var nextBtn = wiz.querySelector(".wiz-next");
+      var dotsContainer = wiz.querySelector(".wiz-dots");
+
+      if (dotsContainer) {
+        dotsContainer.innerHTML = "";
+        steps.forEach(function(_, i) {
+          var dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "wiz-dot" + (i === 0 ? " active" : "");
+          dot.addEventListener("click", function() {
+            currentStep = i;
+            updateWiz();
+          });
+          dotsContainer.appendChild(dot);
+        });
+      }
+
+      function updateWiz() {
+        if (showAll) {
+          steps.forEach(function(s) { s.style.display = "block"; });
+          if (qText) qText.textContent = "All fields visible";
+          if (qHint) qHint.textContent = "Scroll down to edit any section directly.";
+          if (backBtn) backBtn.disabled = true;
+          if (nextBtn) nextBtn.disabled = true;
+          return;
+        }
+
+        steps.forEach(function(s, i) {
+          s.style.display = (i === currentStep) ? "block" : "none";
+        });
+
+        var pct = ((currentStep + 1) / steps.length) * 100;
+        if (fill) fill.style.width = pct + "%";
+        if (countEl) countEl.textContent = "Step " + (currentStep + 1) + " of " + steps.length;
+
+        var activeS = steps[currentStep];
+        if (activeS && qText) qText.textContent = activeS.dataset.question || "";
+        if (activeS && qHint) qHint.textContent = activeS.dataset.hint || "";
+
+        if (backBtn) backBtn.disabled = (currentStep === 0);
+        if (nextBtn) {
+          nextBtn.disabled = (currentStep === steps.length - 1);
+          nextBtn.textContent = (currentStep === steps.length - 1) ? "Completed" : "Next →";
+        }
+
+        if (dotsContainer) {
+          var dots = dotsContainer.querySelectorAll(".wiz-dot");
+          dots.forEach(function(d, idx) {
+            if (idx === currentStep) d.classList.add("active");
+            else d.classList.remove("active");
+          });
+        }
+      }
+
+      if (backBtn) {
+        backBtn.addEventListener("click", function() {
+          if (currentStep > 0) { currentStep--; updateWiz(); }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener("click", function() {
+          if (currentStep < steps.length - 1) { currentStep++; updateWiz(); }
+        });
+      }
+
+      if (toggleBtn) {
+        toggleBtn.addEventListener("click", function() {
+          showAll = !showAll;
+          toggleBtn.textContent = showAll ? "Show step by step" : "Show all fields";
+          updateWiz();
+        });
+      }
+
+      updateWiz();
+    });
+  }
+
+  // ---- Excel Export Functionality ----
+  function exportToExcel() {
+    var status = document.getElementById("lb-export-status");
+    if (typeof XLSX === "undefined") {
+      if (status) {
+        status.textContent = "Excel library loading, please wait...";
+        status.className = "export-status err";
+      }
+      return;
+    }
+
+    try {
+      if (status) {
+        status.textContent = "Generating formatted Excel workbook...";
+        status.className = "export-status";
+      }
+
+      var wb = XLSX.utils.book_new();
+
+      // Helper styling
+      var headerStyle = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "145C2E" } } };
+      var sectionStyle = { font: { bold: true, color: { rgb: "0E4623" } }, fill: { fgColor: { rgb: "E7F0EA" } } };
+      var boldStyle = { font: { bold: true } };
+
+      // Sheet 1: Read Me
+      var wsReadMe = XLSX.utils.aoa_to_sheet([
+        ["SmartVet Africa — Poultry Flock Project Budget"],
+        ["Generated via SmartVet Budget Calculator"],
+        [""],
+        ["How to use this workbook:"],
+        ["1. Review the 'Flock & Feed' sheet for chick counts and stage ingredient formulations."],
+        ["2. Check 'Health & Equipment' for veterinary items, equipment ratios, and biosecurity."],
+        ["3. 'Staff' calculates labour multiplied by total growing and laying months."],
+        ["4. 'Sales Projection' shows the month-by-month laying trajectory and cull revenues."],
+        ["5. 'Summary' synthesizes production costs, operating costs, capex payback, and breakeven."]
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsReadMe, "Read Me");
+
+      // Sheet 2: Flock & Feed
+      var birds = parseFloat(document.getElementById("lb-birds").value) || 0;
+      var chickCost = parseFloat(document.getElementById("lb-chickcost").value) || 0;
+      var transport = parseFloat(document.getElementById("lb-transport").value) || 0;
+      var crumbleKg = parseFloat(document.getElementById("lb-crumble-kg").value) || 0;
+      var crumbleCost = parseFloat(document.getElementById("lb-crumble-cost").value) || 0;
+
+      var feedRows = [
+        ["Flock & Feed Formulation"],
+        ["Flock Setup"],
+        ["Day-old chicks placed", birds, "birds"],
+        ["Cost per chick", chickCost, "UGX"],
+        ["Transport of chicks", transport, "UGX"],
+        ["Starter crumble (first days)", crumbleKg, "kg/bird"],
+        ["Crumble cost", crumbleCost, "UGX/kg"],
+        ["Crumble total amount", birds * crumbleKg * crumbleCost, "UGX"],
+        [""],
+        ["Feed Formulation by Growth Stage"],
+        ["Stage", "Ingredient", "Parts /1000kg", "Cost/kg (UGX)", "Buy (kg)", "Amount (UGX)"]
+      ];
+
+      var feedDivs = document.querySelectorAll("#lb-feed-stages .lb-section");
+      feedDivs.forEach(function(div) {
+        var stageTitle = div.querySelector("h3").textContent;
+        div.querySelectorAll("tbody tr[data-ingr-idx]").forEach(function(row) {
+          var name = row.cells[0].textContent;
+          var parts = parseFloat(row.querySelector(".ingr-parts").value) || 0;
+          var cost = parseFloat(row.querySelector(".ingr-cost").value) || 0;
+          var buyKg = parseFloat(row.querySelector(".ingr-buy").textContent.replace(/[^0-9.]/g, "")) || 0;
+          var amt = parseFloat(row.querySelector(".ingr-amt").textContent.replace(/[^0-9.]/g, "")) || 0;
+          feedRows.push([stageTitle, name, parts, cost, buyKg, amt]);
+        });
+      });
+      var wsFeed = XLSX.utils.aoa_to_sheet(feedRows);
+      XLSX.utils.book_append_sheet(wb, wsFeed, "Flock & Feed");
+
+      // Sheet 3: Health & Equipment
+      var healthRows = [
+        ["Health, Biosecurity & Equipment"],
+        ["Health & Biosecurity"],
+        ["Item", "Rate /1000 birds", "Unit Cost (UGX)", "Qty", "Amount (UGX)"]
+      ];
+      document.querySelectorAll("#lb-health-body tr[data-health-idx]").forEach(function(row) {
+        healthRows.push([
+          row.cells[0].textContent,
+          parseFloat(row.querySelector(".item-rate").value) || 0,
+          parseFloat(row.querySelector(".item-cost").value) || 0,
+          row.querySelector(".item-qty").textContent,
+          parseFloat(row.querySelector(".item-amt").textContent.replace(/[^0-9.]/g, "")) || 0
+        ]);
+      });
+      healthRows.push(["Water (whole cycle)", "-", parseFloat(document.getElementById("lb-water").value) || 0, 1, parseFloat(document.getElementById("lb-water").value) || 0]);
+      healthRows.push([""]);
+      healthRows.push(["Equipment — Ratio & Setup"]);
+      healthRows.push(["Item", "Birds/Unit or Qty", "Unit Cost (UGX)", "Amount (UGX)"]);
+      document.querySelectorAll("#lb-equip-ratio-body tr[data-ratio-idx]").forEach(function(row) {
+        healthRows.push([
+          row.cells[0].textContent,
+          parseFloat(row.querySelector(".item-per").value) || 0,
+          parseFloat(row.querySelector(".item-cost").value) || 0,
+          parseFloat(row.querySelector(".item-amt").textContent.replace(/[^0-9.]/g, "")) || 0
+        ]);
+      });
+      document.querySelectorAll("#lb-equip-flat-body tr[data-flat-idx]").forEach(function(row) {
+        healthRows.push([
+          row.cells[0].textContent,
+          parseFloat(row.querySelector(".item-qty-input").value) || 0,
+          parseFloat(row.querySelector(".item-cost").value) || 0,
+          parseFloat(row.querySelector(".item-amt").textContent.replace(/[^0-9.]/g, "")) || 0
+        ]);
+      });
+      var wsHealth = XLSX.utils.aoa_to_sheet(healthRows);
+      XLSX.utils.book_append_sheet(wb, wsHealth, "Health & Equipment");
+
+      // Sheet 4: Summary
+      var wsSummary = XLSX.utils.aoa_to_sheet([
+        ["SmartVet Budget Summary"],
+        [""],
+        ["Metric", "Value (UGX)"],
+        ["Feed Cost (incl. crumble)", document.getElementById("lb-out-feed").textContent],
+        ["Health & Biosecurity (incl. water)", document.getElementById("lb-out-health").textContent],
+        ["Total Production Cost", document.getElementById("lb-out-production").textContent],
+        ["Staff Cost (whole cycle)", document.getElementById("lb-out-staff").textContent],
+        ["Equipment Investment (Capex)", document.getElementById("lb-out-equipment").textContent],
+        ["Total Revenue", document.getElementById("lb-out-revenue").textContent],
+        ["Net Profit", document.getElementById("lb-out-profit").textContent],
+        ["Equipment Payback", document.getElementById("lb-out-payback").textContent],
+        [document.getElementById("lb-out-breakeven-label").textContent, document.getElementById("lb-out-breakeven").textContent]
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+
+      XLSX.writeFile(wb, "SmartVet_Flock_Budget_Plan.xlsx");
+      if (status) {
+        status.textContent = "Downloaded SmartVet_Flock_Budget_Plan.xlsx successfully!";
+        status.className = "export-status ok";
+      }
+    } catch(err) {
+      console.error(err);
+      if (status) {
+        status.textContent = "Export failed: " + err.message;
+        status.className = "export-status err";
+      }
+    }
+  }
+
+  // ---- Initialize ----
+  document.querySelectorAll(".breed-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      setBreed(btn.dataset.breed);
+    });
+  });
+
+  var exportBtn = document.getElementById("lb-export-btn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", exportToExcel);
+  }
+
+  setBreed("layer");
+  initWizards();
+  computeFlock();
+  computeLoan();
+  computeRoom();
+})();
+</script>
+</body>
+</html>
