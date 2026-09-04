@@ -22,7 +22,7 @@ const LoanCalculator: React.FC = () => {
   const [termMonths, setTermMonths] = useState<number | "">(24);
   const [extraRevenue, setExtraRevenue] = useState<number | "">(2200000);
   const [extraOpCost, setExtraOpCost] = useState<number | "">(900000);
-  const [currency, setCurrency] = useState<string>("UGX");
+  const [currency] = useState<string>("UGX");
 
   const results = useMemo(() => {
     const P = Number(loanAmount) || 0;

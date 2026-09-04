@@ -26,7 +26,7 @@ const FlockBreakeven: React.FC = () => {
   const [mortality, setMortality] = useState<number | "">(5);
   const [weight, setWeight] = useState<number | "">(1.8);
   const [price, setPrice] = useState<number | "">(12500);
-  const [currency, setCurrency] = useState<string>("UGX");
+  const [currency] = useState<string>("UGX");
 
   const results = useMemo(() => {
     const c = Number(chicks) || 0;
